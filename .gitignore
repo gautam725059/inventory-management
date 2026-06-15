@@ -1,0 +1,8 @@
+node_modules/
+.next/
+out/
+*.log
+.DS_Store
+
+# Local inventory data (uncomment to keep data out of git)
+# data/items.json

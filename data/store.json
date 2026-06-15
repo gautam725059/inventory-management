@@ -1,0 +1,139 @@
+{
+  "warehouses": [
+    {
+      "id": "wh-mumbai",
+      "name": "Mumbai Warehouse",
+      "location": "Bhiwandi, MH"
+    },
+    {
+      "id": "wh-delhi",
+      "name": "Delhi Warehouse",
+      "location": "Okhla, DL"
+    },
+    {
+      "id": "wh-bengaluru",
+      "name": "Bengaluru Warehouse",
+      "location": "Whitefield, KA"
+    }
+  ],
+  "products": [
+    {
+      "ean": "8901234567890",
+      "name": "Blue Pen",
+      "comboSizes": [
+        10,
+        5
+      ]
+    },
+    {
+      "ean": "5012345678900",
+      "name": "Soap Bar",
+      "comboSizes": [
+        10,
+        4
+      ]
+    },
+    {
+      "ean": "9876541234567",
+      "name": "kife",
+      "comboSizes": [
+        10
+      ]
+    },
+    {
+      "ean": "9988224455667",
+      "name": "clow clip",
+      "comboSizes": []
+    }
+  ],
+  "stock": [
+    {
+      "warehouseId": "wh-mumbai",
+      "ean": "8901234567890",
+      "quantity": 88
+    },
+    {
+      "warehouseId": "wh-delhi",
+      "ean": "5012345678900",
+      "quantity": 123
+    },
+    {
+      "warehouseId": "wh-mumbai",
+      "ean": "9876541234567",
+      "quantity": 380
+    },
+    {
+      "warehouseId": "wh-bengaluru",
+      "ean": "9988224455667",
+      "quantity": 8945
+    }
+  ],
+  "receipts": [
+    {
+      "id": "19fd0e9f-07c9-46fa-ba8d-986a48c5f6f9",
+      "warehouseId": "wh-mumbai",
+      "ean": "8901234567890",
+      "quantity": 120,
+      "createdAt": "2026-06-15T09:46:04.850Z"
+    },
+    {
+      "id": "2a7694af-d77e-447d-a4aa-527426a67988",
+      "warehouseId": "wh-delhi",
+      "ean": "5012345678900",
+      "quantity": 123,
+      "createdAt": "2026-06-15T09:46:15.729Z"
+    },
+    {
+      "id": "d8518501-f153-4c75-a1c5-68cef36eed90",
+      "warehouseId": "wh-mumbai",
+      "ean": "9876541234567",
+      "quantity": 500,
+      "createdAt": "2026-06-15T10:16:09.328Z"
+    },
+    {
+      "id": "6a2f5fef-d32d-4e62-b5c3-59426a63e345",
+      "warehouseId": "wh-bengaluru",
+      "ean": "9988224455667",
+      "quantity": 9000,
+      "createdAt": "2026-06-15T10:20:50.467Z"
+    }
+  ],
+  "dispatches": [
+    {
+      "id": "2b3fa06d-4a93-4b2d-8684-e188b10c2bd7",
+      "warehouseId": "wh-mumbai",
+      "ean": "8901234567890",
+      "unitSize": 10,
+      "packs": 3,
+      "quantity": 30,
+      "createdAt": "2026-06-15T10:01:59.308Z"
+    },
+    {
+      "id": "4dfa2b6b-fd0b-4830-a2d5-3aedbabe4a40",
+      "warehouseId": "wh-mumbai",
+      "ean": "8901234567890",
+      "unitSize": 1,
+      "packs": 2,
+      "quantity": 2,
+      "createdAt": "2026-06-15T10:01:59.382Z"
+    },
+    {
+      "id": "72e4f900-3692-4c1d-8e29-6acbcb7ddf56",
+      "warehouseId": "wh-mumbai",
+      "ean": "9876541234567",
+      "unitSize": 10,
+      "packs": 12,
+      "quantity": 120,
+      "createdAt": "2026-06-15T10:18:07.860Z"
+    },
+    {
+      "id": "4b75319d-0ae0-4332-b74c-9e655e58c0a8",
+      "warehouseId": "wh-bengaluru",
+      "ean": "9988224455667",
+      "unitSize": 1,
+      "packs": 55,
+      "quantity": 55,
+      "createdAt": "2026-06-15T10:21:15.815Z"
+    }
+  ]
+}

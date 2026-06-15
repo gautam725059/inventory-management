@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"c:/Users/Gautam's PC/inventory-management\" && mkdir -p \"src/app/api/warehouses/[id]/dispatch\" && echo done)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\Gautam's PC\\inventory-management\\src\\app\\api\\warehouses\\[id]"
+    ]
+  }
+}

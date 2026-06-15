@@ -1,0 +1,104 @@
+"use client";
+
+import { useEffect, useState, use } from "react";
+import Link from "next/link";
+import ReceiveForm from "@/components/ReceiveForm";
+import StockCard from "@/components/StockCard";
+import type { WarehouseDetail } from "@/lib/types";
+
+export default function StockInPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
+
+  const [detail, setDetail] = useState<WarehouseDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  async function load() {
+    try {
+      const res = await fetch(`/api/warehouses/${id}`);
+      if (!res.ok) throw new Error("Failed to load warehouse.");
+      setDetail(await res.json());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  return (
+    <div className="mx-auto max-w-5xl px-5 py-10">
+      <Link
+        href={`/warehouse/${id}`}
+        className="text-sm font-medium text-brand-600 hover:underline"
+      >
+        ← {detail?.name ?? "Warehouse"}
+      </Link>
+
+      <header className="mt-3 mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          Stock In — bulk
+        </h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Receive products into {detail?.name ?? "this warehouse"} by EAN.
+        </p>
+      </header>
+
+      {error && (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          {success}
+        </div>
+      )}
+
+      <ReceiveForm
+        warehouseId={id}
+        onReceived={async () => {
+          setSuccess("Stock received and added to the warehouse.");
+          await load();
+        }}
+        onError={(message) => {
+          setError(message || null);
+          if (message) setSuccess(null);
+        }}
+      />
+
+      <div className="mb-4 mt-8 flex items-baseline justify-between">
+        <h3 className="text-base font-semibold text-slate-900">Current stock</h3>
+        {detail && (
+          <span className="text-sm text-slate-500">
+            {detail.lines.length} products ·{" "}
+            {detail.totalUnits.toLocaleString()} pieces
+          </span>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="py-16 text-center text-sm text-slate-400">Loading…</div>
+      ) : !detail || detail.lines.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+          No stock yet. Receive your first product above.
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {detail.lines.map((line) => (
+            <StockCard key={line.ean} line={line} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
