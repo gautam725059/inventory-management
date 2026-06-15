@@ -19,6 +19,8 @@ export interface Product {
   /** Low-stock threshold. When stock falls to/below this, it's flagged for
    *  re-order. 0 = no alert. */
   reorderLevel: number;
+  /** Optional product image: an uploaded path (/uploads/…) or an external URL. */
+  imageUrl?: string;
 }
 
 /** Quantity (in base pieces) of one product held in one warehouse. */
@@ -75,6 +77,7 @@ export interface WarehouseStockLine {
   combos: ComboAvailability[];
   reorderLevel: number;
   lowStock: boolean; // quantity <= reorderLevel (and reorderLevel > 0)
+  imageUrl?: string;
 }
 
 /** Dashboard summary for one warehouse. */
@@ -82,6 +85,25 @@ export interface WarehouseSummary extends Warehouse {
   skuCount: number;
   totalUnits: number;
   lowStockCount: number;
+}
+
+/** How much of a product sits in one warehouse (for the catalog view). */
+export interface WarehouseStockBit {
+  warehouseId: string;
+  warehouseName: string;
+  quantity: number;
+}
+
+/** A catalog row: one distinct product with stock totalled across warehouses. */
+export interface ProductCatalogEntry {
+  ean: string;
+  name: string;
+  comboSizes: number[];
+  reorderLevel: number;
+  totalQuantity: number;
+  lowStock: boolean; // total <= reorderLevel (and reorderLevel > 0)
+  byWarehouse: WarehouseStockBit[];
+  imageUrl?: string;
 }
 
 /** A unified stock movement (in or out) for the history view. */
@@ -123,4 +145,5 @@ export interface ProductUpdateInput {
   name?: string;
   comboSizes?: number[];
   reorderLevel?: number;
+  imageUrl?: string; // empty string clears the image
 }

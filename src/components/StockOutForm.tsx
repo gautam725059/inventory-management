@@ -26,7 +26,7 @@ export default function StockOutForm({
   const inStock = lines.filter((l) => l.quantity > 0);
 
   const [ean, setEan] = useState("");
-  const [unitSize, setUnitSize] = useState("1");
+  const [unitSize, setUnitSize] = useState("");
   const [packs, setPacks] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -35,23 +35,13 @@ export default function StockOutForm({
     [inStock, ean]
   );
 
-  // Pack-size options: always "Single" (1), plus the product's combo sizes.
-  const sizeOptions = useMemo(() => {
-    const sizes = new Set<number>([1, ...(selected?.comboSizes ?? [])]);
-    return Array.from(sizes).sort((a, b) => a - b);
-  }, [selected]);
-
-  const size = Number(unitSize) || 1;
+  const size = Number(unitSize) || 0;
   const packCount = Number(packs) || 0;
+  const validSize = Number.isInteger(size) && size > 0;
   const pieces = size * packCount;
   const available = selected?.quantity ?? 0;
   const remaining = available - pieces;
   const overdraw = pieces > available;
-
-  function pickProduct(nextEan: string) {
-    setEan(nextEan);
-    setUnitSize("1"); // reset pack size when switching product
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -68,7 +58,7 @@ export default function StockOutForm({
         throw new Error(data.error || "Failed to dispatch goods.");
       }
       setEan("");
-      setUnitSize("1");
+      setUnitSize("");
       setPacks("");
       await onDispatched();
     } catch (err) {
@@ -103,7 +93,7 @@ export default function StockOutForm({
             id="product"
             className={inputClass}
             value={ean}
-            onChange={(e) => pickProduct(e.target.value)}
+            onChange={(e) => setEan(e.target.value)}
             required
           >
             <option value="">Select a product…</option>
@@ -116,21 +106,20 @@ export default function StockOutForm({
         </div>
         <div>
           <label htmlFor="unitSize" className={labelClass}>
-            Pack size *
+            Pack size (pieces per pack) *
           </label>
-          <select
+          <input
             id="unitSize"
+            type="number"
+            min={1}
+            step={1}
             className={inputClass}
             value={unitSize}
             onChange={(e) => setUnitSize(e.target.value)}
+            placeholder="10  (1 = single)"
             disabled={!selected}
-          >
-            {sizeOptions.map((s) => (
-              <option key={s} value={s}>
-                {s === 1 ? "Single (1)" : `Pack of ${s}`}
-              </option>
-            ))}
-          </select>
+            required
+          />
         </div>
         <div>
           <label htmlFor="packs" className={labelClass}>
@@ -151,7 +140,7 @@ export default function StockOutForm({
         </div>
       </div>
 
-      {selected && packCount > 0 && (
+      {selected && validSize && packCount > 0 && (
         <p
           className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
             overdraw
@@ -173,7 +162,7 @@ export default function StockOutForm({
       <div className="mt-5">
         <button
           type="submit"
-          disabled={saving || !selected || packCount <= 0 || overdraw}
+          disabled={saving || !selected || !validSize || packCount <= 0 || overdraw}
           className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving ? "Dispatching…" : "Dispatch (stock out)"}

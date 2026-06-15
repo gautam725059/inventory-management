@@ -48,12 +48,6 @@
       "name": "clow clip",
       "comboSizes": [],
       "reorderLevel": 0
-    },
-    {
-      "ean": "0000000000001",
-      "name": "TEMP DELETE ME",
-      "comboSizes": [],
-      "reorderLevel": 0
     }
   ],
   "stock": [
@@ -76,6 +70,11 @@
       "warehouseId": "wh-bengaluru",
       "ean": "9988224455667",
       "quantity": 8945
+    },
+    {
+      "warehouseId": "wh-mumbai",
+      "ean": "9988224455667",
+      "quantity": 0
     }
   ],
   "receipts": [
@@ -108,11 +107,11 @@
       "createdAt": "2026-06-15T10:20:50.467Z"
     },
     {
-      "id": "3de67972-2cec-410f-a81b-58e0e8854e57",
-      "warehouseId": "wh-delhi",
-      "ean": "0000000000001",
-      "quantity": 5,
-      "createdAt": "2026-06-15T10:43:00.581Z"
+      "id": "acff81d7-349c-4895-b37a-492be0467108",
+      "warehouseId": "wh-mumbai",
+      "ean": "9988224455667",
+      "quantity": 8001,
+      "createdAt": "2026-06-15T11:50:48.715Z"
     }
   ],
   "dispatches": [
@@ -151,6 +150,24 @@
       "packs": 55,
       "quantity": 55,
       "createdAt": "2026-06-15T10:21:15.815Z"
+    },
+    {
+      "id": "42ec2d7f-9ecf-4e3a-82d1-e5980a78ee5a",
+      "warehouseId": "wh-mumbai",
+      "ean": "9988224455667",
+      "unitSize": 10,
+      "packs": 800,
+      "quantity": 8000,
+      "createdAt": "2026-06-15T11:52:06.613Z"
+    },
+    {
+      "id": "73791ba1-3cf5-43c4-af7d-a5ea5d7ff190",
+      "warehouseId": "wh-mumbai",
+      "ean": "9988224455667",
+      "unitSize": 1,
+      "packs": 1,
+      "quantity": 1,
+      "createdAt": "2026-06-15T11:52:47.091Z"
     }
   ]
 }

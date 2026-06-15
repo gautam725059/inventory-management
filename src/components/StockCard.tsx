@@ -101,22 +101,36 @@ export default function StockCard({
       }`}
     >
       <div className="mb-3 flex items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-900">{line.name}</span>
-            {line.lowStock && (
-              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
-                Low stock
-              </span>
-            )}
-          </div>
-          <div className="mt-0.5 text-xs text-slate-400">
-            EAN {line.ean}
-            {line.reorderLevel > 0 && (
-              <span className="ml-2 text-slate-400">
-                · reorder at {line.reorderLevel}
-              </span>
-            )}
+        <div className="flex items-start gap-3">
+          {line.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={line.imageUrl}
+              alt={line.name}
+              className="h-11 w-11 shrink-0 rounded-lg border border-slate-200 object-cover"
+            />
+          ) : (
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-base text-slate-300">
+              📷
+            </span>
+          )}
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-slate-900">{line.name}</span>
+              {line.lowStock && (
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                  Low stock
+                </span>
+              )}
+            </div>
+            <div className="mt-0.5 text-xs text-slate-400">
+              EAN {line.ean}
+              {line.reorderLevel > 0 && (
+                <span className="ml-2 text-slate-400">
+                  · reorder at {line.reorderLevel}
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <span
@@ -132,7 +146,8 @@ export default function StockCard({
 
       {line.combos.length === 0 ? (
         <p className="text-sm text-slate-400">
-          No combo sizes set. {editable ? "Use Edit to add them." : "Add them when receiving stock."}
+          Combos are chosen at stock-out.
+          {editable ? " Use Edit to pin preset pack sizes here." : ""}
         </p>
       ) : (
         <div className="flex flex-wrap gap-2">

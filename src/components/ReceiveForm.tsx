@@ -6,7 +6,6 @@ const EMPTY_FORM = {
   ean: "",
   quantity: "",
   name: "",
-  comboSizes: "",
   reorderLevel: "",
 };
 
@@ -32,11 +31,6 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
     setSaving(true);
     onError("");
     try {
-      const comboSizes = form.comboSizes
-        .split(",")
-        .map((s) => Number(s.trim()))
-        .filter((n) => Number.isInteger(n) && n > 0);
-
       const res = await fetch(`/api/warehouses/${warehouseId}/receive`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -44,7 +38,6 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
           ean: form.ean,
           quantity: Number(form.quantity),
           name: form.name || undefined,
-          comboSizes: comboSizes.length ? comboSizes : undefined,
           reorderLevel: form.reorderLevel ? Number(form.reorderLevel) : undefined,
         }),
       });
@@ -69,7 +62,7 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
       <h3 className="mb-4 text-base font-semibold text-slate-900">
         Receive products
       </h3>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <label htmlFor="ean" className={labelClass}>
             EAN / Barcode *
@@ -111,18 +104,6 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             placeholder="Optional"
-          />
-        </div>
-        <div>
-          <label htmlFor="comboSizes" className={labelClass}>
-            Combo pack sizes
-          </label>
-          <input
-            id="comboSizes"
-            className={inputClass}
-            value={form.comboSizes}
-            onChange={(e) => setForm({ ...form, comboSizes: e.target.value })}
-            placeholder="10, 5"
           />
         </div>
         <div>

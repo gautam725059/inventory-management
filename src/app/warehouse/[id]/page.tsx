@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useMemo, useState, use } from "react";
 import Link from "next/link";
 import StockCard from "@/components/StockCard";
 import type { WarehouseDetail } from "@/lib/types";
@@ -16,6 +16,16 @@ export default function WarehousePage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const lines = detail?.lines ?? [];
+    if (!q) return lines;
+    return lines.filter(
+      (l) => l.name.toLowerCase().includes(q) || l.ean.includes(q)
+    );
+  }, [detail, query]);
 
   async function load() {
     try {
@@ -131,15 +141,36 @@ export default function WarehousePage({
         )}
       </div>
 
+      {detail && detail.lines.length > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by name or EAN…"
+            className="min-w-50 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          />
+          <a
+            href={`/api/warehouses/${id}?format=csv`}
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+          >
+            ⬇ Export CSV
+          </a>
+        </div>
+      )}
+
       {loading ? (
         <div className="py-16 text-center text-sm text-slate-400">Loading…</div>
       ) : !detail || detail.lines.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
           No stock yet. Receive your first product above.
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+          No products match your search.
+        </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {detail.lines.map((line) => (
+          {filtered.map((line) => (
             <StockCard
               key={line.ean}
               line={line}

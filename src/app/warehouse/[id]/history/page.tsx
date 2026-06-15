@@ -49,13 +49,23 @@ export default function HistoryPage({
         ← Warehouse
       </Link>
 
-      <header className="mt-3 mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Movement History
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Every stock-in and stock-out, newest first.
-        </p>
+      <header className="mt-3 mb-8 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            Movement History
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Every stock-in and stock-out, newest first.
+          </p>
+        </div>
+        {movements.length > 0 && (
+          <a
+            href={`/api/warehouses/${id}/movements?format=csv`}
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+          >
+            ⬇ Export CSV
+          </a>
+        )}
       </header>
 
       {error && (

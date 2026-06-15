@@ -10,6 +10,7 @@ import type {
   WarehouseStockLine,
   ComboAvailability,
   Movement,
+  ProductCatalogEntry,
   ReceiveInput,
   DispatchInput,
   ProductUpdateInput,
@@ -53,6 +54,7 @@ async function readStore(): Promise<Store> {
             ...p,
             comboSizes: Array.isArray(p.comboSizes) ? p.comboSizes : [],
             reorderLevel: typeof p.reorderLevel === "number" ? p.reorderLevel : 0,
+            imageUrl: typeof p.imageUrl === "string" ? p.imageUrl : undefined,
           }))
         : [],
       stock: Array.isArray(parsed.stock) ? parsed.stock : [],
@@ -114,6 +116,7 @@ function buildLine(
     combos: computeCombos(quantity, comboSizes),
     reorderLevel,
     lowStock: reorderLevel > 0 && quantity <= reorderLevel,
+    imageUrl: product?.imageUrl,
   };
 }
 
@@ -200,6 +203,33 @@ export async function getWarehouseMovements(
   return [...ins, ...outs].sort((a, b) =>
     b.createdAt.localeCompare(a.createdAt)
   );
+}
+
+/** All distinct products with stock totalled across every warehouse. */
+export async function listCatalog(): Promise<ProductCatalogEntry[]> {
+  const store = await readStore();
+  return store.products
+    .map((p) => {
+      const byWarehouse = store.warehouses.map((w) => ({
+        warehouseId: w.id,
+        warehouseName: w.name,
+        quantity:
+          store.stock.find((s) => s.warehouseId === w.id && s.ean === p.ean)
+            ?.quantity ?? 0,
+      }));
+      const totalQuantity = byWarehouse.reduce((sum, b) => sum + b.quantity, 0);
+      return {
+        ean: p.ean,
+        name: p.name,
+        comboSizes: p.comboSizes,
+        reorderLevel: p.reorderLevel,
+        totalQuantity,
+        lowStock: p.reorderLevel > 0 && totalQuantity <= p.reorderLevel,
+        byWarehouse,
+        imageUrl: p.imageUrl,
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 // ---- Writes -----------------------------------------------------------------
@@ -311,6 +341,10 @@ export async function updateProduct(
     }
     if (typeof input.reorderLevel === "number") {
       product.reorderLevel = Math.max(0, Math.floor(input.reorderLevel));
+    }
+    if (typeof input.imageUrl === "string") {
+      // Empty string clears the image.
+      product.imageUrl = input.imageUrl.trim() || undefined;
     }
     return [store, true];
   });

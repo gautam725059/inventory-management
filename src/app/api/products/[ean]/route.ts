@@ -38,6 +38,13 @@ function parseBody(
     value.reorderLevel = n;
   }
 
+  if (b.imageUrl !== undefined) {
+    if (typeof b.imageUrl !== "string") {
+      return { ok: false, error: "imageUrl must be a string." };
+    }
+    value.imageUrl = b.imageUrl.trim();
+  }
+
   return { ok: true, value };
 }
 
