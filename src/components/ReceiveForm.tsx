@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 
-const EMPTY_FORM = { ean: "", quantity: "", name: "", comboSizes: "" };
+const EMPTY_FORM = {
+  ean: "",
+  quantity: "",
+  name: "",
+  comboSizes: "",
+  reorderLevel: "",
+};
 
 const inputClass =
   "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100";
@@ -39,6 +45,7 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
           quantity: Number(form.quantity),
           name: form.name || undefined,
           comboSizes: comboSizes.length ? comboSizes : undefined,
+          reorderLevel: form.reorderLevel ? Number(form.reorderLevel) : undefined,
         }),
       });
       if (!res.ok) {
@@ -62,7 +69,7 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
       <h3 className="mb-4 text-base font-semibold text-slate-900">
         Receive products
       </h3>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div>
           <label htmlFor="ean" className={labelClass}>
             EAN / Barcode *
@@ -116,6 +123,21 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
             value={form.comboSizes}
             onChange={(e) => setForm({ ...form, comboSizes: e.target.value })}
             placeholder="10, 5"
+          />
+        </div>
+        <div>
+          <label htmlFor="reorderLevel" className={labelClass}>
+            Reorder level (low-stock alert)
+          </label>
+          <input
+            id="reorderLevel"
+            type="number"
+            min={0}
+            step={1}
+            className={inputClass}
+            value={form.reorderLevel}
+            onChange={(e) => setForm({ ...form, reorderLevel: e.target.value })}
+            placeholder="Optional"
           />
         </div>
       </div>

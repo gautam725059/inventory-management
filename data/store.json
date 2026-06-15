@@ -23,7 +23,8 @@
       "comboSizes": [
         10,
         5
-      ]
+      ],
+      "reorderLevel": 0
     },
     {
       "ean": "5012345678900",
@@ -31,19 +32,28 @@
       "comboSizes": [
         10,
         4
-      ]
+      ],
+      "reorderLevel": 0
     },
     {
       "ean": "9876541234567",
       "name": "kife",
       "comboSizes": [
         10
-      ]
+      ],
+      "reorderLevel": 0
     },
     {
       "ean": "9988224455667",
       "name": "clow clip",
-      "comboSizes": []
+      "comboSizes": [],
+      "reorderLevel": 0
+    },
+    {
+      "ean": "0000000000001",
+      "name": "TEMP DELETE ME",
+      "comboSizes": [],
+      "reorderLevel": 0
     }
   ],
   "stock": [
@@ -96,6 +106,13 @@
       "ean": "9988224455667",
       "quantity": 9000,
       "createdAt": "2026-06-15T10:20:50.467Z"
+    },
+    {
+      "id": "3de67972-2cec-410f-a81b-58e0e8854e57",
+      "warehouseId": "wh-delhi",
+      "ean": "0000000000001",
+      "quantity": 5,
+      "createdAt": "2026-06-15T10:43:00.581Z"
     }
   ],
   "dispatches": [

@@ -4,12 +4,15 @@ import { randomUUID } from "crypto";
 import type {
   Store,
   Warehouse,
+  Product,
   WarehouseSummary,
   WarehouseDetail,
   WarehouseStockLine,
   ComboAvailability,
+  Movement,
   ReceiveInput,
   DispatchInput,
+  ProductUpdateInput,
 } from "./types";
 
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -44,7 +47,14 @@ async function readStore(): Promise<Store> {
         Array.isArray(parsed.warehouses) && parsed.warehouses.length > 0
           ? parsed.warehouses
           : emptyStore().warehouses,
-      products: Array.isArray(parsed.products) ? parsed.products : [],
+      // Normalize products so older records gain the reorderLevel field.
+      products: Array.isArray(parsed.products)
+        ? parsed.products.map((p) => ({
+            ...p,
+            comboSizes: Array.isArray(p.comboSizes) ? p.comboSizes : [],
+            reorderLevel: typeof p.reorderLevel === "number" ? p.reorderLevel : 0,
+          }))
+        : [],
       stock: Array.isArray(parsed.stock) ? parsed.stock : [],
       receipts: Array.isArray(parsed.receipts) ? parsed.receipts : [],
       dispatches: Array.isArray(parsed.dispatches) ? parsed.dispatches : [],
@@ -88,16 +98,41 @@ function computeCombos(
     }));
 }
 
+/** Build the joined stock-line view for a product + its on-hand quantity. */
+function buildLine(
+  product: Product | undefined,
+  ean: string,
+  quantity: number
+): WarehouseStockLine {
+  const comboSizes = product?.comboSizes ?? [];
+  const reorderLevel = product?.reorderLevel ?? 0;
+  return {
+    ean,
+    name: product?.name ?? "Unknown product",
+    quantity,
+    comboSizes,
+    combos: computeCombos(quantity, comboSizes),
+    reorderLevel,
+    lowStock: reorderLevel > 0 && quantity <= reorderLevel,
+  };
+}
+
 // ---- Reads ------------------------------------------------------------------
 
 export async function listWarehouses(): Promise<WarehouseSummary[]> {
   const store = await readStore();
   return store.warehouses.map((w) => {
     const rows = store.stock.filter((s) => s.warehouseId === w.id && s.quantity > 0);
+    const lowStockCount = rows.filter((r) => {
+      const product = store.products.find((p) => p.ean === r.ean);
+      const reorderLevel = product?.reorderLevel ?? 0;
+      return reorderLevel > 0 && r.quantity <= reorderLevel;
+    }).length;
     return {
       ...w,
       skuCount: rows.length,
       totalUnits: rows.reduce((sum, r) => sum + r.quantity, 0),
+      lowStockCount,
     };
   });
 }
@@ -111,17 +146,13 @@ export async function getWarehouseDetail(
 
   const lines: WarehouseStockLine[] = store.stock
     .filter((s) => s.warehouseId === id)
-    .map((s) => {
-      const product = store.products.find((p) => p.ean === s.ean);
-      const comboSizes = product?.comboSizes ?? [];
-      return {
-        ean: s.ean,
-        name: product?.name ?? "Unknown product",
-        quantity: s.quantity,
-        comboSizes,
-        combos: computeCombos(s.quantity, comboSizes),
-      };
-    })
+    .map((s) =>
+      buildLine(
+        store.products.find((p) => p.ean === s.ean),
+        s.ean,
+        s.quantity
+      )
+    )
     .sort((a, b) => a.name.localeCompare(b.name));
 
   return {
@@ -129,6 +160,46 @@ export async function getWarehouseDetail(
     lines,
     totalUnits: lines.reduce((sum, l) => sum + l.quantity, 0),
   };
+}
+
+/** Unified, newest-first movement log (stock-in + stock-out) for a warehouse. */
+export async function getWarehouseMovements(
+  id: string
+): Promise<Movement[] | undefined> {
+  const store = await readStore();
+  const warehouse = store.warehouses.find((w) => w.id === id);
+  if (!warehouse) return undefined;
+
+  const nameFor = (ean: string) =>
+    store.products.find((p) => p.ean === ean)?.name ?? "Unknown product";
+
+  const ins: Movement[] = store.receipts
+    .filter((r) => r.warehouseId === id)
+    .map((r) => ({
+      id: r.id,
+      type: "in",
+      ean: r.ean,
+      name: nameFor(r.ean),
+      quantity: r.quantity,
+      createdAt: r.createdAt,
+    }));
+
+  const outs: Movement[] = store.dispatches
+    .filter((d) => d.warehouseId === id)
+    .map((d) => ({
+      id: d.id,
+      type: "out",
+      ean: d.ean,
+      name: nameFor(d.ean),
+      quantity: d.quantity,
+      unitSize: d.unitSize,
+      packs: d.packs,
+      createdAt: d.createdAt,
+    }));
+
+  return [...ins, ...outs].sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt)
+  );
 }
 
 // ---- Writes -----------------------------------------------------------------
@@ -152,11 +223,15 @@ export async function receiveStock(
         ean,
         name: input.name?.trim() || `Product ${ean}`,
         comboSizes: input.comboSizes ?? [],
+        reorderLevel: input.reorderLevel ?? 0,
       };
       store.products.push(product);
     } else {
       if (input.name?.trim()) product.name = input.name.trim();
       if (input.comboSizes) product.comboSizes = input.comboSizes;
+      if (typeof input.reorderLevel === "number") {
+        product.reorderLevel = input.reorderLevel;
+      }
     }
 
     // Add to (or create) the per-warehouse stock row.
@@ -177,14 +252,7 @@ export async function receiveStock(
       createdAt: new Date().toISOString(),
     });
 
-    const line: WarehouseStockLine = {
-      ean,
-      name: product.name,
-      quantity: row.quantity,
-      comboSizes: product.comboSizes,
-      combos: computeCombos(row.quantity, product.comboSizes),
-    };
-    return [store, line];
+    return [store, buildLine(product, ean, row.quantity)];
   });
 }
 
@@ -223,27 +291,42 @@ export async function dispatchStock(
     });
 
     const product = store.products.find((p) => p.ean === ean);
-    const comboSizes = product?.comboSizes ?? [];
-    const line: WarehouseStockLine = {
-      ean,
-      name: product?.name ?? "Unknown product",
-      quantity: row.quantity,
-      comboSizes,
-      combos: computeCombos(row.quantity, comboSizes),
-    };
-    return [store, line];
+    return [store, buildLine(product, ean, row.quantity)];
   });
 }
 
-/** Update the combo (pack) sizes a product can be sold in. */
-export async function setComboSizes(
+/** Update a product's name, combo (pack) sizes, and/or reorder level. */
+export async function updateProduct(
   ean: string,
-  comboSizes: number[]
+  input: ProductUpdateInput
 ): Promise<boolean> {
   return mutate((store) => {
     const product = store.products.find((p) => p.ean === ean);
     if (!product) return [store, false];
-    product.comboSizes = comboSizes.filter((s) => s > 0);
+    if (typeof input.name === "string" && input.name.trim()) {
+      product.name = input.name.trim();
+    }
+    if (input.comboSizes) {
+      product.comboSizes = input.comboSizes.filter((s) => s > 0);
+    }
+    if (typeof input.reorderLevel === "number") {
+      product.reorderLevel = Math.max(0, Math.floor(input.reorderLevel));
+    }
     return [store, true];
+  });
+}
+
+/** Remove a product's stock line from one warehouse (does not delete the
+ *  shared product record, which may still be stocked elsewhere). */
+export async function removeStockLine(
+  warehouseId: string,
+  ean: string
+): Promise<boolean> {
+  return mutate((store) => {
+    const before = store.stock.length;
+    store.stock = store.stock.filter(
+      (s) => !(s.warehouseId === warehouseId && s.ean === ean)
+    );
+    return [store, store.stock.length !== before];
   });
 }

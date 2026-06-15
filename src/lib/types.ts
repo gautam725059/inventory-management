@@ -16,6 +16,9 @@ export interface Product {
   ean: string;
   name: string;
   comboSizes: number[];
+  /** Low-stock threshold. When stock falls to/below this, it's flagged for
+   *  re-order. 0 = no alert. */
+  reorderLevel: number;
 }
 
 /** Quantity (in base pieces) of one product held in one warehouse. */
@@ -70,12 +73,27 @@ export interface WarehouseStockLine {
   quantity: number;
   comboSizes: number[];
   combos: ComboAvailability[];
+  reorderLevel: number;
+  lowStock: boolean; // quantity <= reorderLevel (and reorderLevel > 0)
 }
 
 /** Dashboard summary for one warehouse. */
 export interface WarehouseSummary extends Warehouse {
   skuCount: number;
   totalUnits: number;
+  lowStockCount: number;
+}
+
+/** A unified stock movement (in or out) for the history view. */
+export interface Movement {
+  id: string;
+  type: "in" | "out";
+  ean: string;
+  name: string;
+  quantity: number; // pieces moved
+  unitSize?: number; // out only: pieces per pack
+  packs?: number; // out only: number of packs
+  createdAt: string;
 }
 
 /** Full warehouse detail payload. */
@@ -90,6 +108,7 @@ export interface ReceiveInput {
   quantity: number;
   name?: string;
   comboSizes?: number[];
+  reorderLevel?: number;
 }
 
 /** Body accepted by the "dispatch goods" (stock-out) endpoint. */
@@ -97,4 +116,11 @@ export interface DispatchInput {
   ean: string;
   unitSize: number; // pieces per pack (1 = single)
   packs: number;
+}
+
+/** Body accepted by the "update product" endpoint. Any field may be omitted. */
+export interface ProductUpdateInput {
+  name?: string;
+  comboSizes?: number[];
+  reorderLevel?: number;
 }

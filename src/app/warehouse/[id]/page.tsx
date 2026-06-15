@@ -74,7 +74,7 @@ export default function WarehousePage({
         </div>
       )}
 
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Link
           href={`/warehouse/${id}/stock-in`}
           className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400 hover:shadow-md"
@@ -103,6 +103,20 @@ export default function WarehousePage({
             </span>
           </span>
         </Link>
+        <Link
+          href={`/warehouse/${id}/history`}
+          className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-md"
+        >
+          <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100 text-2xl">
+            📜
+          </span>
+          <span>
+            <span className="block font-semibold text-slate-900">History</span>
+            <span className="mt-0.5 block text-sm text-slate-500">
+              All stock movements
+            </span>
+          </span>
+        </Link>
       </div>
 
       <div className="mb-4 flex items-baseline justify-between">
@@ -126,7 +140,13 @@ export default function WarehousePage({
       ) : (
         <div className="flex flex-col gap-3">
           {detail.lines.map((line) => (
-            <StockCard key={line.ean} line={line} />
+            <StockCard
+              key={line.ean}
+              line={line}
+              warehouseId={id}
+              onChanged={load}
+              onError={(message) => setError(message || null)}
+            />
           ))}
         </div>
       )}

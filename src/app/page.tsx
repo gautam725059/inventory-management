@@ -25,6 +25,7 @@ export default function Dashboard() {
 
   const totalUnits = warehouses.reduce((s, w) => s + w.totalUnits, 0);
   const totalLines = warehouses.reduce((s, w) => s + w.skuCount, 0);
+  const totalLow = warehouses.reduce((s, w) => s + w.lowStockCount, 0);
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-10">
@@ -73,6 +74,14 @@ export default function Dashboard() {
                 <p className="text-3xl font-bold tabular-nums">{totalLines}</p>
                 <p className="text-xs uppercase tracking-wide text-brand-100">
                   Stock lines
+                </p>
+              </div>
+              <div>
+                <p className="text-3xl font-bold tabular-nums">
+                  {totalLow}
+                </p>
+                <p className="text-xs uppercase tracking-wide text-brand-100">
+                  Low stock
                 </p>
               </div>
             </div>

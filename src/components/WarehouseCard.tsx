@@ -12,10 +12,15 @@ export default function WarehouseCard({ warehouse }: { warehouse: WarehouseSumma
         <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-brand-50 text-2xl">
           🏬
         </span>
-        <div>
+        <div className="flex-1">
           <h2 className="font-semibold text-slate-900">{warehouse.name}</h2>
           <p className="text-xs text-slate-500">{warehouse.location}</p>
         </div>
+        {warehouse.lowStockCount > 0 && (
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
+            {warehouse.lowStockCount} low
+          </span>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3 border-y border-slate-100 py-3">
