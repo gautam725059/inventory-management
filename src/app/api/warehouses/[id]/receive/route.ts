@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { receiveStock } from "@/lib/db";
+import { receiveStock, createApproval } from "@/lib/db";
+import { getCurrentUser, hasRole } from "@/lib/auth";
 import type { ReceiveInput } from "@/lib/types";
 
 type Context = { params: Promise<{ id: string }> };
@@ -31,7 +32,37 @@ function parseBody(body: unknown): { ok: true; value: ReceiveInput } | { ok: fal
       .filter((s) => Number.isInteger(s) && s > 0);
   }
 
-  return { ok: true, value: { ean, quantity, name, comboSizes } };
+  const vendorName = typeof b.vendorName === "string" ? b.vendorName.trim() : "";
+  if (!vendorName) return { ok: false, error: "Vendor name is required." };
+
+  const bill = typeof b.bill === "string" ? b.bill.trim() : "";
+  if (!bill) return { ok: false, error: "Bill number is required." };
+
+  const date = typeof b.date === "string" ? b.date.trim() : "";
+  if (!date) return { ok: false, error: "Date is required." };
+
+  let purchasePrice: number | undefined;
+  if (b.purchasePrice !== undefined && b.purchasePrice !== "") {
+    const n = Number(b.purchasePrice);
+    if (!Number.isFinite(n) || n < 0) {
+      return { ok: false, error: "Purchase price must be a non-negative number." };
+    }
+    purchasePrice = n;
+  }
+
+  return {
+    ok: true,
+    value: {
+      ean,
+      quantity,
+      name,
+      comboSizes,
+      vendorName,
+      bill,
+      date,
+      purchasePrice,
+    },
+  };
 }
 
 export async function POST(request: Request, { params }: Context) {
@@ -47,6 +78,20 @@ export async function POST(request: Request, { params }: Context) {
   const result = parseBody(body);
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 });
+  }
+
+  // Managers/admins receive directly; staff (and anonymous) queue for approval.
+  const me = await getCurrentUser(request);
+  if (!hasRole(me, "admin", "manager")) {
+    const approval = await createApproval(
+      id,
+      result.value,
+      me ? { id: me.id, name: me.name } : undefined
+    );
+    return NextResponse.json(
+      { pending: true, approvalId: approval.id },
+      { status: 202 }
+    );
   }
 
   try {

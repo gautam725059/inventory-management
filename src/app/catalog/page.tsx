@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import ImageEditor from "@/components/ImageEditor";
+import BarcodeEditor from "@/components/BarcodeEditor";
 import type { ProductCatalogEntry } from "@/lib/types";
 
 export default function CatalogPage() {
@@ -11,6 +12,7 @@ export default function CatalogPage() {
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [editingEan, setEditingEan] = useState<string | null>(null);
+  const [barcodesEan, setBarcodesEan] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -29,6 +31,7 @@ export default function CatalogPage() {
   }, [load]);
 
   const editing = products.find((p) => p.ean === editingEan) ?? null;
+  const editingBarcodes = products.find((p) => p.ean === barcodesEan) ?? null;
 
   const warehouseNames = products[0]?.byWarehouse.map((b) => b.warehouseName) ?? [];
 
@@ -139,10 +142,19 @@ export default function CatalogPage() {
                     </div>
                     <div className="text-xs text-slate-400">
                       EAN {p.ean}
-                      {p.comboSizes.length > 0 && (
-                        <span className="ml-2">· packs {p.comboSizes.join("/")}</span>
+                      {p.barcodes.length > 0 && (
+                        <span className="ml-2">
+                          · {p.barcodes.length} pack barcode
+                          {p.barcodes.length === 1 ? "" : "s"}
+                        </span>
                       )}
                     </div>
+                    <button
+                      onClick={() => setBarcodesEan(p.ean)}
+                      className="mt-1 text-xs font-medium text-brand-600 hover:underline"
+                    >
+                      🏷 Barcodes
+                    </button>
                   </td>
                   {p.byWarehouse.map((b) => (
                     <td
@@ -175,6 +187,16 @@ export default function CatalogPage() {
           name={editing.name}
           imageUrl={editing.imageUrl}
           onClose={() => setEditingEan(null)}
+          onSaved={load}
+        />
+      )}
+
+      {editingBarcodes && (
+        <BarcodeEditor
+          ean={editingBarcodes.ean}
+          name={editingBarcodes.name}
+          barcodes={editingBarcodes.barcodes}
+          onClose={() => setBarcodesEan(null)}
           onSaved={load}
         />
       )}

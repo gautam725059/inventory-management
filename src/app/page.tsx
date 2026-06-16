@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import WarehouseCard from "@/components/WarehouseCard";
 import type { WarehouseSummary } from "@/lib/types";
 
@@ -30,21 +29,13 @@ export default function Dashboard() {
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-10">
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            Warehouse Dashboard
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Select a warehouse to receive stock and manage combos.
-          </p>
-        </div>
-        <Link
-          href="/catalog"
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
-        >
-          📚 Product Catalog
-        </Link>
+      <header className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          Warehouse Dashboard
+        </h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Select a warehouse to receive stock and manage combos.
+        </p>
       </header>
 
       {error && (
@@ -57,9 +48,13 @@ export default function Dashboard() {
         <div className="py-16 text-center text-sm text-slate-400">Loading…</div>
       ) : (
         <>
-          <div className="mb-8 flex flex-col gap-5 rounded-xl border border-brand-100 bg-linear-to-br from-brand-600 to-brand-700 p-6 text-white shadow-sm sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
-              <span className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/15 text-3xl">
+          <div className="relative mb-8 flex flex-col gap-5 overflow-hidden rounded-2xl bg-linear-to-br from-brand-600 via-brand-700 to-brand-800 p-6 text-white shadow-lg shadow-brand-200 sm:flex-row sm:items-center sm:justify-between">
+            {/* decorative glows */}
+            <span className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
+            <span className="pointer-events-none absolute -bottom-20 left-10 h-44 w-44 rounded-full bg-brand-400/20 blur-3xl" />
+
+            <div className="relative flex items-center gap-4">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-3xl shadow-inner ring-1 ring-white/25">
                 📦
               </span>
               <div>
@@ -72,27 +67,20 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <div className="flex gap-8 sm:gap-10">
-              <div>
-                <p className="text-3xl font-bold tabular-nums">{warehouses.length}</p>
-                <p className="text-xs uppercase tracking-wide text-brand-100">
-                  Warehouses
-                </p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold tabular-nums">{totalLines}</p>
-                <p className="text-xs uppercase tracking-wide text-brand-100">
-                  Stock lines
-                </p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold tabular-nums">
-                  {totalLow}
-                </p>
-                <p className="text-xs uppercase tracking-wide text-brand-100">
-                  Low stock
-                </p>
-              </div>
+            <div className="relative flex gap-3 sm:gap-4">
+              {[
+                { v: warehouses.length, l: "Warehouses" },
+                { v: totalLines, l: "Stock lines" },
+                { v: totalLow, l: "Low stock" },
+              ].map((s) => (
+                <div
+                  key={s.l}
+                  className="min-w-20 rounded-xl bg-white/10 px-4 py-3 text-center ring-1 ring-white/15 backdrop-blur-sm"
+                >
+                  <p className="text-2xl font-bold tabular-nums sm:text-3xl">{s.v}</p>
+                  <p className="text-xs uppercase tracking-wide text-brand-100">{s.l}</p>
+                </div>
+              ))}
             </div>
           </div>
 

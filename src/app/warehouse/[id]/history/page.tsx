@@ -15,6 +15,31 @@ function formatDate(iso: string): string {
   });
 }
 
+const TYPE_BADGE: Record<Movement["type"], { label: string; cls: string }> = {
+  in: { label: "Stock In", cls: "bg-emerald-100 text-emerald-700" },
+  out: { label: "Stock Out", cls: "bg-brand-100 text-brand-700" },
+  adjust: { label: "Adjust", cls: "bg-amber-100 text-amber-700" },
+  "transfer-in": { label: "Transfer In", cls: "bg-indigo-100 text-indigo-700" },
+  "transfer-out": { label: "Transfer Out", cls: "bg-indigo-100 text-indigo-700" },
+};
+
+const PIECES_COLOR: Record<Movement["type"], string> = {
+  in: "text-emerald-600",
+  out: "text-brand-600",
+  adjust: "text-amber-600",
+  "transfer-in": "text-emerald-600",
+  "transfer-out": "text-brand-600",
+};
+
+/** Signed piece count for display: out / transfer-out are negative; adjust is
+ *  already signed; everything else is positive. */
+function signedQty(m: Movement): number {
+  if (m.type === "adjust") return m.quantity;
+  return m.type === "out" || m.type === "transfer-out"
+    ? -m.quantity
+    : m.quantity;
+}
+
 export default function HistoryPage({
   params,
 }: {
@@ -102,32 +127,69 @@ export default function HistoryPage({
                     {formatDate(m.createdAt)}
                   </td>
                   <td className="px-4 py-3">
-                    {m.type === "in" ? (
-                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
-                        Stock In
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-700">
-                        Stock Out
-                      </span>
-                    )}
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${TYPE_BADGE[m.type].cls}`}
+                    >
+                      {TYPE_BADGE[m.type].label}
+                    </span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="font-medium text-slate-900">{m.name}</div>
                     <div className="text-xs text-slate-400">EAN {m.ean}</div>
                   </td>
                   <td className="px-4 py-3 text-slate-500">
-                    {m.type === "out" && m.unitSize
-                      ? `${m.packs} × ${m.unitSize === 1 ? "single" : `pack of ${m.unitSize}`}`
-                      : "Bulk receipt"}
+                    {m.type === "out" && m.unitSize ? (
+                      <>
+                        <div>
+                          {m.packs} ×{" "}
+                          {m.unitSize === 1 ? "single" : `pack of ${m.unitSize}`}
+                        </div>
+                        {(m.invoiceNo || m.date || m.customerName) && (
+                          <div className="text-xs text-slate-400">
+                            {m.customerName && <>{m.customerName} · </>}
+                            {m.invoiceNo && <>Invoice {m.invoiceNo}</>}
+                            {m.invoiceNo && m.date && " · "}
+                            {m.date}
+                          </div>
+                        )}
+                      </>
+                    ) : m.type === "in" ? (
+                      <>
+                        <div>{m.vendorName ? m.vendorName : "Bulk receipt"}</div>
+                        {(m.bill || m.date) && (
+                          <div className="text-xs text-slate-400">
+                            {m.bill && <>Bill {m.bill}</>}
+                            {m.bill && m.date && " · "}
+                            {m.date}
+                          </div>
+                        )}
+                      </>
+                    ) : m.type === "adjust" ? (
+                      <>
+                        <div>{m.reason}</div>
+                        <div className="text-xs text-slate-400">
+                          {m.note && <>{m.note} · </>}
+                          {m.byName ? `by ${m.byName}` : ""}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          {m.type === "transfer-out" ? "To " : "From "}
+                          {m.counterparty}
+                        </div>
+                        <div className="text-xs text-slate-400">
+                          {m.note && <>{m.note} · </>}
+                          {m.byName ? `by ${m.byName}` : ""}
+                        </div>
+                      </>
+                    )}
                   </td>
                   <td
-                    className={`px-4 py-3 text-right font-bold tabular-nums ${
-                      m.type === "in" ? "text-emerald-600" : "text-brand-600"
-                    }`}
+                    className={`px-4 py-3 text-right font-bold tabular-nums ${PIECES_COLOR[m.type]}`}
                   >
-                    {m.type === "in" ? "+" : "−"}
-                    {m.quantity.toLocaleString()}
+                    {signedQty(m) >= 0 ? "+" : "−"}
+                    {Math.abs(signedQty(m)).toLocaleString()}
                   </td>
                 </tr>
               ))}

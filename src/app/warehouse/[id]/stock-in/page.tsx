@@ -66,9 +66,15 @@ export default function StockInPage({
 
       <ReceiveForm
         warehouseId={id}
-        onReceived={async () => {
-          setSuccess("Stock received and added to the warehouse.");
-          await load();
+        onReceived={async ({ pending }) => {
+          if (pending) {
+            setSuccess(
+              "Stock-in submitted for admin approval. Stock will update once an admin approves it."
+            );
+          } else {
+            setSuccess("Stock received and added to the warehouse.");
+            await load();
+          }
         }}
         onError={(message) => {
           setError(message || null);

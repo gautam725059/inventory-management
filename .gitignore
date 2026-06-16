@@ -4,5 +4,8 @@ out/
 *.log
 .DS_Store
 
+# Local env (admin password, etc.)
+.env*.local
+
 # Local inventory data (uncomment to keep data out of git)
 # data/items.json

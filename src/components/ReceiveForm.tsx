@@ -1,12 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useMe, canApprove } from "@/lib/useMe";
+import type { Vendor } from "@/lib/types";
+
+/** Today's date as YYYY-MM-DD, for the date input default. */
+function today(): string {
+  const d = new Date();
+  const m = `${d.getMonth() + 1}`.padStart(2, "0");
+  const day = `${d.getDate()}`.padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
 
 const EMPTY_FORM = {
   ean: "",
   quantity: "",
   name: "",
   reorderLevel: "",
+  vendorName: "",
+  bill: "",
+  date: today(),
+  purchasePrice: "",
 };
 
 const inputClass =
@@ -15,8 +29,9 @@ const labelClass = "mb-1 block text-xs font-medium text-slate-600";
 
 interface Props {
   warehouseId: string;
-  /** Called after a successful receive so the parent can reload its stock. */
-  onReceived: () => void | Promise<void>;
+  /** Called after a successful receive (or queued request) so the parent can
+   *  react. `pending` is true when the stock-in awaits admin approval. */
+  onReceived: (result: { pending: boolean }) => void | Promise<void>;
   /** Surface a failure to the parent's error banner. */
   onError: (message: string) => void;
 }
@@ -25,6 +40,17 @@ interface Props {
 export default function ReceiveForm({ warehouseId, onReceived, onError }: Props) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  // Managers/admins receive directly; everyone else submits for approval.
+  const { me } = useMe();
+  const direct = canApprove(me);
+
+  useEffect(() => {
+    fetch("/api/vendors")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list) => setVendors(Array.isArray(list) ? list : []))
+      .catch(() => setVendors([]));
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -39,14 +65,26 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
           quantity: Number(form.quantity),
           name: form.name || undefined,
           reorderLevel: form.reorderLevel ? Number(form.reorderLevel) : undefined,
+          vendorName: form.vendorName,
+          bill: form.bill,
+          date: form.date,
+          purchasePrice: form.purchasePrice || undefined,
         }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Failed to receive goods.");
       }
-      setForm(EMPTY_FORM);
-      await onReceived();
+      const data = await res.json().catch(() => ({}));
+      // Reset the per-item fields but keep vendor / bill / date — successive
+      // line items usually share the same bill.
+      setForm((f) => ({
+        ...EMPTY_FORM,
+        vendorName: f.vendorName,
+        bill: f.bill,
+        date: f.date,
+      }));
+      await onReceived({ pending: !!data.pending });
     } catch (err) {
       onError(err instanceof Error ? err.message : "Failed to receive goods.");
     } finally {
@@ -95,15 +133,77 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
           />
         </div>
         <div>
+          <label htmlFor="vendorName" className={labelClass}>
+            Vendor name *
+          </label>
+          <input
+            id="vendorName"
+            list="vendor-list"
+            className={inputClass}
+            value={form.vendorName}
+            onChange={(e) => setForm({ ...form, vendorName: e.target.value })}
+            placeholder="Pick or type a vendor…"
+            autoComplete="off"
+            required
+          />
+          <datalist id="vendor-list">
+            {vendors.map((v) => (
+              <option key={v.id} value={v.name} />
+            ))}
+          </datalist>
+        </div>
+        <div>
+          <label htmlFor="bill" className={labelClass}>
+            Bill no. *
+          </label>
+          <input
+            id="bill"
+            className={inputClass}
+            value={form.bill}
+            onChange={(e) => setForm({ ...form, bill: e.target.value })}
+            placeholder="e.g. BILL-2026-001"
+            autoComplete="off"
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="date" className={labelClass}>
+            Date *
+          </label>
+          <input
+            id="date"
+            type="date"
+            className={inputClass}
+            value={form.date}
+            onChange={(e) => setForm({ ...form, date: e.target.value })}
+            required
+          />
+        </div>
+        <div>
           <label htmlFor="name" className={labelClass}>
-            Product name (new EANs)
+            Product name
           </label>
           <input
             id="name"
             className={inputClass}
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            placeholder="Optional"
+            placeholder="Required for a new EAN; optional otherwise"
+          />
+        </div>
+        <div>
+          <label htmlFor="purchasePrice" className={labelClass}>
+            Purchase price (per piece)
+          </label>
+          <input
+            id="purchasePrice"
+            type="number"
+            min={0}
+            step="0.01"
+            className={inputClass}
+            value={form.purchasePrice}
+            onChange={(e) => setForm({ ...form, purchasePrice: e.target.value })}
+            placeholder="Cost price, optional"
           />
         </div>
         <div>
@@ -122,13 +222,25 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
           />
         </div>
       </div>
+
+      {!direct && (
+        <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          This stock-in will be sent to a manager/admin for approval and
+          won&apos;t change stock until approved.
+        </p>
+      )}
+
       <div className="mt-5">
         <button
           type="submit"
           disabled={saving}
           className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {saving ? "Receiving…" : "Receive into warehouse"}
+          {saving
+            ? "Submitting…"
+            : direct
+              ? "Receive into warehouse"
+              : "Submit for approval"}
         </button>
       </div>
     </form>

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { updateProduct } from "@/lib/db";
-import type { ProductUpdateInput } from "@/lib/types";
+import type { ProductUpdateInput, PackBarcode } from "@/lib/types";
 
 type Context = { params: Promise<{ ean: string }> };
 
@@ -30,12 +30,49 @@ function parseBody(
       .filter((s) => Number.isInteger(s) && s > 0);
   }
 
+  if (b.barcodes !== undefined) {
+    if (!Array.isArray(b.barcodes)) {
+      return { ok: false, error: "barcodes must be an array." };
+    }
+    const barcodes: PackBarcode[] = [];
+    const seen = new Set<string>();
+    for (const item of b.barcodes) {
+      if (typeof item !== "object" || item === null) {
+        return { ok: false, error: "Each barcode must be an object." };
+      }
+      const row = item as Record<string, unknown>;
+      const ean =
+        typeof row.ean === "string" ? row.ean.trim() : String(row.ean ?? "").trim();
+      const size = Number(row.size);
+      if (!ean) {
+        return { ok: false, error: "Each barcode needs an EAN." };
+      }
+      if (!Number.isInteger(size) || size <= 0) {
+        return { ok: false, error: `Pack size for ${ean} must be a positive whole number.` };
+      }
+      if (seen.has(ean)) {
+        return { ok: false, error: `Duplicate barcode: ${ean}.` };
+      }
+      seen.add(ean);
+      barcodes.push({ ean, size });
+    }
+    value.barcodes = barcodes;
+  }
+
   if (b.reorderLevel !== undefined) {
     const n = Number(b.reorderLevel);
     if (!Number.isInteger(n) || n < 0) {
       return { ok: false, error: "Reorder level must be a non-negative integer." };
     }
     value.reorderLevel = n;
+  }
+
+  if (b.sellingPrice !== undefined && b.sellingPrice !== "") {
+    const n = Number(b.sellingPrice);
+    if (!Number.isFinite(n) || n < 0) {
+      return { ok: false, error: "Selling price must be a non-negative number." };
+    }
+    value.sellingPrice = n;
   }
 
   if (b.imageUrl !== undefined) {

@@ -26,7 +26,19 @@ function parseBody(
     return { ok: false, error: "Number of packs must be a positive whole number." };
   }
 
-  return { ok: true, value: { ean, unitSize, packs } };
+  const date = typeof b.date === "string" ? b.date.trim() : "";
+  if (!date) return { ok: false, error: "Date is required." };
+
+  const invoiceNo = typeof b.invoiceNo === "string" ? b.invoiceNo.trim() : "";
+  if (!invoiceNo) return { ok: false, error: "Invoice number is required." };
+
+  const customerName =
+    typeof b.customerName === "string" ? b.customerName.trim() || undefined : undefined;
+
+  return {
+    ok: true,
+    value: { ean, unitSize, packs, date, invoiceNo, customerName },
+  };
 }
 
 export async function POST(request: Request, { params }: Context) {

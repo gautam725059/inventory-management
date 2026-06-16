@@ -4,10 +4,104 @@
 // (e.g. a pack of 10 or 5 pieces).
 // ---------------------------------------------------------------------------
 
+// ---- Users & auth -----------------------------------------------------------
+
+/** Access levels. admin = full control; manager = operations + approvals;
+ *  staff = data entry only (stock-in needs approval). */
+export type Role = "admin" | "manager" | "staff";
+
+export interface User {
+  id: string;
+  username: string; // unique login handle
+  name: string; // display name
+  role: Role;
+  passwordHash: string; // scrypt hash "salt:hash"
+  active: boolean; // disabled users can't log in
+  createdAt: string;
+}
+
+/** A logged-in session, keyed by an opaque token stored in an httpOnly cookie. */
+export interface Session {
+  token: string;
+  userId: string;
+  createdAt: string;
+  expiresAt: string;
+}
+
+/** Safe, public view of a user (never exposes the password hash). */
+export interface PublicUser {
+  id: string;
+  username: string;
+  name: string;
+  role: Role;
+  active: boolean;
+  createdAt: string;
+}
+
 export interface Warehouse {
   id: string;
   name: string;
   location: string;
+}
+
+// ---- Parties: vendors (suppliers) & customers -------------------------------
+
+/** Shared fields for a business party. */
+interface PartyBase {
+  id: string;
+  name: string;
+  phone?: string;
+  gstin?: string; // tax id
+  address?: string;
+  note?: string;
+  createdAt: string;
+}
+
+/** A supplier the goods are bought from (stock-in). */
+export type Vendor = PartyBase;
+/** A buyer the goods are sold to (stock-out). */
+export type Customer = PartyBase;
+
+/** Body accepted by the create/update party endpoints. */
+export interface PartyInput {
+  name?: string;
+  phone?: string;
+  gstin?: string;
+  address?: string;
+  note?: string;
+}
+
+/** One transaction row in a party's history. */
+export interface PartyTxn {
+  id: string;
+  date: string; // user date if present, else createdAt
+  ean: string;
+  productName: string;
+  quantity: number;
+  ref?: string; // bill no (vendor) or invoice no (customer)
+  amount?: number; // line value if a price is known
+  warehouseName: string;
+}
+
+/** A vendor with its purchase history. */
+export interface VendorDetail extends PartyBase {
+  txns: PartyTxn[];
+  totalQuantity: number;
+  totalValue: number;
+}
+
+/** A customer with its sales history. */
+export interface CustomerDetail extends PartyBase {
+  txns: PartyTxn[];
+  totalQuantity: number;
+}
+
+/** A scannable barcode for a specific pack of a product. The product's own
+ *  `ean` is its primary barcode; these are extra barcodes that each resolve to
+ *  a pack size, e.g. { ean: "…001", size: 10 } = the barcode for a pack of 10. */
+export interface PackBarcode {
+  ean: string;
+  size: number; // pieces in this pack (1 = single)
 }
 
 /** A product is identified by its EAN barcode. Combo sizes are pack sizes it
@@ -16,9 +110,17 @@ export interface Product {
   ean: string;
   name: string;
   comboSizes: number[];
+  /** Extra barcodes — one EAN per pack size (pack of 10, pack of 5, single …).
+   *  Scanning any of these in stock-out auto-fills the matching pack size. */
+  barcodes: PackBarcode[];
   /** Low-stock threshold. When stock falls to/below this, it's flagged for
    *  re-order. 0 = no alert. */
   reorderLevel: number;
+  /** Selling price per piece (set on the product). Drives "product value". */
+  sellingPrice?: number;
+  /** Latest purchase (cost) price per piece, updated on each stock-in. Drives
+   *  "purchase value". */
+  purchasePrice?: number;
   /** Optional product image: an uploaded path (/uploads/…) or an external URL. */
   imageUrl?: string;
 }
@@ -36,7 +138,53 @@ export interface Receipt {
   warehouseId: string;
   ean: string;
   quantity: number;
+  bill?: string; // supplier bill / invoice number for this receipt
+  vendorName?: string; // who the goods were bought from
+  vendorId?: string; // linked vendor master record
+  date?: string; // received date (YYYY-MM-DD) entered by the user
+  purchasePrice?: number; // cost price per piece for this batch
   createdAt: string;
+}
+
+/** Manual stock correction (damage, expiry, count fix, …). delta is signed. */
+export interface Adjustment {
+  id: string;
+  warehouseId: string;
+  ean: string;
+  delta: number; // signed change in pieces (e.g. -3 or +5)
+  reason: string;
+  note?: string;
+  byId?: string;
+  byName?: string;
+  createdAt: string;
+}
+
+/** Movement of stock from one warehouse to another. */
+export interface Transfer {
+  id: string;
+  fromWarehouseId: string;
+  toWarehouseId: string;
+  ean: string;
+  quantity: number; // pieces moved (positive)
+  note?: string;
+  byId?: string;
+  byName?: string;
+  createdAt: string;
+}
+
+/** A regular user's stock-in request awaiting admin approval. */
+export interface Approval {
+  id: string;
+  type: "receive";
+  warehouseId: string;
+  payload: ReceiveInput;
+  status: "pending" | "approved" | "rejected";
+  requestedBy?: string; // user id who submitted it
+  requestedByName?: string; // display name snapshot
+  decidedBy?: string; // user id who approved/rejected
+  decidedByName?: string;
+  createdAt: string;
+  decidedAt?: string;
 }
 
 /** Audit log entry: goods dispatched out of a warehouse as packs (stock-out). */
@@ -47,16 +195,27 @@ export interface Dispatch {
   unitSize: number; // pieces per pack (1 = single)
   packs: number;
   quantity: number; // total pieces removed = unitSize * packs
+  date?: string; // dispatch date (YYYY-MM-DD) entered by the user
+  invoiceNo?: string; // invoice number for this dispatch
+  customerName?: string; // who the goods were sold to
+  customerId?: string; // linked customer master record
   createdAt: string;
 }
 
 /** The whole persisted store. */
 export interface Store {
+  users: User[];
+  sessions: Session[];
   warehouses: Warehouse[];
   products: Product[];
+  vendors: Vendor[];
+  customers: Customer[];
   stock: StockRow[];
   receipts: Receipt[];
   dispatches: Dispatch[];
+  adjustments: Adjustment[];
+  transfers: Transfer[];
+  approvals: Approval[];
 }
 
 // ---- Computed / view shapes returned by the API -----------------------------
@@ -75,6 +234,7 @@ export interface WarehouseStockLine {
   quantity: number;
   comboSizes: number[];
   combos: ComboAvailability[];
+  barcodes: PackBarcode[]; // pack barcodes for scanning in stock-out
   reorderLevel: number;
   lowStock: boolean; // quantity <= reorderLevel (and reorderLevel > 0)
   imageUrl?: string;
@@ -99,22 +259,105 @@ export interface ProductCatalogEntry {
   ean: string;
   name: string;
   comboSizes: number[];
+  barcodes: PackBarcode[];
   reorderLevel: number;
+  sellingPrice?: number;
+  purchasePrice?: number;
   totalQuantity: number;
   lowStock: boolean; // total <= reorderLevel (and reorderLevel > 0)
   byWarehouse: WarehouseStockBit[];
   imageUrl?: string;
 }
 
-/** A unified stock movement (in or out) for the history view. */
-export interface Movement {
-  id: string;
-  type: "in" | "out";
+/** One product's valuation row for the admin panel. */
+export interface ProductValue {
   ean: string;
   name: string;
-  quantity: number; // pieces moved
+  quantity: number; // total pieces across all warehouses
+  sellingPrice: number; // 0 if unset
+  purchasePrice: number; // 0 if unset
+  productValue: number; // quantity * sellingPrice
+  purchaseValue: number; // quantity * purchasePrice
+}
+
+/** Whole-inventory valuation returned to the admin panel. */
+export interface InventoryValuation {
+  products: ProductValue[];
+  totalQuantity: number;
+  totalProductValue: number;
+  totalPurchaseValue: number;
+}
+
+// ---- Reports ----------------------------------------------------------------
+
+export interface ReportProductRow {
+  ean: string;
+  name: string;
+  soldUnits: number;
+  revenue: number;
+  purchasedUnits: number;
+  spend: number;
+  profit: number; // revenue − COGS for the units sold
+}
+
+export interface ReportMonthly {
+  month: string; // "YYYY-MM"
+  salesRevenue: number;
+  purchaseSpend: number;
+  salesUnits: number;
+}
+
+export interface LowStockRow {
+  ean: string;
+  name: string;
+  warehouseName: string;
+  quantity: number;
+  reorderLevel: number;
+}
+
+/** Business report over an optional date range. Revenue/COGS use the product's
+ *  current selling/purchase prices; purchase spend uses each receipt's recorded
+ *  cost. */
+export interface Report {
+  from?: string;
+  to?: string;
+  sales: {
+    units: number;
+    revenue: number;
+    cogs: number;
+    profit: number;
+    marginPct: number;
+    count: number;
+  };
+  purchases: { units: number; spend: number; count: number };
+  inventory: {
+    totalQuantity: number;
+    totalProductValue: number;
+    totalPurchaseValue: number;
+  };
+  byProduct: ReportProductRow[];
+  monthly: ReportMonthly[];
+  lowStock: LowStockRow[];
+}
+
+/** A unified stock movement for the history view. */
+export interface Movement {
+  id: string;
+  type: "in" | "out" | "adjust" | "transfer-in" | "transfer-out";
+  ean: string;
+  name: string;
+  quantity: number; // pieces moved (signed for "adjust", positive otherwise)
   unitSize?: number; // out only: pieces per pack
   packs?: number; // out only: number of packs
+  date?: string; // user-entered date (dispatch date for out, received date for in)
+  invoiceNo?: string; // out only: invoice number
+  bill?: string; // in only: supplier bill number
+  vendorName?: string; // in only: vendor the goods came from
+  customerName?: string; // out only: customer the goods were sold to
+  reason?: string; // adjust only
+  note?: string; // adjust / transfer
+  counterparty?: string; // transfer only: the other warehouse's name
+  byName?: string; // who performed it (adjust / transfer)
   createdAt: string;
 }
 
@@ -131,19 +374,30 @@ export interface ReceiveInput {
   name?: string;
   comboSizes?: number[];
   reorderLevel?: number;
+  bill: string; // supplier bill / invoice number
+  vendorName: string; // vendor the goods were bought from
+  date: string; // received date (YYYY-MM-DD)
+  purchasePrice?: number; // cost price per piece
 }
 
-/** Body accepted by the "dispatch goods" (stock-out) endpoint. */
+/** Body accepted by the "dispatch goods" (stock-out) endpoint. The `ean` may be
+ *  a product's primary EAN or any of its pack barcodes — it is resolved to the
+ *  product and its pack size server-side. */
 export interface DispatchInput {
   ean: string;
   unitSize: number; // pieces per pack (1 = single)
   packs: number;
+  date: string; // dispatch date (YYYY-MM-DD)
+  invoiceNo: string; // invoice number
+  customerName?: string; // who the goods were sold to (optional)
 }
 
 /** Body accepted by the "update product" endpoint. Any field may be omitted. */
 export interface ProductUpdateInput {
   name?: string;
   comboSizes?: number[];
+  barcodes?: PackBarcode[];
   reorderLevel?: number;
+  sellingPrice?: number;
   imageUrl?: string; // empty string clears the image
 }

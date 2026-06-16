@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, use } from "react";
 import Link from "next/link";
 import StockCard from "@/components/StockCard";
+import { useMe, canApprove } from "@/lib/useMe";
 import type { WarehouseDetail } from "@/lib/types";
 
 export default function WarehousePage({
@@ -11,6 +12,8 @@ export default function WarehousePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const { me } = useMe();
+  const canManage = canApprove(me);
 
   const [detail, setDetail] = useState<WarehouseDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -127,6 +130,39 @@ export default function WarehousePage({
             </span>
           </span>
         </Link>
+
+        {canManage && (
+          <>
+            <Link
+              href={`/warehouse/${id}/adjust`}
+              className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-amber-400 hover:shadow-md"
+            >
+              <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-50 text-2xl">
+                ⚖️
+              </span>
+              <span>
+                <span className="block font-semibold text-slate-900">Adjust</span>
+                <span className="mt-0.5 block text-sm text-slate-500">
+                  Correct stock (+/−)
+                </span>
+              </span>
+            </Link>
+            <Link
+              href={`/warehouse/${id}/transfer`}
+              className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-400 hover:shadow-md"
+            >
+              <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-50 text-2xl">
+                🔁
+              </span>
+              <span>
+                <span className="block font-semibold text-slate-900">Transfer</span>
+                <span className="mt-0.5 block text-sm text-slate-500">
+                  Move to another warehouse
+                </span>
+              </span>
+            </Link>
+          </>
+        )}
       </div>
 
       <div className="mb-4 flex items-baseline justify-between">

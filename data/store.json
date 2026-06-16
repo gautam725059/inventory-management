@@ -21,10 +21,10 @@
       "ean": "8901234567890",
       "name": "Blue Pen",
       "comboSizes": [
-        10,
-        5
+        10
       ],
-      "reorderLevel": 0
+      "reorderLevel": 7,
+      "barcodes": []
     },
     {
       "ean": "5012345678900",
@@ -33,7 +33,8 @@
         10,
         4
       ],
-      "reorderLevel": 0
+      "reorderLevel": 222,
+      "barcodes": []
     },
     {
       "ean": "9876541234567",
@@ -41,30 +42,73 @@
       "comboSizes": [
         10
       ],
-      "reorderLevel": 0
+      "reorderLevel": 0,
+      "barcodes": []
     },
     {
       "ean": "9988224455667",
       "name": "clow clip",
       "comboSizes": [],
-      "reorderLevel": 0
+      "reorderLevel": 0,
+      "barcodes": []
     }
   ],
+  "users": [
+    {
+      "id": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "username": "admin",
+      "name": "Administrator",
+      "role": "admin",
+      "passwordHash": "0971b29e58751da6c6c6d55c45f206cd:eeb020f89a8bc78db302abd837f268d01e6bc9a52387f3d9dd1f6bbb08389984f9329f5edef8b3c0aa748aac7fc178db6b29a85f65e137896c2aeb4c0ebc8707",
+      "active": true,
+      "createdAt": "2026-06-16T08:11:44.734Z"
+    },
+    {
+      "id": "0df01930-4868-46a5-8db2-d102701f01b6",
+      "username": "manager",
+      "name": "Manager",
+      "role": "manager",
+      "passwordHash": "b261bcb05a30a4da41a5e0cec6377e60:b33fdad1e139d4b1f783da79732c524490627ffa5f95ef1812af6403646d0f23ed32456e38da3b3fb34439f20a58b60f7ea16d229096065384ab0df3280da5b8",
+      "active": true,
+      "createdAt": "2026-06-16T09:47:30.255Z"
+    },
+    {
+      "id": "213a1a27-549b-48ad-aaab-bb287c5ec9ed",
+      "username": "staff",
+      "name": "Staff",
+      "role": "staff",
+      "passwordHash": "496874a0043e6f3e0c1dbc8ce333e2f7:3f7c7a47a949172ec3210f3d09277be0fb72510bdf608bbf5c1ed6f70f74d8b0e5eaada311ad54416941053ccfc5ca53137b1f9d4c7fc300fb2a329f8b09e46e",
+      "active": true,
+      "createdAt": "2026-06-16T09:47:30.418Z"
+    }
+  ],
+  "sessions": [],
+  "vendors": [
+    {
+      "id": "96912932-753b-48b4-9bc3-3cdd172fa612",
+      "name": "ttt",
+      "createdAt": "2026-06-16T11:11:36.698Z",
+      "phone": "07369954206",
+      "gstin": "gh45657hhvhgv65676",
+      "address": "Hazaribagh"
+    }
+  ],
+  "customers": [],
   "stock": [
     {
       "warehouseId": "wh-mumbai",
       "ean": "8901234567890",
-      "quantity": 88
+      "quantity": 1093
     },
     {
       "warehouseId": "wh-delhi",
       "ean": "5012345678900",
-      "quantity": 123
+      "quantity": 10123
     },
     {
       "warehouseId": "wh-mumbai",
       "ean": "9876541234567",
-      "quantity": 380
+      "quantity": 358
     },
     {
       "warehouseId": "wh-bengaluru",
@@ -112,6 +156,35 @@
       "ean": "9988224455667",
       "quantity": 8001,
       "createdAt": "2026-06-15T11:50:48.715Z"
+    },
+    {
+      "id": "2362a310-2418-4dfe-978a-86b9a928e0c9",
+      "warehouseId": "wh-mumbai",
+      "ean": "8901234567890",
+      "quantity": 5,
+      "createdAt": "2026-06-16T06:15:50.447Z"
+    },
+    {
+      "id": "89d5985a-7358-42dd-a13c-ed0d048cf370",
+      "warehouseId": "wh-mumbai",
+      "ean": "8901234567890",
+      "quantity": 1000,
+      "bill": "bill2026011",
+      "vendorName": "ytr",
+      "date": "2026-06-16",
+      "purchasePrice": 34,
+      "createdAt": "2026-06-16T07:46:48.705Z"
+    },
+    {
+      "id": "891d7c2d-2249-443b-8615-4030d8131d1e",
+      "warehouseId": "wh-delhi",
+      "ean": "5012345678900",
+      "quantity": 10000,
+      "bill": "531",
+      "vendorName": "ttt",
+      "vendorId": "96912932-753b-48b4-9bc3-3cdd172fa612",
+      "date": "2026-06-16",
+      "createdAt": "2026-06-16T11:11:36.698Z"
     }
   ],
   "dispatches": [
@@ -168,6 +241,20 @@
       "packs": 1,
       "quantity": 1,
       "createdAt": "2026-06-15T11:52:47.091Z"
+    },
+    {
+      "id": "76735bd4-6aeb-42ab-88da-65752cfd35a9",
+      "warehouseId": "wh-mumbai",
+      "ean": "9876541234567",
+      "unitSize": 1,
+      "packs": 22,
+      "quantity": 22,
+      "date": "2026-06-16",
+      "invoiceNo": "inv2026001",
+      "createdAt": "2026-06-16T07:11:37.120Z"
     }
-  ]
+  ],
+  "adjustments": [],
+  "transfers": [],
+  "approvals": []
 }

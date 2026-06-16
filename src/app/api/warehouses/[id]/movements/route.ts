@@ -13,16 +13,52 @@ export async function GET(request: Request, { params }: Context) {
 
   const format = new URL(request.url).searchParams.get("format");
   if (format === "csv") {
-    const headers = ["Date", "Type", "Product", "EAN", "Pack size", "Packs", "Pieces"];
-    const rows = movements.map((m) => [
-      m.createdAt,
-      m.type === "in" ? "Stock In" : "Stock Out",
-      m.name,
-      m.ean,
-      m.unitSize ?? "",
-      m.packs ?? "",
-      (m.type === "in" ? "+" : "-") + m.quantity,
-    ]);
+    const TYPE_LABEL: Record<string, string> = {
+      in: "Stock In",
+      out: "Stock Out",
+      adjust: "Adjustment",
+      "transfer-in": "Transfer In",
+      "transfer-out": "Transfer Out",
+    };
+    const headers = [
+      "Date",
+      "Type",
+      "Product",
+      "EAN",
+      "Pack size",
+      "Packs",
+      "Pieces",
+      "Invoice no",
+      "Customer",
+      "Vendor",
+      "Bill no",
+      "Doc date",
+      "Reason / Counterparty",
+      "Note",
+      "By",
+    ];
+    const rows = movements.map((m) => {
+      const dir =
+        m.type === "out" || m.type === "transfer-out" ? -1 : 1;
+      const signed = m.type === "adjust" ? m.quantity : dir * m.quantity;
+      return [
+        m.createdAt,
+        TYPE_LABEL[m.type] ?? m.type,
+        m.name,
+        m.ean,
+        m.unitSize ?? "",
+        m.packs ?? "",
+        (signed >= 0 ? "+" : "-") + Math.abs(signed),
+        m.invoiceNo ?? "",
+        m.customerName ?? "",
+        m.vendorName ?? "",
+        m.bill ?? "",
+        m.date ?? "",
+        m.reason ?? m.counterparty ?? "",
+        m.note ?? "",
+        m.byName ?? "",
+      ];
+    });
     return csvResponse(`movements-${id}.csv`, toCsv(headers, rows));
   }
 
