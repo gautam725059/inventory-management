@@ -80,9 +80,9 @@ export async function POST(request: Request, { params }: Context) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
 
-  // Managers/admins receive directly; staff (and anonymous) queue for approval.
+  // Admins receive directly; staff (and anonymous) queue for approval.
   const me = await getCurrentUser(request);
-  if (!hasRole(me, "admin", "manager")) {
+  if (!hasRole(me, "admin")) {
     const approval = await createApproval(
       id,
       result.value,

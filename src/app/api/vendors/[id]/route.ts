@@ -14,11 +14,11 @@ export async function GET(request: Request, { params }: Context) {
   return NextResponse.json(detail);
 }
 
-/** Manager/admin: update a vendor. */
+/** Admin only: update a vendor. */
 export async function PATCH(request: Request, { params }: Context) {
   const me = await getCurrentUser(request);
-  if (!hasRole(me, "admin", "manager")) {
-    return NextResponse.json({ error: "Admin or manager only." }, { status: 403 });
+  if (!hasRole(me, "admin")) {
+    return NextResponse.json({ error: "Admin only." }, { status: 403 });
   }
   const { id } = await params;
   let body: unknown;

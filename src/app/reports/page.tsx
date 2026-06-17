@@ -20,7 +20,7 @@ function monthLabel(m: string): string {
 
 export default function ReportsPage() {
   const { me, loading: meLoading } = useMe();
-  const canView = me?.role === "admin" || me?.role === "manager";
+  const canView = me?.role === "admin";
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -58,7 +58,7 @@ export default function ReportsPage() {
       <div className="mx-auto max-w-sm px-5 py-16 text-center">
         <h1 className="text-xl font-bold text-slate-900">Reports</h1>
         <p className="mt-2 text-sm text-slate-500">
-          {me ? `Your role (${me.role}) can't view reports.` : "Sign in as an admin or manager."}
+          {me ? `Your role (${me.role}) can't view reports.` : "Sign in as an admin."}
         </p>
         <div className="mt-5">
           <Link href="/" className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">

@@ -41,7 +41,7 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [vendors, setVendors] = useState<Vendor[]>([]);
-  // Managers/admins receive directly; everyone else submits for approval.
+  // Admins receive directly; everyone else submits for approval.
   const { me } = useMe();
   const direct = canApprove(me);
 
@@ -225,7 +225,7 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
 
       {!direct && (
         <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-          This stock-in will be sent to a manager/admin for approval and
+          This stock-in will be sent to an admin for approval and
           won&apos;t change stock until approved.
         </p>
       )}

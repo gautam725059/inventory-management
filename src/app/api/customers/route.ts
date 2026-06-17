@@ -9,11 +9,11 @@ export async function GET(request: Request) {
   return NextResponse.json(await listCustomers());
 }
 
-/** Manager/admin: create a customer. */
+/** Admin only: create a customer. */
 export async function POST(request: Request) {
   const me = await getCurrentUser(request);
-  if (!hasRole(me, "admin", "manager")) {
-    return NextResponse.json({ error: "Admin or manager only." }, { status: 403 });
+  if (!hasRole(me, "admin")) {
+    return NextResponse.json({ error: "Admin only." }, { status: 403 });
   }
   let body: unknown;
   try {

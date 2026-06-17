@@ -4,11 +4,11 @@ import { getCurrentUser, hasRole } from "@/lib/auth";
 
 type Context = { params: Promise<{ id: string }> };
 
-/** Manager/admin: apply a manual +/- stock correction with a reason. */
+/** Admin only: apply a manual +/- stock correction with a reason. */
 export async function POST(request: Request, { params }: Context) {
   const me = await getCurrentUser(request);
-  if (!hasRole(me, "admin", "manager")) {
-    return NextResponse.json({ error: "Admin or manager only." }, { status: 403 });
+  if (!hasRole(me, "admin")) {
+    return NextResponse.json({ error: "Admin only." }, { status: 403 });
   }
   const { id } = await params;
 

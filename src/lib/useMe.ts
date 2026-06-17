@@ -31,7 +31,7 @@ export async function logout(): Promise<void> {
   await fetch("/api/auth/logout", { method: "POST" });
 }
 
-/** True if the user can act without approval (manager or admin). */
+/** True if the user can act without approval (admin only). */
 export function canApprove(me: PublicUser | null): boolean {
-  return me?.role === "admin" || me?.role === "manager";
+  return me?.role === "admin";
 }

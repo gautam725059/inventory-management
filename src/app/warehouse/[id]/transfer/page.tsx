@@ -105,7 +105,7 @@ export default function TransferPage({
           ← Warehouse
         </Link>
         <div className="mt-6 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-          Stock transfer is restricted to managers and admins.
+          Stock transfer is restricted to admins.
         </div>
       </div>
     );

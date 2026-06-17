@@ -6,9 +6,9 @@
 
 // ---- Users & auth -----------------------------------------------------------
 
-/** Access levels. admin = full control; manager = operations + approvals;
- *  staff = data entry only (stock-in needs approval). */
-export type Role = "admin" | "manager" | "staff";
+/** Access levels. admin = full control; staff = data entry only (stock-in
+ *  needs admin approval). */
+export type Role = "admin" | "staff";
 
 export interface User {
   id: string;

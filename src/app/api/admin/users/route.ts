@@ -3,7 +3,7 @@ import { listUsers, createUser } from "@/lib/db";
 import { getCurrentUser, hasRole } from "@/lib/auth";
 import type { Role } from "@/lib/types";
 
-const ROLES: Role[] = ["admin", "manager", "staff"];
+const ROLES: Role[] = ["admin", "staff"];
 
 /** Admin-only: list all users. */
 export async function GET(request: Request) {

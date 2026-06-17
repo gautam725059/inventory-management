@@ -4,12 +4,12 @@ import { getCurrentUser, hasRole } from "@/lib/auth";
 
 type Context = { params: Promise<{ id: string }> };
 
-/** Admin/manager: approve or reject a pending stock-in. Approving applies the
+/** Admin only: approve or reject a pending stock-in. Approving applies the
  *  receive to stock. Body: { action: "approve" | "reject" }. */
 export async function POST(request: Request, { params }: Context) {
   const me = await getCurrentUser(request);
-  if (!hasRole(me, "admin", "manager")) {
-    return NextResponse.json({ error: "Admin or manager only." }, { status: 403 });
+  if (!hasRole(me, "admin")) {
+    return NextResponse.json({ error: "Admin only." }, { status: 403 });
   }
   const { id } = await params;
 

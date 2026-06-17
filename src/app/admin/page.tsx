@@ -28,7 +28,7 @@ function formatDateTime(iso: string): string {
 export default function AdminPage() {
   const { me, loading: meLoading } = useMe();
   const isAdmin = me?.role === "admin";
-  const canView = me?.role === "admin" || me?.role === "manager";
+  const canView = me?.role === "admin";
 
   const [valuation, setValuation] = useState<InventoryValuation | null>(null);
   const [approvals, setApprovals] = useState<Approval[]>([]);
@@ -105,7 +105,7 @@ export default function AdminPage() {
         <p className="mt-2 text-sm text-slate-500">
           {me
             ? `Your role (${me.role}) doesn't have access to the admin panel.`
-            : "Please sign in as an admin or manager to continue."}
+            : "Please sign in as an admin to continue."}
         </p>
         <div className="mt-5 flex justify-center gap-2">
           <Link
@@ -437,7 +437,7 @@ function SellPriceRow({
 
 // ---- User management (admin only) ------------------------------------------
 
-const ROLES: Role[] = ["admin", "manager", "staff"];
+const ROLES: Role[] = ["admin", "staff"];
 
 function UsersSection({
   users,

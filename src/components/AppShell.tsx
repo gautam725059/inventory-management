@@ -10,7 +10,7 @@ interface NavItem {
   href: string;
   label: string;
   icon: string;
-  managerOnly?: boolean;
+  adminOnly?: boolean;
 }
 
 const NAV: NavItem[] = [
@@ -18,13 +18,12 @@ const NAV: NavItem[] = [
   { href: "/catalog", label: "Catalog", icon: "📦" },
   { href: "/vendors", label: "Vendors", icon: "🏭" },
   { href: "/customers", label: "Customers", icon: "🧾" },
-  { href: "/reports", label: "Reports", icon: "📊", managerOnly: true },
-  { href: "/admin", label: "Admin", icon: "🔐", managerOnly: true },
+  { href: "/reports", label: "Reports", icon: "📊", adminOnly: true },
+  { href: "/admin", label: "Admin", icon: "🔐", adminOnly: true },
 ];
 
 const roleBadge: Record<string, string> = {
   admin: "bg-brand-100 text-brand-700",
-  manager: "bg-emerald-100 text-emerald-700",
   staff: "bg-slate-200 text-slate-600",
 };
 
@@ -39,8 +38,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  const canManage = me?.role === "admin" || me?.role === "manager";
-  const items = NAV.filter((n) => !n.managerOnly || canManage);
+  const isAdmin = me?.role === "admin";
+  const items = NAV.filter((n) => !n.adminOnly || isAdmin);
 
   return (
     <div className="min-h-screen">

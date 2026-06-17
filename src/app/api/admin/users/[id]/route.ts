@@ -4,7 +4,7 @@ import { getCurrentUser, hasRole } from "@/lib/auth";
 import type { Role } from "@/lib/types";
 
 type Context = { params: Promise<{ id: string }> };
-const ROLES: Role[] = ["admin", "manager", "staff"];
+const ROLES: Role[] = ["admin", "staff"];
 
 /** Admin-only: update a user's name, role, active flag, or password. */
 export async function PATCH(request: Request, { params }: Context) {
