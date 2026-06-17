@@ -2,15 +2,18 @@ import { NextResponse } from "next/server";
 import {
   ensureAdminSeeded,
   findUserByUsername,
+  findActiveUsersByRole,
   createSession,
   toPublicUser,
 } from "@/lib/db";
 import { verifyPasswordHash } from "@/lib/password";
 import { SESSION_COOKIE, sessionCookieOptions } from "@/lib/auth";
+import type { Role, User } from "@/lib/types";
 
 const SESSION_MAX_AGE = 7 * 24 * 60 * 60; // 7 days
 
-/** Log in with username + password. Sets an httpOnly session cookie. */
+/** Log in by role + password (the dropdown login), or username + password.
+ *  Sets an httpOnly session cookie. */
 export async function POST(request: Request) {
   await ensureAdminSeeded();
 
@@ -21,21 +24,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
   const b = body as Record<string, unknown>;
+  const role = typeof b.role === "string" ? b.role : "";
   const username = typeof b.username === "string" ? b.username.trim() : "";
   const password = typeof b.password === "string" ? b.password : "";
-  if (!username || !password) {
+
+  if (!password) {
+    return NextResponse.json({ error: "Password is required." }, { status: 400 });
+  }
+
+  let user: User | null = null;
+
+  if (role === "admin" || role === "staff") {
+    // Role-based login: match the password against any active user of that role.
+    const candidates = await findActiveUsersByRole(role as Role);
+    user = candidates.find((u) => verifyPasswordHash(password, u.passwordHash)) ?? null;
+  } else if (username) {
+    const u = await findUserByUsername(username);
+    user = u && u.active && verifyPasswordHash(password, u.passwordHash) ? u : null;
+  } else {
     return NextResponse.json(
-      { error: "Username and password are required." },
+      { error: "Select a role and enter the password." },
       { status: 400 }
     );
   }
 
-  const user = await findUserByUsername(username);
-  if (!user || !user.active || !verifyPasswordHash(password, user.passwordHash)) {
-    return NextResponse.json(
-      { error: "Invalid username or password." },
-      { status: 401 }
-    );
+  if (!user) {
+    return NextResponse.json({ error: "Incorrect password." }, { status: 401 });
   }
 
   const token = await createSession(user.id);

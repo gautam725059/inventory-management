@@ -1077,6 +1077,12 @@ export async function findUserByUsername(username: string): Promise<User | undef
   return store.users.find((x) => x.username.toLowerCase() === u);
 }
 
+/** All active users with the given role (for role-based login). */
+export async function findActiveUsersByRole(role: Role): Promise<User[]> {
+  const store = await readStore();
+  return store.users.filter((u) => u.role === role && u.active);
+}
+
 export async function listUsers(): Promise<PublicUser[]> {
   const store = await readStore();
   return store.users

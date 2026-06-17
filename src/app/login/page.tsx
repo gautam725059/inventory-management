@@ -8,7 +8,7 @@ function LoginForm() {
   const params = useSearchParams();
   const next = params.get("next") || "/";
 
-  const [username, setUsername] = useState("");
+  const [role, setRole] = useState("admin");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -21,7 +21,7 @@ function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ role, password }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -56,17 +56,18 @@ function LoginForm() {
 
           <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label htmlFor="username" className="mb-1 block text-xs font-medium text-slate-600">
-              Username
+            <label htmlFor="role" className="mb-1 block text-xs font-medium text-slate-600">
+              Login as
             </label>
-            <input
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoComplete="username"
-              autoFocus
+            <select
+              id="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
               className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-            />
+            >
+              <option value="admin">Admin</option>
+              <option value="staff">Staff</option>
+            </select>
           </div>
           <div>
             <label htmlFor="password" className="mb-1 block text-xs font-medium text-slate-600">
@@ -78,12 +79,13 @@ function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
+              autoFocus
               className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </div>
           <button
             type="submit"
-            disabled={busy || !username || !password}
+            disabled={busy || !password}
             className="mt-1 w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:opacity-50"
           >
             {busy ? "Signing in…" : "Sign in"}
