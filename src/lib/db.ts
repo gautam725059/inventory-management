@@ -388,8 +388,9 @@ export async function listCatalog(): Promise<ProductCatalogEntry[]> {
 
 // ---- Writes -----------------------------------------------------------------
 
-/** Receive a batch of goods into a warehouse. Creates the product if its EAN
- *  is new, otherwise tops up existing stock. */
+/** Receive a batch of goods into a warehouse. The scanned EAN may be a
+ *  product's primary EAN or any of its pack barcodes — it is resolved to the
+ *  product. Creates the product only if the EAN matches nothing. */
 export async function receiveStock(
   warehouseId: string,
   input: ReceiveInput
@@ -398,14 +399,17 @@ export async function receiveStock(
     const warehouse = store.warehouses.find((w) => w.id === warehouseId);
     if (!warehouse) throw new Error("Warehouse not found.");
 
-    const ean = input.ean.trim();
+    const scanned = input.ean.trim();
 
-    // Upsert the product record (shared across warehouses).
-    let product = store.products.find((p) => p.ean === ean);
+    // Resolve to an existing product by primary EAN first, then pack barcode.
+    let product =
+      store.products.find((p) => p.ean === scanned) ??
+      store.products.find((p) => p.barcodes.some((b) => b.ean === scanned));
+
     if (!product) {
       product = {
-        ean,
-        name: input.name?.trim() || `Product ${ean}`,
+        ean: scanned,
+        name: input.name?.trim() || `Product ${scanned}`,
         comboSizes: input.comboSizes ?? [],
         barcodes: [],
         reorderLevel: input.reorderLevel ?? 0,
@@ -419,6 +423,9 @@ export async function receiveStock(
       }
     }
 
+    // Stock is always keyed by the product's primary EAN.
+    const stockEan = product.ean;
+
     // Remember the latest purchase (cost) price on the product for valuation.
     if (typeof input.purchasePrice === "number") {
       product.purchasePrice = input.purchasePrice;
@@ -426,10 +433,10 @@ export async function receiveStock(
 
     // Add to (or create) the per-warehouse stock row.
     let row = store.stock.find(
-      (s) => s.warehouseId === warehouseId && s.ean === ean
+      (s) => s.warehouseId === warehouseId && s.ean === stockEan
     );
     if (!row) {
-      row = { warehouseId, ean, quantity: 0 };
+      row = { warehouseId, ean: stockEan, quantity: 0 };
       store.stock.push(row);
     }
     row.quantity += input.quantity;
@@ -439,7 +446,7 @@ export async function receiveStock(
     store.receipts.push({
       id: randomUUID(),
       warehouseId,
-      ean,
+      ean: stockEan,
       quantity: input.quantity,
       bill: input.bill,
       vendorName: input.vendorName?.trim() || undefined,
@@ -449,7 +456,7 @@ export async function receiveStock(
       createdAt: new Date().toISOString(),
     });
 
-    return [store, buildLine(product, ean, row.quantity)];
+    return [store, buildLine(product, stockEan, row.quantity)];
   });
 }
 
