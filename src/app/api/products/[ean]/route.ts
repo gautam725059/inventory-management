@@ -85,6 +85,14 @@ function parseBody(
     value.sellingPrice = n;
   }
 
+  if (b.purchasePrice !== undefined && b.purchasePrice !== "") {
+    const n = Number(b.purchasePrice);
+    if (!Number.isFinite(n) || n < 0) {
+      return { ok: false, error: "Purchase price must be a non-negative number." };
+    }
+    value.purchasePrice = n;
+  }
+
   if (b.imageUrl !== undefined) {
     if (typeof b.imageUrl !== "string") {
       return { ok: false, error: "imageUrl must be a string." };

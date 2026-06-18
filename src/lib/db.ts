@@ -601,6 +601,9 @@ export async function updateProduct(
     if (typeof input.sellingPrice === "number") {
       product.sellingPrice = Math.max(0, input.sellingPrice);
     }
+    if (typeof input.purchasePrice === "number") {
+      product.purchasePrice = Math.max(0, input.purchasePrice);
+    }
     if (typeof input.imageUrl === "string") {
       // Empty string clears the image.
       product.imageUrl = input.imageUrl.trim() || undefined;

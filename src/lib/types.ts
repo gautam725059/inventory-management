@@ -417,5 +417,6 @@ export interface ProductUpdateInput {
   barcodes?: PackBarcode[];
   reorderLevel?: number;
   sellingPrice?: number;
+  purchasePrice?: number;
   imageUrl?: string; // empty string clears the image
 }

@@ -75,13 +75,17 @@ export default function AdminPage() {
     }
   }
 
-  async function saveSellingPrice(ean: string, value: string) {
+  async function savePrice(
+    ean: string,
+    field: "sellingPrice" | "purchasePrice",
+    value: string
+  ) {
     setError(null);
     try {
       const res = await fetch(`/api/products/${ean}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sellingPrice: value === "" ? 0 : Number(value) }),
+        body: JSON.stringify({ [field]: value === "" ? 0 : Number(value) }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -329,7 +333,7 @@ export default function AdminPage() {
         ) : (
           <ProductValueTable
             products={valuation.products}
-            onSaveSellingPrice={saveSellingPrice}
+            onSave={savePrice}
             totalProductValue={valuation.totalProductValue}
             totalPurchaseValue={valuation.totalPurchaseValue}
           />
@@ -346,12 +350,16 @@ export default function AdminPage() {
 
 function ProductValueTable({
   products,
-  onSaveSellingPrice,
+  onSave,
   totalProductValue,
   totalPurchaseValue,
 }: {
   products: ProductValue[];
-  onSaveSellingPrice: (ean: string, value: string) => void | Promise<void>;
+  onSave: (
+    ean: string,
+    field: "sellingPrice" | "purchasePrice",
+    value: string
+  ) => void | Promise<void>;
   totalProductValue: number;
   totalPurchaseValue: number;
 }) {
@@ -370,7 +378,7 @@ function ProductValueTable({
         </thead>
         <tbody>
           {products.map((p) => (
-            <SellPriceRow key={p.ean} p={p} onSave={onSaveSellingPrice} />
+            <PriceRow key={p.ean} p={p} onSave={onSave} />
           ))}
         </tbody>
         <tfoot>
@@ -391,16 +399,51 @@ function ProductValueTable({
   );
 }
 
-function SellPriceRow({
+/** An inline editable ₹ price cell with a Save button shown when changed. */
+function PriceCell({
+  current,
+  onSave,
+}: {
+  current: number;
+  onSave: (value: string) => void | Promise<void>;
+}) {
+  const [value, setValue] = useState(current ? String(current) : "");
+  const dirty = (Number(value) || 0) !== current;
+  return (
+    <div className="flex items-center justify-end gap-1.5">
+      <span className="text-slate-400">₹</span>
+      <input
+        type="number"
+        min={0}
+        step="0.01"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="0"
+        className="w-24 rounded-lg border border-slate-300 bg-white px-2 py-1 text-right text-sm tabular-nums outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+      />
+      {dirty && (
+        <button
+          onClick={() => onSave(value)}
+          className="rounded-lg bg-brand-600 px-2 py-1 text-xs font-semibold text-white transition hover:bg-brand-700"
+        >
+          Save
+        </button>
+      )}
+    </div>
+  );
+}
+
+function PriceRow({
   p,
   onSave,
 }: {
   p: ProductValue;
-  onSave: (ean: string, value: string) => void | Promise<void>;
+  onSave: (
+    ean: string,
+    field: "sellingPrice" | "purchasePrice",
+    value: string
+  ) => void | Promise<void>;
 }) {
-  const [value, setValue] = useState(p.sellingPrice ? String(p.sellingPrice) : "");
-  const dirty = (Number(value) || 0) !== p.sellingPrice;
-
   return (
     <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
       <td className="px-4 py-3">
@@ -410,30 +453,17 @@ function SellPriceRow({
       <td className="px-4 py-3 text-right tabular-nums text-slate-700">
         {p.quantity.toLocaleString("en-IN")}
       </td>
-      <td className="px-4 py-3 text-right tabular-nums text-slate-500">
-        {p.purchasePrice ? inr(p.purchasePrice) : "—"}
+      <td className="px-4 py-3">
+        <PriceCell
+          current={p.purchasePrice}
+          onSave={(v) => onSave(p.ean, "purchasePrice", v)}
+        />
       </td>
       <td className="px-4 py-3">
-        <div className="flex items-center justify-end gap-1.5">
-          <span className="text-slate-400">₹</span>
-          <input
-            type="number"
-            min={0}
-            step="0.01"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="0"
-            className="w-24 rounded-lg border border-slate-300 bg-white px-2 py-1 text-right text-sm tabular-nums outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-          />
-          {dirty && (
-            <button
-              onClick={() => onSave(p.ean, value)}
-              className="rounded-lg bg-brand-600 px-2 py-1 text-xs font-semibold text-white transition hover:bg-brand-700"
-            >
-              Save
-            </button>
-          )}
-        </div>
+        <PriceCell
+          current={p.sellingPrice}
+          onSave={(v) => onSave(p.ean, "sellingPrice", v)}
+        />
       </td>
       <td className="px-4 py-3 text-right tabular-nums text-slate-700">
         {inr(p.purchaseValue)}
