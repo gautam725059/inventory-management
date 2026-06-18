@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { receiveStock, createApproval } from "@/lib/db";
-import { getCurrentUser, hasRole } from "@/lib/auth";
+import { receiveStock } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 import type { ReceiveInput } from "@/lib/types";
 
 type Context = { params: Promise<{ id: string }> };
@@ -80,18 +80,10 @@ export async function POST(request: Request, { params }: Context) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
 
-  // Admins receive directly; staff (and anonymous) queue for approval.
+  // Any logged-in user can receive stock directly (no approval needed).
   const me = await getCurrentUser(request);
-  if (!hasRole(me, "admin")) {
-    const approval = await createApproval(
-      id,
-      result.value,
-      me ? { id: me.id, name: me.name } : undefined
-    );
-    return NextResponse.json(
-      { pending: true, approvalId: approval.id },
-      { status: 202 }
-    );
+  if (!me) {
+    return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   }
 
   try {

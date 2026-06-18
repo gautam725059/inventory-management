@@ -155,14 +155,24 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <header className="mt-3 mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Admin Panel
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Inventory value, purchase value, stock-in approvals
-          {isAdmin && ", and users"}.
-        </p>
+      <header className="mt-3 mb-8 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            Admin Panel
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Inventory value, purchase value, stock-in approvals
+            {isAdmin && ", and users"}.
+          </p>
+        </div>
+        {isAdmin && (
+          <Link
+            href="/admin/import"
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700"
+          >
+            📥 Bulk Import
+          </Link>
+        )}
       </header>
 
       {error && (

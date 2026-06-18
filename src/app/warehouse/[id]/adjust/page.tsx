@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, use } from "react";
 import Link from "next/link";
-import { useMe, canApprove } from "@/lib/useMe";
+import { useMe } from "@/lib/useMe";
 import type { WarehouseDetail } from "@/lib/types";
 
 const inputClass =
@@ -25,7 +25,7 @@ export default function AdjustPage({
 }) {
   const { id } = use(params);
   const { me, loading: meLoading } = useMe();
-  const allowed = canApprove(me);
+  const allowed = !!me; // any logged-in user can add/remove inventory
 
   const [detail, setDetail] = useState<WarehouseDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -120,11 +120,11 @@ export default function AdjustPage({
 
       <header className="mt-3 mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Stock Adjustment
+          Add / Remove Inventory
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          Correct a stock count (damage, expiry, recount…). Every adjustment is
-          logged with your name and reason.
+          Add (+) or remove (−) stock with a reason (damage, expiry, recount…).
+          Every change is logged with your name and reason.
         </p>
       </header>
 

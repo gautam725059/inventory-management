@@ -144,11 +144,12 @@ export default function HistoryPage({
                           {m.packs} ×{" "}
                           {m.unitSize === 1 ? "single" : `pack of ${m.unitSize}`}
                         </div>
-                        {(m.invoiceNo || m.date || m.customerName) && (
+                        {(m.invoiceNo || m.date || m.customerName || m.referenceNo) && (
                           <div className="text-xs text-slate-400">
                             {m.customerName && <>{m.customerName} · </>}
                             {m.invoiceNo && <>Invoice {m.invoiceNo}</>}
-                            {m.invoiceNo && m.date && " · "}
+                            {m.referenceNo && <> · Ref {m.referenceNo}</>}
+                            {(m.invoiceNo || m.referenceNo) && m.date && " · "}
                             {m.date}
                           </div>
                         )}

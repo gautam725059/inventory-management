@@ -49,6 +49,7 @@ export default function StockOutForm({
   const [packs, setPacks] = useState("");
   const [date, setDate] = useState(today());
   const [invoiceNo, setInvoiceNo] = useState("");
+  const [referenceNo, setReferenceNo] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [saving, setSaving] = useState(false);
@@ -109,6 +110,7 @@ export default function StockOutForm({
           packs: packCount,
           date: date.trim(),
           invoiceNo: invoiceNo.trim(),
+          referenceNo: referenceNo.trim() || undefined,
           customerName: customerName.trim() || undefined,
         }),
       });
@@ -119,6 +121,7 @@ export default function StockOutForm({
       setEan("");
       setPacks("");
       setInvoiceNo("");
+      setReferenceNo("");
       setCustomerName("");
       // Keep the date — usually several dispatches share one date.
       await onDispatched();
@@ -232,6 +235,22 @@ export default function StockOutForm({
             placeholder="e.g. INV-2026-001"
             disabled={!resolved}
             required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="referenceNo" className={labelClass}>
+            Reference no. (optional)
+          </label>
+          <input
+            id="referenceNo"
+            type="text"
+            autoComplete="off"
+            className={inputClass}
+            value={referenceNo}
+            onChange={(e) => setReferenceNo(e.target.value)}
+            placeholder="e.g. PO / order ref"
+            disabled={!resolved}
           />
         </div>
 

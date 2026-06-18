@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { adjustStock } from "@/lib/db";
-import { getCurrentUser, hasRole } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 
 type Context = { params: Promise<{ id: string }> };
 
-/** Admin only: apply a manual +/- stock correction with a reason. */
+/** Any logged-in user: add or remove inventory (+/- correction with a reason). */
 export async function POST(request: Request, { params }: Context) {
   const me = await getCurrentUser(request);
-  if (!hasRole(me, "admin")) {
-    return NextResponse.json({ error: "Admin only." }, { status: 403 });
+  if (!me) {
+    return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   }
   const { id } = await params;
 

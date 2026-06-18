@@ -34,10 +34,12 @@ function parseBody(
 
   const customerName =
     typeof b.customerName === "string" ? b.customerName.trim() || undefined : undefined;
+  const referenceNo =
+    typeof b.referenceNo === "string" ? b.referenceNo.trim() || undefined : undefined;
 
   return {
     ok: true,
-    value: { ean, unitSize, packs, date, invoiceNo, customerName },
+    value: { ean, unitSize, packs, date, invoiceNo, referenceNo, customerName },
   };
 }
 

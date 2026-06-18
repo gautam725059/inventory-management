@@ -37,6 +37,8 @@ import type {
   ReportProductRow,
   ReportMonthly,
   LowStockRow,
+  ImportItem,
+  ImportResult,
 } from "./types";
 
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -79,7 +81,10 @@ function normalizeBarcodes(raw: unknown): PackBarcode[] {
     const size = Number(b.size);
     if (!ean || seen.has(ean) || !Number.isInteger(size) || size <= 0) continue;
     seen.add(ean);
-    out.push({ ean, size });
+    const name = typeof b.name === "string" ? b.name.trim() || undefined : undefined;
+    const price =
+      typeof b.price === "number" && b.price >= 0 ? b.price : undefined;
+    out.push({ ean, size, name, price });
   }
   return out;
 }
@@ -305,6 +310,7 @@ export async function getWarehouseMovements(
       packs: d.packs,
       date: d.date,
       invoiceNo: d.invoiceNo,
+      referenceNo: d.referenceNo,
       customerName: d.customerName,
       createdAt: d.createdAt,
     }));
@@ -492,12 +498,65 @@ export async function dispatchStock(
       quantity: pieces,
       date: input.date,
       invoiceNo: input.invoiceNo,
+      referenceNo: input.referenceNo,
       customerName: input.customerName?.trim() || undefined,
       customerId,
       createdAt: new Date().toISOString(),
     });
 
     return [store, buildLine(product, stockEan, row.quantity)];
+  });
+}
+
+/** Bulk-import master products with their pack barcodes. Creates new products,
+ *  merges packs into existing ones (updating size/name/price on matching EANs).
+ *  Pack EANs that collide with another product's primary EAN are skipped. */
+export async function importCatalog(items: ImportItem[]): Promise<ImportResult> {
+  return mutate<ImportResult>((store) => {
+    let productsCreated = 0;
+    let productsUpdated = 0;
+    let packsAdded = 0;
+
+    for (const item of items) {
+      const ean = item.ean.trim();
+      if (!ean) continue;
+
+      let product = store.products.find((p) => p.ean === ean);
+      if (!product) {
+        product = {
+          ean,
+          name: item.name.trim() || `Product ${ean}`,
+          comboSizes: [],
+          barcodes: [],
+          reorderLevel: 0,
+        };
+        store.products.push(product);
+        productsCreated++;
+      } else {
+        if (item.name.trim()) product.name = item.name.trim();
+        productsUpdated++;
+      }
+
+      // EANs owned by OTHER products (can't reuse as a pack barcode here).
+      const otherPrimary = new Set(
+        store.products.filter((p) => p.ean !== product!.ean).map((p) => p.ean)
+      );
+
+      for (const b of normalizeBarcodes(item.barcodes)) {
+        if (b.ean === product.ean || otherPrimary.has(b.ean)) continue;
+        const existing = product.barcodes.find((x) => x.ean === b.ean);
+        if (existing) {
+          existing.size = b.size;
+          existing.name = b.name;
+          existing.price = b.price;
+        } else {
+          product.barcodes.push(b);
+          packsAdded++;
+        }
+      }
+    }
+
+    return [store, { productsCreated, productsUpdated, packsAdded }];
   });
 }
 

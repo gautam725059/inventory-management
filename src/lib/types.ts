@@ -102,6 +102,8 @@ export interface CustomerDetail extends PartyBase {
 export interface PackBarcode {
   ean: string;
   size: number; // pieces in this pack (1 = single)
+  name?: string; // optional pack/listing name (e.g. an Amazon title)
+  price?: number; // optional selling price for this specific pack
 }
 
 /** A product is identified by its EAN barcode. Combo sizes are pack sizes it
@@ -197,6 +199,7 @@ export interface Dispatch {
   quantity: number; // total pieces removed = unitSize * packs
   date?: string; // dispatch date (YYYY-MM-DD) entered by the user
   invoiceNo?: string; // invoice number for this dispatch
+  referenceNo?: string; // optional reference number (PO/order/ref)
   customerName?: string; // who the goods were sold to
   customerId?: string; // linked customer master record
   createdAt: string;
@@ -351,6 +354,7 @@ export interface Movement {
   packs?: number; // out only: number of packs
   date?: string; // user-entered date (dispatch date for out, received date for in)
   invoiceNo?: string; // out only: invoice number
+  referenceNo?: string; // out only: reference number
   bill?: string; // in only: supplier bill number
   vendorName?: string; // in only: vendor the goods came from
   customerName?: string; // out only: customer the goods were sold to
@@ -389,7 +393,21 @@ export interface DispatchInput {
   packs: number;
   date: string; // dispatch date (YYYY-MM-DD)
   invoiceNo: string; // invoice number
+  referenceNo?: string; // optional reference number (PO/order/ref)
   customerName?: string; // who the goods were sold to (optional)
+}
+
+/** One master product + its packs, for the bulk catalog import. */
+export interface ImportItem {
+  ean: string; // master/primary EAN (or a generated key when none is given)
+  name: string;
+  barcodes: PackBarcode[];
+}
+
+export interface ImportResult {
+  productsCreated: number;
+  productsUpdated: number;
+  packsAdded: number;
 }
 
 /** Body accepted by the "update product" endpoint. Any field may be omitted. */

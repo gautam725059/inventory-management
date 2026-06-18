@@ -131,37 +131,36 @@ export default function WarehousePage({
           </span>
         </Link>
 
+        <Link
+          href={`/warehouse/${id}/adjust`}
+          className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-amber-400 hover:shadow-md"
+        >
+          <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-50 text-2xl">
+            ⚖️
+          </span>
+          <span>
+            <span className="block font-semibold text-slate-900">Add / Remove Stock</span>
+            <span className="mt-0.5 block text-sm text-slate-500">
+              Adjust inventory (+/−)
+            </span>
+          </span>
+        </Link>
+
         {canManage && (
-          <>
-            <Link
-              href={`/warehouse/${id}/adjust`}
-              className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-amber-400 hover:shadow-md"
-            >
-              <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-50 text-2xl">
-                ⚖️
+          <Link
+            href={`/warehouse/${id}/transfer`}
+            className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-400 hover:shadow-md"
+          >
+            <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-50 text-2xl">
+              🔁
+            </span>
+            <span>
+              <span className="block font-semibold text-slate-900">Transfer</span>
+              <span className="mt-0.5 block text-sm text-slate-500">
+                Move to another warehouse
               </span>
-              <span>
-                <span className="block font-semibold text-slate-900">Adjust</span>
-                <span className="mt-0.5 block text-sm text-slate-500">
-                  Correct stock (+/−)
-                </span>
-              </span>
-            </Link>
-            <Link
-              href={`/warehouse/${id}/transfer`}
-              className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-400 hover:shadow-md"
-            >
-              <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-50 text-2xl">
-                🔁
-              </span>
-              <span>
-                <span className="block font-semibold text-slate-900">Transfer</span>
-                <span className="mt-0.5 block text-sm text-slate-500">
-                  Move to another warehouse
-                </span>
-              </span>
-            </Link>
-          </>
+            </span>
+          </Link>
         )}
       </div>
 

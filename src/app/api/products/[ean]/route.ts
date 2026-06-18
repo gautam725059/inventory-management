@@ -54,7 +54,17 @@ function parseBody(
         return { ok: false, error: `Duplicate barcode: ${ean}.` };
       }
       seen.add(ean);
-      barcodes.push({ ean, size });
+      const name =
+        typeof row.name === "string" ? row.name.trim() || undefined : undefined;
+      let price: number | undefined;
+      if (row.price !== undefined && row.price !== "") {
+        const p = Number(row.price);
+        if (!Number.isFinite(p) || p < 0) {
+          return { ok: false, error: `Price for ${ean} must be a non-negative number.` };
+        }
+        price = p;
+      }
+      barcodes.push({ ean, size, name, price });
     }
     value.barcodes = barcodes;
   }

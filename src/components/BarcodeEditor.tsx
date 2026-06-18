@@ -16,6 +16,8 @@ interface Props {
 interface Row {
   ean: string;
   size: string; // kept as a string while editing
+  pname: string; // optional pack name
+  price: string; // optional pack price
 }
 
 const inputClass =
@@ -33,8 +35,13 @@ export default function BarcodeEditor({
 }: Props) {
   const [rows, setRows] = useState<Row[]>(
     barcodes.length > 0
-      ? barcodes.map((b) => ({ ean: b.ean, size: String(b.size) }))
-      : [{ ean: "", size: "" }]
+      ? barcodes.map((b) => ({
+          ean: b.ean,
+          size: String(b.size),
+          pname: b.name ?? "",
+          price: b.price != null ? String(b.price) : "",
+        }))
+      : [{ ean: "", size: "", pname: "", price: "" }]
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +50,7 @@ export default function BarcodeEditor({
     setRows((rs) => rs.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
   }
   function addRow() {
-    setRows((rs) => [...rs, { ean: "", size: "" }]);
+    setRows((rs) => [...rs, { ean: "", size: "", pname: "", price: "" }]);
   }
   function removeRow(i: number) {
     setRows((rs) => rs.filter((_, idx) => idx !== i));
@@ -70,7 +77,16 @@ export default function BarcodeEditor({
       }
       if (seen.has(e)) return setError(`Duplicate barcode: ${e}.`);
       seen.add(e);
-      barcodesOut.push({ ean: e, size });
+      const price = r.price.trim() ? Number(r.price) : undefined;
+      if (price !== undefined && (!Number.isFinite(price) || price < 0)) {
+        return setError(`Price for ${e} must be a non-negative number.`);
+      }
+      barcodesOut.push({
+        ean: e,
+        size,
+        name: r.pname.trim() || undefined,
+        price,
+      });
     }
 
     setBusy(true);
@@ -116,39 +132,57 @@ export default function BarcodeEditor({
           </div>
         )}
 
-        <div className="mt-4 space-y-2">
-          <div className="flex gap-2 text-xs font-medium text-slate-500">
-            <span className="flex-1">Barcode / EAN</span>
-            <span className="w-28">Pieces per pack</span>
-            <span className="w-8" />
-          </div>
+        <div className="mt-4 space-y-3">
           {rows.map((r, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <input
-                className={`${inputClass} flex-1`}
-                value={r.ean}
-                onChange={(e) => update(i, { ean: e.target.value })}
-                placeholder="Scan or type the pack EAN…"
-                inputMode="numeric"
-                autoComplete="off"
-              />
-              <input
-                className={`${inputClass} w-28`}
-                value={r.size}
-                onChange={(e) => update(i, { size: e.target.value })}
-                placeholder="10"
-                type="number"
-                min={1}
-                step={1}
-              />
-              <button
-                type="button"
-                onClick={() => removeRow(i)}
-                title="Remove row"
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-400 transition hover:border-red-200 hover:text-red-500"
-              >
-                ✕
-              </button>
+            <div key={i} className="rounded-lg border border-slate-200 p-2.5">
+              <div className="flex items-center gap-2">
+                <input
+                  className={`${inputClass} flex-1`}
+                  value={r.ean}
+                  onChange={(e) => update(i, { ean: e.target.value })}
+                  placeholder="Pack EAN (scan or type)…"
+                  inputMode="numeric"
+                  autoComplete="off"
+                />
+                <input
+                  className={`${inputClass} w-24`}
+                  value={r.size}
+                  onChange={(e) => update(i, { size: e.target.value })}
+                  placeholder="pcs e.g 10"
+                  type="number"
+                  min={1}
+                  step={1}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeRow(i)}
+                  title="Remove row"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-400 transition hover:border-red-200 hover:text-red-500"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  className={`${inputClass} flex-1`}
+                  value={r.pname}
+                  onChange={(e) => update(i, { pname: e.target.value })}
+                  placeholder="Pack name (optional, e.g. listing title)"
+                  autoComplete="off"
+                />
+                <div className="flex w-32 items-center gap-1">
+                  <span className="text-sm text-slate-400">₹</span>
+                  <input
+                    className={inputClass}
+                    value={r.price}
+                    onChange={(e) => update(i, { price: e.target.value })}
+                    placeholder="price"
+                    type="number"
+                    min={0}
+                    step="0.01"
+                  />
+                </div>
+              </div>
             </div>
           ))}
         </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMe, canApprove } from "@/lib/useMe";
 import type { Vendor } from "@/lib/types";
 
 /** Today's date as YYYY-MM-DD, for the date input default. */
@@ -41,9 +40,6 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [vendors, setVendors] = useState<Vendor[]>([]);
-  // Admins receive directly; everyone else submits for approval.
-  const { me } = useMe();
-  const direct = canApprove(me);
 
   useEffect(() => {
     fetch("/api/vendors")
@@ -223,24 +219,13 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
         </div>
       </div>
 
-      {!direct && (
-        <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-          This stock-in will be sent to an admin for approval and
-          won&apos;t change stock until approved.
-        </p>
-      )}
-
       <div className="mt-5">
         <button
           type="submit"
           disabled={saving}
           className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {saving
-            ? "Submitting…"
-            : direct
-              ? "Receive into warehouse"
-              : "Submit for approval"}
+          {saving ? "Receiving…" : "Receive into warehouse"}
         </button>
       </div>
     </form>
