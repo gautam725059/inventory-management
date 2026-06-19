@@ -33,8 +33,18 @@ const g = globalThis as unknown as { _mongoClient?: Promise<MongoClient> };
 
 function clientPromise(): Promise<MongoClient> {
   if (!g._mongoClient) {
-    const client = new MongoClient(process.env.MONGODB_URI as string);
-    g._mongoClient = client.connect();
+    const client = new MongoClient(process.env.MONGODB_URI as string, {
+      // Fail fast instead of hanging when the cluster is unreachable.
+      serverSelectionTimeoutMS: 8000,
+    });
+    // IMPORTANT: don't cache a *rejected* connection promise. If the first
+    // connect fails (DNS/SRV refused, cluster down, IP not allowlisted), clear
+    // the cache so the next request retries instead of failing instantly
+    // forever.
+    g._mongoClient = client.connect().catch((err) => {
+      g._mongoClient = undefined;
+      throw err;
+    });
   }
   return g._mongoClient;
 }

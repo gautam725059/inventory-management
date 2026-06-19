@@ -15,6 +15,18 @@ const SESSION_MAX_AGE = 7 * 24 * 60 * 60; // 7 days
 /** Log in by role + password (the dropdown login), or username + password.
  *  Sets an httpOnly session cookie. */
 export async function POST(request: Request) {
+  try {
+    return await handleLogin(request);
+  } catch (err) {
+    console.error("[auth/login] failed:", err);
+    return NextResponse.json(
+      { error: "Login is temporarily unavailable. Please try again." },
+      { status: 503 }
+    );
+  }
+}
+
+async function handleLogin(request: Request) {
   await ensureAdminSeeded();
 
   let body: unknown;

@@ -47,6 +47,7 @@ export default function StockOutForm({
 
   const [ean, setEan] = useState("");
   const [packs, setPacks] = useState("");
+  const [chosenSize, setChosenSize] = useState(1);
   const [date, setDate] = useState(today());
   const [invoiceNo, setInvoiceNo] = useState("");
   const [referenceNo, setReferenceNo] = useState("");
@@ -81,8 +82,24 @@ export default function StockOutForm({
   const resolved = trimmedEan ? barcodeMap.get(trimmedEan) : undefined;
   const unknownEan = trimmedEan.length > 0 && !resolved;
 
+  // When the master/primary EAN is entered, let the user pick the pack size to
+  // dispatch: single, plus any pack sizes set on the product. A scanned *pack*
+  // barcode already carries its own size, so it skips the chooser.
+  const isPrimaryScan = !!resolved && trimmedEan === resolved.line.ean;
+  const sizeOptions = isPrimaryScan
+    ? [1, ...(resolved.line.comboSizes ?? []).filter((s) => s > 1)]
+    : resolved
+      ? [resolved.size]
+      : [];
+  const showSizeChooser = isPrimaryScan && sizeOptions.length > 1;
+
+  // Reset the chosen size whenever a different product resolves.
+  useEffect(() => {
+    setChosenSize(1);
+  }, [resolved?.line.ean, isPrimaryScan]);
+
   const packCount = Number(packs) || 0;
-  const size = resolved?.size ?? 0;
+  const size = isPrimaryScan ? chosenSize : resolved?.size ?? 0;
   const pieces = size * packCount;
   const available = resolved?.line.quantity ?? 0;
   const remaining = available - pieces;
@@ -106,7 +123,7 @@ export default function StockOutForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ean: resolved.line.ean,
-          unitSize: resolved.size,
+          unitSize: size,
           packs: packCount,
           date: date.trim(),
           invoiceNo: invoiceNo.trim(),
@@ -175,8 +192,8 @@ export default function StockOutForm({
               <span className="font-semibold text-slate-900">
                 {resolved.line.name}
               </span>{" "}
-              · <span className="font-medium text-brand-700">{packLabel(resolved.size)}</span>
-              {resolved.size > 1 && ` (${resolved.size} pcs each)`} ·{" "}
+              · <span className="font-medium text-brand-700">{packLabel(size)}</span>
+              {size > 1 && ` (${size} pcs each)`} ·{" "}
               {resolved.line.quantity.toLocaleString()} pcs in stock
             </p>
           )}
@@ -187,6 +204,26 @@ export default function StockOutForm({
             </p>
           )}
         </div>
+
+        {showSizeChooser && (
+          <div className="sm:col-span-2">
+            <label htmlFor="packSize" className={labelClass}>
+              Pack size *
+            </label>
+            <select
+              id="packSize"
+              className={inputClass}
+              value={chosenSize}
+              onChange={(e) => setChosenSize(Number(e.target.value))}
+            >
+              {sizeOptions.map((s) => (
+                <option key={s} value={s}>
+                  {s === 1 ? "Single (1 pc)" : `Pack of ${s} (${s} pcs each)`}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div>
           <label htmlFor="packs" className={labelClass}>

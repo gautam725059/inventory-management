@@ -112,11 +112,22 @@ export function parseCatalogText(text: string): ParseOutput {
         continue;
       }
       if (!packEan || !isValidEan(packEan)) {
-        const why = looksScientific(packEan)
-          ? "EAN looks broken by Excel (scientific notation)"
-          : "missing/invalid EAN";
-        errors.push(`Row ${i + 1}: "${packCode}" — ${why} — skipped.`);
-        skipped++;
+        // No barcode for this pack: Excel mangled it, OR (the common case) the
+        // sheet simply lists pack sizes with no per-pack barcode. Either way we
+        // keep the size as a sellable combo size on the master, rather than
+        // dropping the pack. (size 1 = single, already implicit, so skip it.)
+        if (looksScientific(packEan)) {
+          errors.push(
+            `Row ${i + 1}: "${packCode}" — EAN looks broken by Excel (scientific notation) — kept as a pack size only.`
+          );
+        }
+        if (size > 1) {
+          if (!current.comboSizes) current.comboSizes = [];
+          if (!current.comboSizes.includes(size)) {
+            current.comboSizes.push(size);
+            validPacks++;
+          }
+        }
         continue;
       }
       const price = priceRaw && Number.isFinite(Number(priceRaw)) ? Number(priceRaw) : undefined;
@@ -135,7 +146,10 @@ export function parseCatalogText(text: string): ParseOutput {
   // exist as standalone products is fine, but for import we only keep with packs
   // OR a valid primary EAN).
   const kept = items.filter(
-    (it) => it.barcodes.length > 0 || isValidEan(it.ean)
+    (it) =>
+      it.barcodes.length > 0 ||
+      (it.comboSizes?.length ?? 0) > 0 ||
+      isValidEan(it.ean)
   );
 
   return {

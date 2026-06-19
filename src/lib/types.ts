@@ -402,6 +402,9 @@ export interface ImportItem {
   ean: string; // master/primary EAN (or a generated key when none is given)
   name: string;
   barcodes: PackBarcode[];
+  /** Pack sizes (>1) from pack rows that have no barcode of their own — e.g.
+   *  "P10/P15/P20" become comboSizes [10,15,20] the product can be sold in. */
+  comboSizes?: number[];
 }
 
 export interface ImportResult {

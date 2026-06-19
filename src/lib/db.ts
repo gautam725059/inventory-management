@@ -138,23 +138,49 @@ async function readStoreFromFile(): Promise<Store | null> {
   }
 }
 
+// When Mongo is configured but unreachable, fall back to the local JSON file
+// store so the app keeps working (offline / DNS-SRV-blocked networks) instead of
+// hard-crashing every request. We warn at most once per minute to avoid log
+// spam, and note that writes made while offline live only in the file until
+// Mongo is reachable again.
+let lastMongoWarnAt = 0;
+function warnMongoFallback(err: unknown): void {
+  const now = Date.now();
+  if (now - lastMongoWarnAt < 60_000) return;
+  lastMongoWarnAt = now;
+  const msg = err instanceof Error ? err.message.split("\n")[0] : String(err);
+  console.warn(
+    `[db] MongoDB unavailable, falling back to local file store (data/store.json). Reason: ${msg}`
+  );
+}
+
 async function readStore(): Promise<Store> {
   if (mongoEnabled()) {
-    const doc = await mongoReadStoreDoc();
-    if (doc) return normalizeStore(doc);
-    // First run on Mongo: import existing JSON file data (one-time auto-migrate),
-    // otherwise start from an empty seeded store.
-    const seed = (await readStoreFromFile()) ?? emptyStore();
-    await mongoWriteStore(seed);
-    return seed;
+    try {
+      const doc = await mongoReadStoreDoc();
+      if (doc) return normalizeStore(doc);
+      // First run on Mongo: import existing JSON file data (one-time
+      // auto-migrate), otherwise start from an empty seeded store.
+      const seed = (await readStoreFromFile()) ?? emptyStore();
+      await mongoWriteStore(seed);
+      return seed;
+    } catch (err) {
+      warnMongoFallback(err);
+      // fall through to the file store below
+    }
   }
   return (await readStoreFromFile()) ?? emptyStore();
 }
 
 async function writeStore(store: Store): Promise<void> {
   if (mongoEnabled()) {
-    await mongoWriteStore(store);
-    return;
+    try {
+      await mongoWriteStore(store);
+      return;
+    } catch (err) {
+      warnMongoFallback(err);
+      // fall through to the file store below
+    }
   }
   await fs.mkdir(DATA_DIR, { recursive: true });
   await fs.writeFile(DATA_FILE, JSON.stringify(store, null, 2), "utf8");
@@ -542,6 +568,15 @@ export async function importCatalog(items: ImportItem[]): Promise<ImportResult> 
       } else {
         if (item.name.trim()) product.name = item.name.trim();
         productsUpdated++;
+      }
+
+      // Merge any pack sizes parsed from barcode-less pack rows (P10/P15/…).
+      if (item.comboSizes && item.comboSizes.length) {
+        const merged = new Set<number>([
+          ...product.comboSizes,
+          ...item.comboSizes.filter((s) => Number.isInteger(s) && s > 1),
+        ]);
+        product.comboSizes = [...merged].sort((a, b) => a - b);
       }
 
       // EANs owned by OTHER products (can't reuse as a pack barcode here).
