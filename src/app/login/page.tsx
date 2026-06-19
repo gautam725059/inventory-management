@@ -1,12 +1,13 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 function LoginForm() {
-  const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/";
+  // Only allow same-site relative paths (guard against open-redirect via ?next).
+  const rawNext = params.get("next") || "/";
+  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
 
   const [role, setRole] = useState("admin");
   const [password, setPassword] = useState("");
@@ -27,11 +28,13 @@ function LoginForm() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Login failed.");
       }
-      router.push(next);
-      router.refresh();
+      // Full-page navigation (not router.push): forces the app to re-mount and
+      // re-read the new session cookie, so AuthGate/useMe see the logged-in user
+      // immediately instead of bouncing back to /login until a manual refresh.
+      window.location.assign(next);
+      return; // keep the button in its busy state during the reload
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");
-    } finally {
       setBusy(false);
     }
   }

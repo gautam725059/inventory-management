@@ -523,6 +523,12 @@
       "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
       "createdAt": "2026-06-19T08:44:05.303Z",
       "expiresAt": "2026-06-26T08:44:05.303Z"
+    },
+    {
+      "token": "64e8b38c7e7bb59efa6190d6257489f96a56e4f86d0d239fd4570fa018b2e024",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-19T09:58:26.673Z",
+      "expiresAt": "2026-06-26T09:58:26.673Z"
     }
   ],
   "vendors": [
@@ -538,29 +544,14 @@
   "customers": [],
   "stock": [
     {
-      "warehouseId": "wh-mumbai",
-      "ean": "8901234567890",
-      "quantity": 1093
-    },
-    {
       "warehouseId": "wh-delhi",
       "ean": "5012345678900",
       "quantity": 10123
     },
     {
-      "warehouseId": "wh-mumbai",
-      "ean": "9876541234567",
-      "quantity": 358
-    },
-    {
       "warehouseId": "wh-bengaluru",
       "ean": "9988224455667",
       "quantity": 8945
-    },
-    {
-      "warehouseId": "wh-mumbai",
-      "ean": "9988224455667",
-      "quantity": 0
     }
   ],
   "receipts": [
