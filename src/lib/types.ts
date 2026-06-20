@@ -205,6 +205,83 @@ export interface Dispatch {
   createdAt: string;
 }
 
+// ---- Combos: bundles of different products sold together --------------------
+
+/** One line in a combo recipe: how many pieces of a product go into one combo. */
+export interface ComboComponent {
+  ean: string; // a product's primary EAN
+  quantity: number; // pieces of that product per single combo
+}
+
+/** A sellable bundle of different products, e.g. 1 J Hook + 1 Frame Hook +
+ *  1 Nut Hook. Selling a combo deducts each component from stock; combos are
+ *  not stocked themselves — they're built from on-hand pieces. */
+export interface Combo {
+  id: string;
+  name: string;
+  barcode?: string; // optional scannable EAN for the whole combo
+  price?: number; // optional combo selling price
+  components: ComboComponent[];
+  createdAt: string;
+}
+
+/** Body accepted by the create/update combo endpoints. */
+export interface ComboInput {
+  name?: string;
+  barcode?: string;
+  price?: number;
+  components?: ComboComponent[];
+}
+
+/** A combo joined with its component product names + per-warehouse buildable
+ *  count (how many combos the least-stocked component allows). */
+export interface ComboView extends Combo {
+  lines: {
+    ean: string;
+    name: string;
+    quantity: number; // per combo
+  }[];
+}
+
+/** One component's contribution to a combo sale (snapshot at sale time). */
+export interface ComboDispatchComponent {
+  ean: string;
+  name: string;
+  quantity: number; // per combo
+  pieces: number; // total removed = quantity * combos
+}
+
+/** Audit log entry: a batch of combos dispatched out of a warehouse. The stock
+ *  of each component is reduced; the combo itself is not a stock item. */
+export interface ComboDispatch {
+  id: string;
+  warehouseId: string;
+  comboId: string;
+  comboName: string; // snapshot
+  barcode?: string;
+  combos: number; // number of combos sold
+  price?: number; // combo unit price snapshot
+  amount?: number; // price * combos, if a price is known
+  components: ComboDispatchComponent[];
+  totalPieces: number; // sum of all component pieces removed
+  date?: string;
+  invoiceNo?: string;
+  referenceNo?: string;
+  customerName?: string;
+  customerId?: string;
+  createdAt: string;
+}
+
+/** Body accepted by the "dispatch combo" endpoint. */
+export interface ComboDispatchInput {
+  comboId: string;
+  combos: number;
+  date: string;
+  invoiceNo: string;
+  referenceNo?: string;
+  customerName?: string;
+}
+
 /** The whole persisted store. */
 export interface Store {
   users: User[];
@@ -216,9 +293,11 @@ export interface Store {
   stock: StockRow[];
   receipts: Receipt[];
   dispatches: Dispatch[];
+  comboDispatches: ComboDispatch[];
   adjustments: Adjustment[];
   transfers: Transfer[];
   approvals: Approval[];
+  combos: Combo[];
 }
 
 // ---- Computed / view shapes returned by the API -----------------------------
@@ -346,21 +425,22 @@ export interface Report {
 /** A unified stock movement for the history view. */
 export interface Movement {
   id: string;
-  type: "in" | "out" | "adjust" | "transfer-in" | "transfer-out";
+  type: "in" | "out" | "adjust" | "transfer-in" | "transfer-out" | "combo-out";
   ean: string;
   name: string;
   quantity: number; // pieces moved (signed for "adjust", positive otherwise)
   unitSize?: number; // out only: pieces per pack
-  packs?: number; // out only: number of packs
+  packs?: number; // out / combo-out: number of packs / combos
   date?: string; // user-entered date (dispatch date for out, received date for in)
-  invoiceNo?: string; // out only: invoice number
-  referenceNo?: string; // out only: reference number
+  invoiceNo?: string; // out / combo-out: invoice number
+  referenceNo?: string; // out / combo-out: reference number
   bill?: string; // in only: supplier bill number
   vendorName?: string; // in only: vendor the goods came from
-  customerName?: string; // out only: customer the goods were sold to
+  customerName?: string; // out / combo-out: customer the goods were sold to
   reason?: string; // adjust only
   note?: string; // adjust / transfer
   counterparty?: string; // transfer only: the other warehouse's name
+  comboItems?: string; // combo-out only: "J Hook ×5, Frame Hook ×5"
   byName?: string; // who performed it (adjust / transfer)
   createdAt: string;
 }

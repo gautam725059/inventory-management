@@ -21,6 +21,7 @@ const TYPE_BADGE: Record<Movement["type"], { label: string; cls: string }> = {
   adjust: { label: "Adjust", cls: "bg-amber-100 text-amber-700" },
   "transfer-in": { label: "Transfer In", cls: "bg-indigo-100 text-indigo-700" },
   "transfer-out": { label: "Transfer Out", cls: "bg-indigo-100 text-indigo-700" },
+  "combo-out": { label: "Combo Out", cls: "bg-fuchsia-100 text-fuchsia-700" },
 };
 
 const PIECES_COLOR: Record<Movement["type"], string> = {
@@ -29,13 +30,14 @@ const PIECES_COLOR: Record<Movement["type"], string> = {
   adjust: "text-amber-600",
   "transfer-in": "text-emerald-600",
   "transfer-out": "text-brand-600",
+  "combo-out": "text-fuchsia-600",
 };
 
-/** Signed piece count for display: out / transfer-out are negative; adjust is
- *  already signed; everything else is positive. */
+/** Signed piece count for display: out / transfer-out / combo-out are negative;
+ *  adjust is already signed; everything else is positive. */
 function signedQty(m: Movement): number {
   if (m.type === "adjust") return m.quantity;
-  return m.type === "out" || m.type === "transfer-out"
+  return m.type === "out" || m.type === "transfer-out" || m.type === "combo-out"
     ? -m.quantity
     : m.quantity;
 }
@@ -135,7 +137,13 @@ export default function HistoryPage({
                   </td>
                   <td className="px-4 py-3">
                     <div className="font-medium text-slate-900">{m.name}</div>
-                    <div className="text-xs text-slate-400">EAN {m.ean}</div>
+                    <div className="text-xs text-slate-400">
+                      {m.type === "combo-out"
+                        ? m.ean
+                          ? `Combo · ${m.ean}`
+                          : "Combo"
+                        : `EAN ${m.ean}`}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-slate-500">
                     {m.type === "out" && m.unitSize ? (
@@ -172,6 +180,22 @@ export default function HistoryPage({
                           {m.note && <>{m.note} · </>}
                           {m.byName ? `by ${m.byName}` : ""}
                         </div>
+                      </>
+                    ) : m.type === "combo-out" ? (
+                      <>
+                        <div>
+                          {m.packs} combo{m.packs === 1 ? "" : "s"}
+                          {m.comboItems ? ` · ${m.comboItems}` : ""}
+                        </div>
+                        {(m.invoiceNo || m.date || m.customerName || m.referenceNo) && (
+                          <div className="text-xs text-slate-400">
+                            {m.customerName && <>{m.customerName} · </>}
+                            {m.invoiceNo && <>Invoice {m.invoiceNo}</>}
+                            {m.referenceNo && <> · Ref {m.referenceNo}</>}
+                            {(m.invoiceNo || m.referenceNo) && m.date && " · "}
+                            {m.date}
+                          </div>
+                        )}
                       </>
                     ) : (
                       <>

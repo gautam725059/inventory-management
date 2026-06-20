@@ -19,6 +19,7 @@ export async function GET(request: Request, { params }: Context) {
       adjust: "Adjustment",
       "transfer-in": "Transfer In",
       "transfer-out": "Transfer Out",
+      "combo-out": "Combo Out",
     };
     const headers = [
       "Date",
@@ -40,7 +41,9 @@ export async function GET(request: Request, { params }: Context) {
     ];
     const rows = movements.map((m) => {
       const dir =
-        m.type === "out" || m.type === "transfer-out" ? -1 : 1;
+        m.type === "out" || m.type === "transfer-out" || m.type === "combo-out"
+          ? -1
+          : 1;
       const signed = m.type === "adjust" ? m.quantity : dir * m.quantity;
       return [
         m.createdAt,
@@ -57,7 +60,7 @@ export async function GET(request: Request, { params }: Context) {
         m.bill ?? "",
         m.date ?? "",
         m.reason ?? m.counterparty ?? "",
-        m.note ?? "",
+        m.note ?? m.comboItems ?? "",
         m.byName ?? "",
       ];
     });

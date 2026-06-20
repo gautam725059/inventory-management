@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { Vendor } from "@/lib/types";
+import { useEffect, useMemo, useState } from "react";
+import type { Vendor, ProductCatalogEntry } from "@/lib/types";
 
 /** Today's date as YYYY-MM-DD, for the date input default. */
 function today(): string {
@@ -14,7 +14,6 @@ function today(): string {
 const EMPTY_FORM = {
   ean: "",
   quantity: "",
-  name: "",
   reorderLevel: "",
   vendorName: "",
   bill: "",
@@ -35,21 +34,54 @@ interface Props {
   onError: (message: string) => void;
 }
 
-/** Form for receiving products into a warehouse by EAN + quantity. */
+/** Form for receiving stock into a warehouse. The EAN is scanned/typed and the
+ *  product name is resolved from the catalog (read-only). Receiving is blocked
+ *  unless the EAN matches an existing product. */
 export default function ReceiveForm({ warehouseId, onReceived, onError }: Props) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [products, setProducts] = useState<ProductCatalogEntry[]>([]);
 
   useEffect(() => {
     fetch("/api/vendors")
       .then((r) => (r.ok ? r.json() : []))
       .then((list) => setVendors(Array.isArray(list) ? list : []))
       .catch(() => setVendors([]));
+    fetch("/api/products")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list) => setProducts(Array.isArray(list) ? list : []))
+      .catch(() => setProducts([]));
   }, []);
+
+  // Resolve the entered EAN to a catalog product — by primary EAN or any of its
+  // pack barcodes. The product name is shown read-only from this.
+  const matchedProduct = useMemo(() => {
+    const e = form.ean.trim();
+    if (!e) return undefined;
+    return products.find(
+      (p) => p.ean === e || (p.barcodes ?? []).some((b) => b.ean === e)
+    );
+  }, [form.ean, products]);
+
+  const eanEntered = form.ean.trim().length > 0;
+  const noMatch = eanEntered && !matchedProduct;
+  const productName = matchedProduct?.name ?? "";
+
+  const canSubmit =
+    !!matchedProduct &&
+    Number(form.quantity) > 0 &&
+    form.vendorName.trim().length > 0 &&
+    form.bill.trim().length > 0 &&
+    form.date.trim().length > 0;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    // Block unless the EAN resolves to an existing product.
+    if (!matchedProduct) {
+      onError("EAN does not match any product. Add it via Add New Product first.");
+      return;
+    }
     setSaving(true);
     onError("");
     try {
@@ -57,9 +89,9 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ean: form.ean,
+          ean: form.ean.trim(),
           quantity: Number(form.quantity),
-          name: form.name || undefined,
+          name: matchedProduct.name,
           reorderLevel: form.reorderLevel ? Number(form.reorderLevel) : undefined,
           vendorName: form.vendorName,
           bill: form.bill,
@@ -106,10 +138,35 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
             className={inputClass}
             value={form.ean}
             onChange={(e) => setForm({ ...form, ean: e.target.value })}
-            placeholder="8901234567890"
+            placeholder="Scan or type the EAN…"
             inputMode="numeric"
+            autoComplete="off"
+            // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
             required
+          />
+          {matchedProduct && (
+            <p className="mt-1 truncate text-xs text-emerald-600">
+              ✓ {matchedProduct.name}
+            </p>
+          )}
+          {noMatch && (
+            <p className="mt-1 text-xs font-medium text-red-600">
+              No product matches this EAN.
+            </p>
+          )}
+        </div>
+        <div>
+          <label htmlFor="name" className={labelClass}>
+            Product name
+          </label>
+          <input
+            id="name"
+            className={`${inputClass} cursor-not-allowed bg-slate-50 text-slate-700`}
+            value={productName}
+            readOnly
+            tabIndex={-1}
+            placeholder="Auto-filled from the EAN"
           />
         </div>
         <div>
@@ -176,18 +233,6 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
           />
         </div>
         <div>
-          <label htmlFor="name" className={labelClass}>
-            Product name
-          </label>
-          <input
-            id="name"
-            className={inputClass}
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            placeholder="Required for a new EAN; optional otherwise"
-          />
-        </div>
-        <div>
           <label htmlFor="purchasePrice" className={labelClass}>
             Purchase price (per piece)
           </label>
@@ -222,7 +267,8 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
       <div className="mt-5">
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || !canSubmit}
+          title={!matchedProduct ? "Enter an EAN that matches a product" : ""}
           className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving ? "Receiving…" : "Receive into warehouse"}

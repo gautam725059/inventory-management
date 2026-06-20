@@ -529,6 +529,12 @@
       "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
       "createdAt": "2026-06-19T09:58:26.673Z",
       "expiresAt": "2026-06-26T09:58:26.673Z"
+    },
+    {
+      "token": "17975c2e2ede3aecadf1c3e5d75ead7538dffa93dd329586b0d281e8ee6b507c",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-19T11:29:20.080Z",
+      "expiresAt": "2026-06-26T11:29:20.080Z"
     }
   ],
   "vendors": [
@@ -687,7 +693,26 @@
       "createdAt": "2026-06-16T07:11:37.120Z"
     }
   ],
+  "comboDispatches": [],
   "adjustments": [],
   "transfers": [],
-  "approvals": []
+  "approvals": [],
+  "combos": [
+    {
+      "id": "4dbf694a-ad1e-49e3-9775-168fdd26fd76",
+      "name": "hook combo set",
+      "price": 598.99,
+      "components": [
+        {
+          "ean": "8906199313285",
+          "quantity": 17
+        },
+        {
+          "ean": "8906199313438",
+          "quantity": 17
+        }
+      ],
+      "createdAt": "2026-06-19T11:31:59.068Z"
+    }
+  ]
 }

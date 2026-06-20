@@ -132,6 +132,21 @@ export default function WarehousePage({
         </Link>
 
         <Link
+          href={`/warehouse/${id}/add-product`}
+          className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-fuchsia-400 hover:shadow-md"
+        >
+          <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-fuchsia-50 text-2xl">
+            🆕
+          </span>
+          <span>
+            <span className="block font-semibold text-slate-900">Add New Product</span>
+            <span className="mt-0.5 block text-sm text-slate-500">
+              Create a product + image
+            </span>
+          </span>
+        </Link>
+
+        <Link
           href={`/warehouse/${id}/adjust`}
           className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-amber-400 hover:shadow-md"
         >

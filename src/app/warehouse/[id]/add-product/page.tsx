@@ -2,12 +2,11 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import StockOutForm from "@/components/StockOutForm";
-import ComboOutForm from "@/components/ComboOutForm";
+import AddProductForm from "@/components/AddProductForm";
 import StockCard from "@/components/StockCard";
 import type { WarehouseDetail } from "@/lib/types";
 
-export default function StockOutPage({
+export default function AddProductPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -18,7 +17,6 @@ export default function StockOutPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [mode, setMode] = useState<"product" | "combo">("product");
 
   async function load() {
     try {
@@ -48,10 +46,12 @@ export default function StockOutPage({
 
       <header className="mt-3 mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Stock Out — packs
+          Add New Product
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          Dispatch from {detail?.name ?? "this warehouse"} as packs or singles.
+          Create a brand-new product (with EAN, name &amp; image) and receive its
+          first stock into {detail?.name ?? "this warehouse"}. It will then appear
+          in the Catalog.
         </p>
       </header>
 
@@ -61,68 +61,32 @@ export default function StockOutPage({
         </div>
       )}
       {success && (
-        <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          {success}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <span>{success}</span>
+          <Link
+            href="/catalog"
+            className="font-semibold text-emerald-700 underline hover:text-emerald-800"
+          >
+            View in Catalog →
+          </Link>
         </div>
       )}
 
-      <div className="mb-5 inline-flex rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
-        <button
-          onClick={() => setMode("product")}
-          className={`rounded-md px-4 py-1.5 text-sm font-semibold transition ${
-            mode === "product"
-              ? "bg-brand-600 text-white shadow-sm"
-              : "text-slate-600 hover:bg-slate-50"
-          }`}
-        >
-          📤 Product
-        </button>
-        <button
-          onClick={() => setMode("combo")}
-          className={`rounded-md px-4 py-1.5 text-sm font-semibold transition ${
-            mode === "combo"
-              ? "bg-brand-600 text-white shadow-sm"
-              : "text-slate-600 hover:bg-slate-50"
-          }`}
-        >
-          🎁 Combo
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="py-16 text-center text-sm text-slate-400">Loading…</div>
-      ) : mode === "product" ? (
-        <StockOutForm
-          warehouseId={id}
-          lines={detail?.lines ?? []}
-          onDispatched={async () => {
-            setSuccess("Stock dispatched.");
-            await load();
-          }}
-          onError={(message) => {
-            setError(message || null);
-            if (message) setSuccess(null);
-          }}
-        />
-      ) : (
-        <ComboOutForm
-          warehouseId={id}
-          lines={detail?.lines ?? []}
-          onDispatched={async () => {
-            setSuccess("Combo dispatched.");
-            await load();
-          }}
-          onError={(message) => {
-            setError(message || null);
-            if (message) setSuccess(null);
-          }}
-        />
-      )}
+      <AddProductForm
+        warehouseId={id}
+        onAdded={async (name) => {
+          setError(null);
+          setSuccess(`"${name}" added and received. It's now in the Catalog.`);
+          await load();
+        }}
+        onError={(message) => {
+          setError(message || null);
+          if (message) setSuccess(null);
+        }}
+      />
 
       <div className="mb-4 mt-8 flex items-baseline justify-between">
-        <h3 className="text-base font-semibold text-slate-900">
-          Remaining stock
-        </h3>
+        <h3 className="text-base font-semibold text-slate-900">Current stock</h3>
         {detail && (
           <span className="text-sm text-slate-500">
             {detail.lines.length} products ·{" "}
@@ -135,7 +99,7 @@ export default function StockOutPage({
         <div className="py-16 text-center text-sm text-slate-400">Loading…</div>
       ) : !detail || detail.lines.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-          No stock in this warehouse.
+          No stock yet. Add your first product above.
         </div>
       ) : (
         <div className="flex flex-col gap-3">

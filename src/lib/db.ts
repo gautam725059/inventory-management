@@ -39,6 +39,13 @@ import type {
   LowStockRow,
   ImportItem,
   ImportResult,
+  Combo,
+  ComboComponent,
+  ComboInput,
+  ComboView,
+  ComboDispatch,
+  ComboDispatchComponent,
+  ComboDispatchInput,
 } from "./types";
 
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -62,9 +69,11 @@ function emptyStore(): Store {
     stock: [],
     receipts: [],
     dispatches: [],
+    comboDispatches: [],
     adjustments: [],
     transfers: [],
     approvals: [],
+    combos: [],
   };
 }
 
@@ -121,9 +130,26 @@ function normalizeStore(parsed: Partial<Store>): Store {
     stock: Array.isArray(parsed.stock) ? parsed.stock : [],
     receipts: Array.isArray(parsed.receipts) ? parsed.receipts : [],
     dispatches: Array.isArray(parsed.dispatches) ? parsed.dispatches : [],
+    comboDispatches: Array.isArray(parsed.comboDispatches)
+      ? parsed.comboDispatches
+      : [],
     adjustments: Array.isArray(parsed.adjustments) ? parsed.adjustments : [],
     transfers: Array.isArray(parsed.transfers) ? parsed.transfers : [],
     approvals: Array.isArray(parsed.approvals) ? parsed.approvals : [],
+    combos: Array.isArray(parsed.combos)
+      ? parsed.combos.map((c) => ({
+          ...c,
+          components: Array.isArray(c.components)
+            ? c.components.filter(
+                (k) =>
+                  k &&
+                  typeof k.ean === "string" &&
+                  Number.isInteger(k.quantity) &&
+                  k.quantity > 0
+              )
+            : [],
+        }))
+      : [],
   };
 }
 
@@ -377,7 +403,26 @@ export async function getWarehouseMovements(
       };
     });
 
-  return [...ins, ...outs, ...adjusts, ...transfers].sort((a, b) =>
+  const comboOuts: Movement[] = store.comboDispatches
+    .filter((c) => c.warehouseId === id)
+    .map((c) => ({
+      id: c.id,
+      type: "combo-out",
+      ean: c.barcode ?? "",
+      name: c.comboName,
+      quantity: c.totalPieces,
+      packs: c.combos,
+      date: c.date,
+      invoiceNo: c.invoiceNo,
+      referenceNo: c.referenceNo,
+      customerName: c.customerName,
+      comboItems: c.components
+        .map((k) => `${k.name} ×${k.pieces}`)
+        .join(", "),
+      createdAt: c.createdAt,
+    }));
+
+  return [...ins, ...outs, ...adjusts, ...transfers, ...comboOuts].sort((a, b) =>
     b.createdAt.localeCompare(a.createdAt)
   );
 }
@@ -1137,6 +1182,221 @@ export async function getCustomerDetail(
     txns,
     totalQuantity: txns.reduce((s, t) => s + t.quantity, 0),
   };
+}
+
+// ---- Combos: bundles of different products ----------------------------------
+
+/** Clean stored/user component rows: positive whole quantities, non-empty EAN,
+ *  de-duplicated by EAN (last quantity wins). */
+function normalizeComponents(raw: unknown): ComboComponent[] {
+  if (!Array.isArray(raw)) return [];
+  const byEan = new Map<string, number>();
+  for (const item of raw) {
+    if (typeof item !== "object" || item === null) continue;
+    const k = item as Record<string, unknown>;
+    const ean = typeof k.ean === "string" ? k.ean.trim() : "";
+    const quantity = Number(k.quantity);
+    if (!ean || !Number.isInteger(quantity) || quantity <= 0) continue;
+    byEan.set(ean, quantity);
+  }
+  return [...byEan.entries()].map(([ean, quantity]) => ({ ean, quantity }));
+}
+
+/** True if a barcode collides with any product EAN/pack barcode, or another
+ *  combo's barcode (ignoring the combo with id === selfId). */
+function barcodeInUse(store: Store, barcode: string, selfId: string | null): boolean {
+  if (
+    store.products.some(
+      (p) => p.ean === barcode || p.barcodes.some((b) => b.ean === barcode)
+    )
+  ) {
+    return true;
+  }
+  return store.combos.some((c) => c.id !== selfId && c.barcode === barcode);
+}
+
+function cleanComboInput(store: Store, input: ComboInput) {
+  const name = typeof input.name === "string" ? input.name.trim() : "";
+  const barcode =
+    typeof input.barcode === "string" ? input.barcode.trim() || undefined : undefined;
+  const price =
+    typeof input.price === "number" && input.price >= 0 ? input.price : undefined;
+  // Keep only components that point at a real product.
+  const components = normalizeComponents(input.components).filter((c) =>
+    store.products.some((p) => p.ean === c.ean)
+  );
+  return { name, barcode, price, components };
+}
+
+type ComboResult = { ok: true; combo: Combo } | { ok: false; error: string };
+
+/** All combos, enriched with component product names. */
+export async function listCombos(): Promise<ComboView[]> {
+  const store = await readStore();
+  const nameFor = (ean: string) =>
+    store.products.find((p) => p.ean === ean)?.name ?? "Unknown product";
+  return [...store.combos]
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((c) => ({
+      ...c,
+      lines: c.components.map((k) => ({
+        ean: k.ean,
+        name: nameFor(k.ean),
+        quantity: k.quantity,
+      })),
+    }));
+}
+
+export async function createCombo(input: ComboInput): Promise<ComboResult> {
+  return mutate<ComboResult>((store) => {
+    const c = cleanComboInput(store, input);
+    if (!c.name) return [store, { ok: false, error: "Combo name is required." }];
+    if (!c.components.length) {
+      return [store, { ok: false, error: "Add at least one product to the combo." }];
+    }
+    if (store.combos.some((x) => x.name.toLowerCase() === c.name.toLowerCase())) {
+      return [store, { ok: false, error: "A combo with this name already exists." }];
+    }
+    if (c.barcode && barcodeInUse(store, c.barcode, null)) {
+      return [
+        store,
+        { ok: false, error: "That barcode is already used by a product or combo." },
+      ];
+    }
+    const combo: Combo = {
+      id: randomUUID(),
+      name: c.name,
+      barcode: c.barcode,
+      price: c.price,
+      components: c.components,
+      createdAt: new Date().toISOString(),
+    };
+    store.combos.push(combo);
+    return [store, { ok: true, combo }];
+  });
+}
+
+export async function updateCombo(
+  id: string,
+  input: ComboInput
+): Promise<ComboResult> {
+  return mutate<ComboResult>((store) => {
+    const combo = store.combos.find((c) => c.id === id);
+    if (!combo) return [store, { ok: false, error: "Combo not found." }];
+    const c = cleanComboInput(store, input);
+    if (input.name !== undefined) {
+      if (!c.name) return [store, { ok: false, error: "Combo name can't be empty." }];
+      if (
+        store.combos.some(
+          (x) => x.id !== id && x.name.toLowerCase() === c.name.toLowerCase()
+        )
+      ) {
+        return [store, { ok: false, error: "A combo with this name already exists." }];
+      }
+      combo.name = c.name;
+    }
+    if (input.barcode !== undefined) {
+      if (c.barcode && barcodeInUse(store, c.barcode, id)) {
+        return [
+          store,
+          { ok: false, error: "That barcode is already used by a product or combo." },
+        ];
+      }
+      combo.barcode = c.barcode;
+    }
+    if (input.price !== undefined) combo.price = c.price;
+    if (input.components !== undefined) {
+      if (!c.components.length) {
+        return [store, { ok: false, error: "A combo needs at least one product." }];
+      }
+      combo.components = c.components;
+    }
+    return [store, { ok: true, combo }];
+  });
+}
+
+export async function deleteCombo(id: string): Promise<boolean> {
+  return mutate((store) => {
+    const before = store.combos.length;
+    store.combos = store.combos.filter((c) => c.id !== id);
+    return [store, store.combos.length !== before];
+  });
+}
+
+/** Dispatch a batch of combos from a warehouse: verify every component has
+ *  enough stock, then deduct all of them atomically and log the sale. Throws
+ *  if any component is short (nothing is deducted). */
+export async function dispatchCombo(
+  warehouseId: string,
+  input: ComboDispatchInput
+): Promise<ComboDispatch> {
+  return mutate((store) => {
+    const warehouse = store.warehouses.find((w) => w.id === warehouseId);
+    if (!warehouse) throw new Error("Warehouse not found.");
+
+    const combo = store.combos.find((c) => c.id === input.comboId);
+    if (!combo) throw new Error("Combo not found.");
+    if (!combo.components.length) throw new Error("This combo has no products.");
+
+    const count = input.combos;
+    const nameFor = (ean: string) =>
+      store.products.find((p) => p.ean === ean)?.name ?? ean;
+
+    // First pass: verify every component (all-or-nothing).
+    for (const comp of combo.components) {
+      const need = comp.quantity * count;
+      const have =
+        store.stock.find(
+          (s) => s.warehouseId === warehouseId && s.ean === comp.ean
+        )?.quantity ?? 0;
+      if (need > have) {
+        throw new Error(
+          `Not enough "${nameFor(comp.ean)}" — need ${need}, only ${have} in this warehouse.`
+        );
+      }
+    }
+
+    // Second pass: deduct each component.
+    const components: ComboDispatchComponent[] = [];
+    let totalPieces = 0;
+    for (const comp of combo.components) {
+      const need = comp.quantity * count;
+      const row = store.stock.find(
+        (s) => s.warehouseId === warehouseId && s.ean === comp.ean
+      )!;
+      row.quantity -= need;
+      totalPieces += need;
+      components.push({
+        ean: comp.ean,
+        name: nameFor(comp.ean),
+        quantity: comp.quantity,
+        pieces: need,
+      });
+    }
+
+    const customerId = upsertPartyByName(store.customers, input.customerName);
+
+    const record: ComboDispatch = {
+      id: randomUUID(),
+      warehouseId,
+      comboId: combo.id,
+      comboName: combo.name,
+      barcode: combo.barcode,
+      combos: count,
+      price: combo.price,
+      amount: typeof combo.price === "number" ? combo.price * count : undefined,
+      components,
+      totalPieces,
+      date: input.date,
+      invoiceNo: input.invoiceNo,
+      referenceNo: input.referenceNo,
+      customerName: input.customerName?.trim() || undefined,
+      customerId,
+      createdAt: new Date().toISOString(),
+    };
+    store.comboDispatches.push(record);
+    return [store, record];
+  });
 }
 
 // ---- Users & sessions -------------------------------------------------------
