@@ -15,6 +15,7 @@ export default function CatalogPage() {
   const [barcodesEan, setBarcodesEan] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
+  const [sortTotal, setSortTotal] = useState<"none" | "asc" | "desc">("none");
 
   const load = useCallback(async () => {
     try {
@@ -39,11 +40,22 @@ export default function CatalogPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return products;
-    return products.filter(
-      (p) => p.name.toLowerCase().includes(q) || p.ean.includes(q)
-    );
-  }, [products, query]);
+    let list = q
+      ? products.filter(
+          (p) => p.name.toLowerCase().includes(q) || p.ean.includes(q)
+        )
+      : products;
+    if (sortTotal === "asc") {
+      list = [...list].sort((a, b) => a.totalQuantity - b.totalQuantity);
+    } else if (sortTotal === "desc") {
+      list = [...list].sort((a, b) => b.totalQuantity - a.totalQuantity);
+    }
+    return list;
+  }, [products, query, sortTotal]);
+
+  function cycleSortTotal() {
+    setSortTotal((s) => (s === "none" ? "desc" : s === "desc" ? "asc" : "none"));
+  }
 
   const allFilteredSelected =
     filtered.length > 0 && filtered.every((p) => selected.has(p.ean));
@@ -184,7 +196,18 @@ export default function CatalogPage() {
                     {n}
                   </th>
                 ))}
-                <th className="px-4 py-3 text-right font-medium">Total</th>
+                <th className="px-4 py-3 text-right font-medium">
+                  <button
+                    onClick={cycleSortTotal}
+                    title="Sort by total quantity"
+                    className="ml-auto inline-flex items-center gap-1 uppercase tracking-wide transition hover:text-slate-700"
+                  >
+                    Total
+                    <span className={sortTotal === "none" ? "text-slate-300" : "text-brand-600"}>
+                      {sortTotal === "asc" ? "▲" : sortTotal === "desc" ? "▼" : "⇅"}
+                    </span>
+                  </button>
+                </th>
               </tr>
             </thead>
             <tbody>

@@ -2,19 +2,24 @@
 
 import { useEffect, useState } from "react";
 import WarehouseCard from "@/components/WarehouseCard";
-import type { WarehouseSummary } from "@/lib/types";
+import type { WarehouseSummary, ProductCatalogEntry } from "@/lib/types";
 
 export default function Dashboard() {
   const [warehouses, setWarehouses] = useState<WarehouseSummary[]>([]);
+  const [products, setProducts] = useState<ProductCatalogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/warehouses");
-        if (!res.ok) throw new Error("Failed to load warehouses.");
-        setWarehouses(await res.json());
+        const [whRes, prRes] = await Promise.all([
+          fetch("/api/warehouses"),
+          fetch("/api/products"),
+        ]);
+        if (!whRes.ok) throw new Error("Failed to load warehouses.");
+        setWarehouses(await whRes.json());
+        if (prRes.ok) setProducts(await prRes.json());
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong.");
       } finally {
@@ -25,7 +30,9 @@ export default function Dashboard() {
 
   const totalUnits = warehouses.reduce((s, w) => s + w.totalUnits, 0);
   const totalLines = warehouses.reduce((s, w) => s + w.skuCount, 0);
-  const totalLow = warehouses.reduce((s, w) => s + w.lowStockCount, 0);
+  // Low / out of stock across the whole catalog (total stock at or below the
+  // reorder level — includes products that are completely out of stock).
+  const totalLow = products.filter((p) => p.lowStock).length;
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-10">
@@ -71,7 +78,7 @@ export default function Dashboard() {
               {[
                 { v: warehouses.length, l: "Warehouses" },
                 { v: totalLines, l: "Stock lines" },
-                { v: totalLow, l: "Low stock" },
+                { v: totalLow, l: "Low / Out" },
               ].map((s) => (
                 <div
                   key={s.l}

@@ -32,6 +32,8 @@ export default function PartyManager({ kind, apiBase, title, subtitle, refLabel 
   const [list, setList] = useState<Vendor[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
 
   const [form, setForm] = useState(BLANK);
   const [adding, setAdding] = useState(false);
@@ -137,6 +139,52 @@ export default function PartyManager({ kind, apiBase, title, subtitle, refLabel 
     );
   });
 
+  const allFilteredSelected =
+    filtered.length > 0 && filtered.every((p) => selected.has(p.id));
+
+  function toggle(id: string) {
+    setSelected((s) => {
+      const next = new Set(s);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    setSelected((s) => {
+      const next = new Set(s);
+      if (allFilteredSelected) filtered.forEach((p) => next.delete(p.id));
+      else filtered.forEach((p) => next.add(p.id));
+      return next;
+    });
+  }
+
+  async function deleteSelected() {
+    const ids = [...selected];
+    if (ids.length === 0) return;
+    if (!confirm(`Delete ${ids.length} ${kind}(s)? This can't be undone.`)) return;
+    setDeleting(true);
+    setError(null);
+    try {
+      const res = await fetch(apiBase, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || "Delete failed.");
+      }
+      setSelected(new Set());
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Delete failed.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-5xl px-5 py-10">
       <Link href="/" className="text-sm font-medium text-brand-600 hover:underline">
@@ -229,6 +277,30 @@ export default function PartyManager({ kind, apiBase, title, subtitle, refLabel 
         className="mb-5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
       />
 
+      {canManage && selected.size > 0 && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+          <span className="text-sm font-medium text-red-700">
+            {selected.size} {kind}
+            {selected.size === 1 ? "" : "s"} selected
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setSelected(new Set())}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              Clear
+            </button>
+            <button
+              onClick={deleteSelected}
+              disabled={deleting}
+              className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+            >
+              {deleting ? "Deleting…" : `🗑 Delete ${selected.size} selected`}
+            </button>
+          </div>
+        </div>
+      )}
+
       {filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
           {list.length === 0
@@ -242,6 +314,17 @@ export default function PartyManager({ kind, apiBase, title, subtitle, refLabel 
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+                {canManage && (
+                  <th className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={allFilteredSelected}
+                      onChange={toggleAll}
+                      aria-label="Select all"
+                      className="h-4 w-4 cursor-pointer accent-brand-600 align-middle"
+                    />
+                  </th>
+                )}
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Phone</th>
                 <th className="px-4 py-3 font-medium">GSTIN</th>
@@ -250,7 +333,23 @@ export default function PartyManager({ kind, apiBase, title, subtitle, refLabel 
             </thead>
             <tbody>
               {filtered.map((p) => (
-                <tr key={p.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                <tr
+                  key={p.id}
+                  className={`border-b border-slate-100 last:border-0 hover:bg-slate-50 ${
+                    selected.has(p.id) ? "bg-brand-50/50" : ""
+                  }`}
+                >
+                  {canManage && (
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(p.id)}
+                        onChange={() => toggle(p.id)}
+                        aria-label={`Select ${p.name}`}
+                        className="h-4 w-4 cursor-pointer accent-brand-600 align-middle"
+                      />
+                    </td>
+                  )}
                   <td className="px-4 py-3 font-medium text-slate-900">{p.name}</td>
                   <td className="px-4 py-3 text-slate-600">{p.phone || "—"}</td>
                   <td className="px-4 py-3 text-slate-600">{p.gstin || "—"}</td>

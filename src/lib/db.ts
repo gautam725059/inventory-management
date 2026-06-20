@@ -54,7 +54,7 @@ const DATA_FILE = path.join(DATA_DIR, "store.json");
 // The three warehouses are seeded on first run. Each holds its own stock.
 const DEFAULT_WAREHOUSES: Warehouse[] = [
   { id: "wh-mumbai", name: "Mumbai Warehouse", location: "Bhiwandi, MH" },
-  { id: "wh-delhi", name: "Delhi Warehouse", location: "Okhla, DL" },
+  { id: "wh-delhi", name: "Haryana Warehouse", location: "Farrukhnagar, HR" },
   { id: "wh-bengaluru", name: "Bengaluru Warehouse", location: "Whitefield, KA" },
 ];
 
@@ -256,7 +256,7 @@ function buildLine(
     combos: computeCombos(quantity, comboSizes),
     barcodes: product?.barcodes ?? [],
     reorderLevel,
-    lowStock: reorderLevel > 0 && quantity <= reorderLevel,
+    lowStock: quantity <= reorderLevel,
     imageUrl: product?.imageUrl,
   };
 }
@@ -285,11 +285,14 @@ function upsertPartyByName(
 export async function listWarehouses(): Promise<WarehouseSummary[]> {
   const store = await readStore();
   return store.warehouses.map((w) => {
-    const rows = store.stock.filter((s) => s.warehouseId === w.id && s.quantity > 0);
-    const lowStockCount = rows.filter((r) => {
+    const allRows = store.stock.filter((s) => s.warehouseId === w.id);
+    const rows = allRows.filter((s) => s.quantity > 0);
+    // Low / out of stock: at or below the reorder level. With reorderLevel 0
+    // this flags an emptied (quantity 0) line as out of stock.
+    const lowStockCount = allRows.filter((r) => {
       const product = store.products.find((p) => p.ean === r.ean);
       const reorderLevel = product?.reorderLevel ?? 0;
-      return reorderLevel > 0 && r.quantity <= reorderLevel;
+      return r.quantity <= reorderLevel;
     }).length;
     return {
       ...w,
@@ -449,7 +452,7 @@ export async function listCatalog(): Promise<ProductCatalogEntry[]> {
         sellingPrice: p.sellingPrice,
         purchasePrice: p.purchasePrice,
         totalQuantity,
-        lowStock: p.reorderLevel > 0 && totalQuantity <= p.reorderLevel,
+        lowStock: totalQuantity <= p.reorderLevel,
         byWarehouse,
         imageUrl: p.imageUrl,
       };
@@ -969,7 +972,7 @@ export async function getReports(from?: string, to?: string): Promise<Report> {
         reorderLevel,
       };
     })
-    .filter((r) => r.reorderLevel > 0 && r.quantity <= r.reorderLevel)
+    .filter((r) => r.quantity <= r.reorderLevel)
     .sort((a, b) => a.quantity - b.quantity);
 
   const valuation = await getValuation();
@@ -1135,6 +1138,30 @@ export async function createCustomer(input: PartyInput): Promise<PartyResult> {
 }
 export async function updateCustomer(id: string, input: PartyInput): Promise<PartyResult> {
   return mutate<PartyResult>((s) => [s, updatePartyIn(s.customers, id, input)]);
+}
+
+/** Delete vendors by id. Historical receipts keep their vendor-name snapshot,
+ *  so past purchases still read correctly. Returns the number removed. */
+export async function deleteVendors(ids: string[]): Promise<number> {
+  const set = new Set(ids.map((i) => i.trim()).filter(Boolean));
+  if (set.size === 0) return 0;
+  return mutate((store) => {
+    const before = store.vendors.length;
+    store.vendors = store.vendors.filter((v) => !set.has(v.id));
+    return [store, before - store.vendors.length];
+  });
+}
+
+/** Delete customers by id. Historical dispatches keep their customer-name
+ *  snapshot. Returns the number removed. */
+export async function deleteCustomers(ids: string[]): Promise<number> {
+  const set = new Set(ids.map((i) => i.trim()).filter(Boolean));
+  if (set.size === 0) return 0;
+  return mutate((store) => {
+    const before = store.customers.length;
+    store.customers = store.customers.filter((c) => !set.has(c.id));
+    return [store, before - store.customers.length];
+  });
 }
 
 export async function getVendorDetail(id: string): Promise<VendorDetail | undefined> {

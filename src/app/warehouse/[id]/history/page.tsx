@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useMemo, useState, use } from "react";
 import Link from "next/link";
 import type { Movement } from "@/lib/types";
 
@@ -52,6 +52,7 @@ export default function HistoryPage({
   const [movements, setMovements] = useState<Movement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -66,6 +67,15 @@ export default function HistoryPage({
       }
     })();
   }, [id]);
+
+  // Filter by EAN (or product name). Empty box shows everything.
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return movements;
+    return movements.filter(
+      (m) => m.ean.toLowerCase().includes(q) || m.name.toLowerCase().includes(q)
+    );
+  }, [movements, query]);
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-10">
@@ -101,11 +111,33 @@ export default function HistoryPage({
         </div>
       )}
 
+      {!loading && movements.length > 0 && (
+        <div className="mb-5">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by EAN (or product name)…"
+            inputMode="numeric"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          />
+          {query.trim() && (
+            <p className="mt-1.5 text-xs text-slate-500">
+              Showing <strong className="text-slate-900">{filtered.length}</strong>{" "}
+              of {movements.length} movements for &ldquo;{query.trim()}&rdquo;.
+            </p>
+          )}
+        </div>
+      )}
+
       {loading ? (
         <div className="py-16 text-center text-sm text-slate-400">Loading…</div>
       ) : movements.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
           No movements yet. Stock-in and stock-out activity will appear here.
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+          No movements match &ldquo;{query.trim()}&rdquo;.
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -120,7 +152,7 @@ export default function HistoryPage({
               </tr>
             </thead>
             <tbody>
-              {movements.map((m) => (
+              {filtered.map((m) => (
                 <tr
                   key={m.id}
                   className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
