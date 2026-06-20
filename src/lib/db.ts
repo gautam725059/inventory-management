@@ -707,6 +707,27 @@ export async function removeStockLine(
   });
 }
 
+/** Delete products by EAN: removes the product record and its per-warehouse
+ *  stock rows everywhere, and strips the EANs from any combo recipes so they
+ *  don't dangle. Historical receipts/dispatches are kept as an audit trail.
+ *  Returns the number of products actually removed. */
+export async function deleteProducts(eans: string[]): Promise<number> {
+  const set = new Set(eans.map((e) => e.trim()).filter(Boolean));
+  if (set.size === 0) return 0;
+  return mutate((store) => {
+    const before = store.products.length;
+    store.products = store.products.filter((p) => !set.has(p.ean));
+    const removed = before - store.products.length;
+    if (removed > 0) {
+      store.stock = store.stock.filter((s) => !set.has(s.ean));
+      for (const c of store.combos) {
+        c.components = c.components.filter((k) => !set.has(k.ean));
+      }
+    }
+    return [store, removed];
+  });
+}
+
 // ---- Stock adjustments & transfers ------------------------------------------
 
 /** Apply a manual +/- correction to a stock line. Throws if it would push the

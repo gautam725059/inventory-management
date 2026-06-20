@@ -13,6 +13,8 @@ export default function CatalogPage() {
   const [query, setQuery] = useState("");
   const [editingEan, setEditingEan] = useState<string | null>(null);
   const [barcodesEan, setBarcodesEan] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -42,6 +44,57 @@ export default function CatalogPage() {
       (p) => p.name.toLowerCase().includes(q) || p.ean.includes(q)
     );
   }, [products, query]);
+
+  const allFilteredSelected =
+    filtered.length > 0 && filtered.every((p) => selected.has(p.ean));
+
+  function toggle(ean: string) {
+    setSelected((s) => {
+      const next = new Set(s);
+      if (next.has(ean)) next.delete(ean);
+      else next.add(ean);
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    setSelected((s) => {
+      const next = new Set(s);
+      if (allFilteredSelected) filtered.forEach((p) => next.delete(p.ean));
+      else filtered.forEach((p) => next.add(p.ean));
+      return next;
+    });
+  }
+
+  async function deleteSelected() {
+    const eans = [...selected];
+    if (eans.length === 0) return;
+    if (
+      !confirm(
+        `Delete ${eans.length} product(s)? This removes them from the catalog along with their stock. This can't be undone.`
+      )
+    )
+      return;
+    setDeleting(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/products", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eans }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || "Delete failed.");
+      }
+      setSelected(new Set());
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Delete failed.");
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-10">
@@ -79,6 +132,29 @@ export default function CatalogPage() {
         className="mb-5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
       />
 
+      {selected.size > 0 && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+          <span className="text-sm font-medium text-red-700">
+            {selected.size} product{selected.size === 1 ? "" : "s"} selected
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setSelected(new Set())}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              Clear
+            </button>
+            <button
+              onClick={deleteSelected}
+              disabled={deleting}
+              className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+            >
+              {deleting ? "Deleting…" : `🗑 Delete ${selected.size} selected`}
+            </button>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="py-16 text-center text-sm text-slate-400">Loading…</div>
       ) : filtered.length === 0 ? (
@@ -92,6 +168,15 @@ export default function CatalogPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+                <th className="px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={allFilteredSelected}
+                    onChange={toggleAll}
+                    aria-label="Select all"
+                    className="h-4 w-4 cursor-pointer accent-brand-600 align-middle"
+                  />
+                </th>
                 <th className="px-4 py-3 font-medium">Image</th>
                 <th className="px-4 py-3 font-medium">Product</th>
                 {warehouseNames.map((n) => (
@@ -106,8 +191,19 @@ export default function CatalogPage() {
               {filtered.map((p) => (
                 <tr
                   key={p.ean}
-                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
+                  className={`border-b border-slate-100 last:border-0 hover:bg-slate-50 ${
+                    selected.has(p.ean) ? "bg-brand-50/50" : ""
+                  }`}
                 >
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(p.ean)}
+                      onChange={() => toggle(p.ean)}
+                      aria-label={`Select ${p.name}`}
+                      className="h-4 w-4 cursor-pointer accent-brand-600 align-middle"
+                    />
+                  </td>
                   <td className="px-4 py-3">
                     <button
                       onClick={() => setEditingEan(p.ean)}

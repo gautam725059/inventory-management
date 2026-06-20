@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { listCatalog } from "@/lib/db";
+import { listCatalog, deleteProducts } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 import { toCsv, csvResponse } from "@/lib/csv";
 
 export async function GET(request: Request) {
@@ -30,4 +31,27 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.json(catalog);
+}
+
+/** Bulk-delete products by EAN. Body: { eans: string[] }. */
+export async function DELETE(request: Request) {
+  const me = await getCurrentUser(request);
+  if (!me) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
+  }
+  const b = body as Record<string, unknown>;
+  const eans = Array.isArray(b.eans)
+    ? b.eans.filter((e): e is string => typeof e === "string")
+    : [];
+  if (eans.length === 0) {
+    return NextResponse.json({ error: "No products selected." }, { status: 400 });
+  }
+
+  const deleted = await deleteProducts(eans);
+  return NextResponse.json({ deleted });
 }
