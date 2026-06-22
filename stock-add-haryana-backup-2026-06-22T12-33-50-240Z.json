@@ -1,0 +1,2922 @@
+{
+  "warehouses": [
+    {
+      "id": "wh-mumbai",
+      "name": "Mumbai Warehouse",
+      "location": "Bhiwandi, MH"
+    },
+    {
+      "id": "wh-delhi",
+      "name": "Haryana Warehouse",
+      "location": "Farrukhnagar, HR"
+    },
+    {
+      "id": "wh-bengaluru",
+      "name": "Bengaluru Warehouse",
+      "location": "Whitefield, KA"
+    }
+  ],
+  "products": [
+    {
+      "ean": "8906199310604",
+      "name": "Knife Set - Black",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": 0,
+      "purchasePrice": 0,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313155",
+      "name": "J HOOK (Flower J Hook)",
+      "comboSizes": [
+        10,
+        15,
+        20
+      ],
+      "barcodes": [
+        {
+          "ean": "8906199310000",
+          "size": 10,
+          "name": "Shanya Adhesive Wall Hooks Transparent (Stainless Steel, Transparent)",
+          "price": null
+        },
+        {
+          "ean": "8906199310017",
+          "size": 15,
+          "name": "Shanya Adhesive Wall Hooks (Stainless Steel, Transparent)",
+          "price": null
+        },
+        {
+          "ean": "8906199310024",
+          "size": 20,
+          "name": "Shanya Heavy-Duty Adhesive Wall Hooks",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": 0,
+      "purchasePrice": 1.3,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313162",
+      "name": "Big J Hook Silver",
+      "comboSizes": [
+        10
+      ],
+      "barcodes": [
+        {
+          "ean": "8906199311212",
+          "size": 10,
+          "name": "Shanya Transparent Self-Adhesive Wall Hooks",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313186",
+      "name": "Big J Hook Golden",
+      "comboSizes": [
+        10
+      ],
+      "barcodes": [
+        {
+          "ean": "8906199311205",
+          "size": 10,
+          "name": "Shanya Self Adhesive Wall Hooks",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313193",
+      "name": "frame hooks",
+      "comboSizes": [
+        10,
+        15,
+        20
+      ],
+      "barcodes": [
+        {
+          "ean": "8906199310079",
+          "size": 10,
+          "name": "Shanya Self Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)",
+          "price": null
+        },
+        {
+          "ean": "8906199310321",
+          "size": 15,
+          "name": "Shanya Self Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)",
+          "price": null
+        },
+        {
+          "ean": "8906199310338",
+          "size": 20,
+          "name": "Shanya Self Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)",
+          "price": null
+        },
+        {
+          "ean": "8906199311465",
+          "size": 10,
+          "name": "Shanya Self Adhesive Wall Hooks (PVC, Transparent)",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 1.7,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313216",
+      "name": "Nut Hook",
+      "comboSizes": [
+        10,
+        15,
+        20
+      ],
+      "barcodes": [
+        {
+          "ean": "8906199310123",
+          "size": 10,
+          "name": "Shanya Self-Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)",
+          "price": null
+        },
+        {
+          "ean": "8906199310307",
+          "size": 15,
+          "name": "Shanya Self-Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)",
+          "price": null
+        },
+        {
+          "ean": "8906199310314",
+          "size": 20,
+          "name": "Shanya Self-Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313223",
+      "name": "369 Rotating Hook",
+      "comboSizes": [
+        5
+      ],
+      "barcodes": [
+        {
+          "ean": "8906199311717",
+          "size": 5,
+          "name": "Shanya Rotating Ceiling / Wall Hooks (Plastic, Black)",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 4.3,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313230",
+      "name": "Star Hook",
+      "comboSizes": [
+        5
+      ],
+      "barcodes": [
+        {
+          "ean": "8906199312387",
+          "size": 5,
+          "name": "Shanya Star Self-Adhesive Wall Hooks (Acrylic, Transparent)",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313247",
+      "name": "Shell Hook P1",
+      "comboSizes": [
+        5
+      ],
+      "barcodes": [
+        {
+          "ean": "8906199312394",
+          "size": 5,
+          "name": "Shanya Shell Design Self-Adhesive Wall Hooks (Acrylic, Transparent)",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313254",
+      "name": "6PC Transparent Hook",
+      "comboSizes": [
+        2
+      ],
+      "barcodes": [
+        {
+          "ean": "8906199312592",
+          "size": 2,
+          "name": "Shanya Transparent Self-Adhesive Wall Hooks",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 15,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-6pc-silver-hook",
+      "name": "6PC Silver Hook",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199312585",
+          "size": 2,
+          "name": "Shanya Transparent Self-Adhesive Wall Hooks",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-6pc-green-hook",
+      "name": "6PC Green Hook",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199312578",
+          "size": 2,
+          "name": "Shanya Self-Adhesive Wall Hooks",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-matte-black-u-hook",
+      "name": "Matte Black U Hook",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199312899",
+          "size": 5,
+          "name": "Matte Black U Hook P5",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-matte-silver-u-hook",
+      "name": "Matte Silver U Hook",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199312103",
+          "size": 5,
+          "name": "Matte Silver U Hook P5",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-matte-silver-hook",
+      "name": "Matte Silver Hook",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199312257",
+          "size": 2,
+          "name": "Matte Silver Hook P2",
+          "price": null
+        },
+        {
+          "ean": "21633907",
+          "size": 4,
+          "name": "Matte Silver Hook P4",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-matte-black-hook",
+      "name": "Matte Black Hook",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199312240",
+          "size": 2,
+          "name": "Matte Black Hook P2",
+          "price": null
+        },
+        {
+          "ean": "21633884",
+          "size": 4,
+          "name": "Matte Black Hook P4",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-crystal-hook",
+      "name": "Crystal Hook",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199310727",
+          "size": 10,
+          "name": "Crystal Hook P10",
+          "price": null
+        },
+        {
+          "ean": "8906199310758",
+          "size": 15,
+          "name": "Crystal Hook P15",
+          "price": null
+        },
+        {
+          "ean": "8906199310765",
+          "size": 20,
+          "name": "Crystal Hook P20",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-u-transparent-hook",
+      "name": "U Transparent Hook",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199310611",
+          "size": 10,
+          "name": "U Transparent Hook P10",
+          "price": null
+        },
+        {
+          "ean": "8906199310734",
+          "size": 15,
+          "name": "U Transparent Hook P15",
+          "price": null
+        },
+        {
+          "ean": "8906199310741",
+          "size": 20,
+          "name": "U Transparent Hook P20",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-s-hook",
+      "name": "S Hook",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199311502",
+          "size": 10,
+          "name": "S Hook P10",
+          "price": 20
+        },
+        {
+          "ean": "8906199311519",
+          "size": 15,
+          "name": "S Hook P15",
+          "price": null
+        },
+        {
+          "ean": "8906199311526",
+          "size": 20,
+          "name": "S Hook P20",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-cloth-rope",
+      "name": "Cloth Rope",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199310093",
+          "size": 2,
+          "name": "Shanya Nylon Cloth Rope with Clips (Multicolour)",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-bathroom-shelf-black-white",
+      "name": "Bathroom Shelf Black & White",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199311694",
+          "size": 1,
+          "name": "Shanya Adhesive Bathroom Shelf (Plastic, White)",
+          "price": null
+        },
+        {
+          "ean": "8906199311670",
+          "size": 2,
+          "name": "Shanya Wall Mounted Bathroom Shelf (Plastic, white)",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-bathroom-shelf-white",
+      "name": "Bathroom Shelf White",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199311663",
+          "size": 2,
+          "name": "Shanya Self Adhesive Bathroom Shelf (Plastic, White)",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311779",
+      "name": "Bathroom Towel Rod Single",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311762",
+      "name": "Bathroom Towel Rod Double P1",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310659",
+      "name": "Knife Set - Purple",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310628",
+      "name": "Knife Set - Blue",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310642",
+      "name": "Knife Set - Green",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310635",
+      "name": "Knife Set - Red",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-plastic-oil-dispenser",
+      "name": "Plastic Oil Dispenser",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199311755",
+          "size": 2,
+          "name": "Shanya Plastic Oil Dispenser",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-silicone-baking-mat",
+      "name": "Silicone Baking Mat",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199310130",
+          "size": 2,
+          "name": "Shanya Anti-Skid Baking Mat (Silicone)",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-shoe-cleaning-wipes",
+      "name": "Shoe Cleaning Wipes",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199310192",
+          "size": 1,
+          "name": "Shanya Shoe Cleaning Wipes",
+          "price": null
+        },
+        {
+          "ean": "8906199310178",
+          "size": 2,
+          "name": "Shanya Shoe Cleaning Wipes",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-ice-cube-tray-hexagonal",
+      "name": "Ice Cube Tray Hexagonal",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199310031",
+          "size": 2,
+          "name": "Shanya Ice Tray (Silicone)",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "auto-ice-cube-tray-circle",
+      "name": "Ice Cube Tray Circle",
+      "comboSizes": [],
+      "barcodes": [
+        {
+          "ean": "8906199310055",
+          "size": 2,
+          "name": "Shanya Ice Tray Set (Silicone)",
+          "price": null
+        }
+      ],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312936",
+      "name": "Evil Eye Key Chain - Tree",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312929",
+      "name": "Evil Eye Key Chain - Elephant",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312943",
+      "name": "Evil Eye Key Chain - Dream Catcher",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312950",
+      "name": "Evil Eye Key Chain - Peacock",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312967",
+      "name": "Evil Eye Key Chain - Turtle",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312974",
+      "name": "Evil Eye Key Chain - Owl",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312875",
+      "name": "Gaurdian Bell - Bronze",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312868",
+      "name": "Gaurdian Bell - Silver",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311700",
+      "name": "Face Changing Key Chain",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312882",
+      "name": "Butterfly Crown",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311854",
+      "name": "Welcome Baby Boy - Foot",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311830",
+      "name": "Welcome Baby Girl - Foot",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 45,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310987",
+      "name": "Welcome Baby Boy - Baby",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "21633861",
+      "name": "Welcome Baby Girl - Baby",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310970",
+      "name": "Welcome Baby Girl - Baby",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313261",
+      "name": "Shanya Floral Bunny Kitchen Apron (Polyester)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313278",
+      "name": "Shanya Floral Bunny Kitchen Apron (Polyester)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313094",
+      "name": "Shanya Mesh Tea Infuser Strainer (Stainless Steel)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313100",
+      "name": "Shanya Garbage Bag (Medium)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313131",
+      "name": "Welcome Baby Girl Decoration Kit by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313124",
+      "name": "Welcome Baby Boy Decoration Kit by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313148",
+      "name": "Happy Anniversary Foil Balloon Banner by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313117",
+      "name": "Shanya Air Fryer Liner (Silicone)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313087",
+      "name": "Rose Gold Birthday Girl Crown & Sash by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313070",
+      "name": "Glitter Tiara with Satin Sash by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313063",
+      "name": "Birthday Girl Glitter Sash & Tiara Crown by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313025",
+      "name": "Shanya Bracelets & Earrings Set (Golden, Silver)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313049",
+      "name": "Shanya Heart Drop Pendant with Chain (Golden)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313032",
+      "name": "Shanya Elegant Heart Pendant with Chain (Golden)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313056",
+      "name": "Shanya Heart Charm Contemporary Necklace (Golden)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313001",
+      "name": "Shanya Rain Suit (Black)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313018",
+      "name": "Shanya Rain Suit (Blue)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312998",
+      "name": "Shanya Stainless Steel Blue Handle Spoon Set",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312981",
+      "name": "Shanya Stainless Steel Marble Style Fork Set",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312905",
+      "name": "Shanya Flexible Hair Claw Clip (Cream, Beige, Brown, Black)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312899",
+      "name": "Shanya Self Adhesive Wall Hooks (Stainless Steel, Matte Black)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312691",
+      "name": "Shanya Plastic Key Chain with Label Window",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312684",
+      "name": "Shanya Plastic Key Chain with Label Window",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312592",
+      "name": "Shanya Transparent Self-Adhesive Wall Hooks",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312585",
+      "name": "Shanya Transparent Self-Adhesive Wall Hooks",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312578",
+      "name": "Shanya Self-Adhesive Wall Hooks",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312615",
+      "name": "Shanya Claw Clip (Beige, Brown, Taupe, Black)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312561",
+      "name": "Shanya Smart Rolling Ball Pet Toy with Rope (Red)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312424",
+      "name": "Shanya Windproof Umbrella (Maroon)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312400",
+      "name": "Shanya 3-Fold Windproof Compact Umbrella (Blue)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312417",
+      "name": "Shanya 3 Fold Windproof Compact Umbrella (Green)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312462",
+      "name": "Shanya Large Matte Hair Claw Clip (Olive Green, Espresso Brown, Ivory Beige, and Matte Black)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312387",
+      "name": "Shanya Star Self-Adhesive Wall Hooks (Acrylic, Transparent)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312240",
+      "name": "Shanya Matte Finish Self Adhesive Wall Hooks",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312455",
+      "name": "Shanya Claw Clip Set (Ivory, Taupe Beige, Mocha Brown, Matte Black)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312226",
+      "name": "Shanya Penguin Toothbrush Holder (Plastic, Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312257",
+      "name": "Shanya Premium Silver Self-Adhesive Wall Hooks",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "21633907",
+      "name": "Shanya Premium Self-Adhesive Wall Hooks",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312295",
+      "name": "Lord Ganesha Evil Eye Wall Hanging (Blue) - Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312394",
+      "name": "Shanya Shell Design Self-Adhesive Wall Hooks (Acrylic, Transparent)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312288",
+      "name": "Bright Owl Evil-Eye Wall Hanging (Blue) - Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312271",
+      "name": "Elegant Owl & Evil-Eye Wall Hanging (Blue) - Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312264",
+      "name": "Wooden Elephant Hamza Evil-Eye Wall Hanging (Green & Blue) - Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312233",
+      "name": "Shanya Soap & Toothbrush Holder Set (Plastic, White)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "21633884",
+      "name": "Shanya Heavy Duty Self-Adhesive Wall Hooks",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312189",
+      "name": "Shanya Royal Mosaic Foil Work Shagun Envelope",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312097",
+      "name": "Shanya Plastic Airtight Container",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311946",
+      "name": "Shanya Matte Daisy Hair Claw Clip (Multicolor)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312134",
+      "name": "Shanya Small Butterfly Claw Clip (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312073",
+      "name": "Shanya Elastic Hair Ties (Pastel)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312141",
+      "name": "Shanya Embellished Metal Claw Clip (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311953",
+      "name": "Shanya Daisy Style Claw Clip (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312172",
+      "name": "Shanya Royal Elephant with Foil Money Envelope",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312103",
+      "name": "Shanya Waterproof Wall Hooks (Stainless Steel, Silver)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311939",
+      "name": "Shanya Plastic 4-Section Airtight Storage Container",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312127",
+      "name": "Shanya Matte Banana Hair Clip (Coffee, Beige, Taupe, Black)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312110",
+      "name": "Shanya Pastel Marble Mini Claw Clip Set (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312028",
+      "name": "Shanya Elephant Tree Foil Shagun Envelope",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311984",
+      "name": "Shanya Flower & Bow Cute Hair Ties Set (Brown)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311991",
+      "name": "Shanya Premium Elephant Print Envelope",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312011",
+      "name": "Shanya Premium Peacock Print Envelope",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199312004",
+      "name": "Shanya Marble Texture Claw Clip Set (Colour May Vary)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311977",
+      "name": "Shanya Bear Toothbrush Holder (Plastic, Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311960",
+      "name": "Shanya Soft Matte Hair Clip Set (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311755",
+      "name": "Shanya Plastic Oil Dispenser",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311847",
+      "name": "Shanya Soft Elastic Hair Ties (Multicolor)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311823",
+      "name": "Birthday Girl Sash & Crown by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311748",
+      "name": "Shanya Modern Soap Case with Lid (Plastic, Multicolor)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311731",
+      "name": "Shanya Soft Duster Ball (Microfiber, Grey & White)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311724",
+      "name": "Shanya Self Adhesive Handle (Plastic, Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311694",
+      "name": "Bathroom Shelf Black & White",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 21,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311687",
+      "name": "Shanya Multipurpose Kitchen Brush (Plastic, Purple)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311717",
+      "name": "Shanya Rotating Ceiling / Wall Hooks (Plastic, Black)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311670",
+      "name": "Shanya Wall Mounted Bathroom Shelf (Plastic, white)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311663",
+      "name": "Shanya Self Adhesive Bathroom Shelf (Plastic, White)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311557",
+      "name": "Shanya Leather Cleaning Wipes (Cotton)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311540",
+      "name": "Shanya Leather Cleaning Wipes (Cotton)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310321",
+      "name": "Shanya Self Adhesive Wall Hooks (PVC, Transparent)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310338",
+      "name": "Shanya Self Adhesive Wall Hooks (PVC, Transparent)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311465",
+      "name": "Shanya Self Adhesive Wall Hooks (PVC, Transparent)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311489",
+      "name": "Shanya Glass Spray Oil Dispenser Bottle",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311472",
+      "name": "Shanya Key Chain (Golden)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 29,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311410",
+      "name": "Shanya Pearl & Crystal Floral Hair Pin (Pink & White)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311434",
+      "name": "Shanya Pearl & Crystal Leaf Hair Pin (White)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310369",
+      "name": "Shanya Jasmin Artificial Gajra (White)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310352",
+      "name": "Shanya Mini Claw Clip Set (Colour May Vary)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311380",
+      "name": "Shanya Long Straight Ponytail Hair Extensions (Black)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311373",
+      "name": "Shanya Straight Ponytail Hair Extensions (Brown)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311427",
+      "name": "Shanya Pearl & Crystal Floral Hair Pin (White & Red)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311403",
+      "name": "Shanya Curly Frill Bun Hair Extensions (Brown)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311397",
+      "name": "Shanya Curly Frill Bun Hair Extensions (Black)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311236",
+      "name": "Shanya Clip-In Streaks Hair Extensions (Rose Gold)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311243",
+      "name": "Shanya Synthetic Clip-In Hair Extensions (Rose Pink)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311250",
+      "name": "Shanya Clip-In Hair Extensions (Purple)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311274",
+      "name": "Shanya Clip In Hair Extensions (Baby Pink)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311281",
+      "name": "Shanya Hair Extensions (Gold)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311212",
+      "name": "Shanya Transparent Self-Adhesive Wall Hooks",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311205",
+      "name": "Shanya Self Adhesive Wall Hooks",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311229",
+      "name": "Shanya Heavy Duty Adhesive Wall Hooks",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311137",
+      "name": "Shanya 5 Clip-In Straight Hair Extensions (Natural Black)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 80,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311106",
+      "name": "Shanya Clip-In Curly Hair Extensions (Natural Dark Brown)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 80,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311113",
+      "name": "Shanya Clip-In Curly Hair Extensions (Natural Black)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 80,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311120",
+      "name": "Shanya Clip-In Straight Hair Extensions (Natural Dark Brown)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 80,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311090",
+      "name": "Shanya Hair Bun Scrunchie (Brown)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 40,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311083",
+      "name": "Pink Glitter Cursive Happy Birthday Banner by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 25,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311076",
+      "name": "Silver Glitter Cursive Happy Birthday Banner by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311069",
+      "name": "Blue Glitter Cursive Happy Birthday Banner by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311052",
+      "name": "Rose Gold Glitter Cursive Happy Birthday Banner by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311038",
+      "name": "Golden Shinning Happy Birthday Banner by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311014",
+      "name": "Happy Birthday Banner Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311007",
+      "name": "Happy Birthday Banner (Black & Gold) by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199311021",
+      "name": "Happy Birthday Banner - Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310994",
+      "name": "Happy Birthday Banner by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310949",
+      "name": "Birthday Girl Sash & Headband Set by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310932",
+      "name": "Butterfly Happy Birthday Banner by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310925",
+      "name": "Mermaid Theme Happy Birthday Banner by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310918",
+      "name": "Unicorn Theme Happy Birthday Banner by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310901",
+      "name": "Shanya Hair Bun Scrunchie (Black)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 40,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310826",
+      "name": "Happy Birthday Foil Balloons (Polka Hearts) by Shanya",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310819",
+      "name": "Shanya Mini Flower Hair Claw Clip Set (Colour May Vary)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310567",
+      "name": "Shanya Floral Claw Clip (Colour May Vary)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310796",
+      "name": "Shanya Flower Design with Rhinestones Claw Clip (Assorted)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310581",
+      "name": "Shanya Matte Finish Arch Claw Clip (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310703",
+      "name": "Shanya Claw Clip (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310697",
+      "name": "Shanya Floral Claw Clip (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310727",
+      "name": "Shanya Crystal Shaped Adhesive Wall Hooks",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310611",
+      "name": "Shanya Self-Adhesive Wall Hooks Transparent",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310390",
+      "name": "Shanya Scented Artificial Gajra Set (White & Red)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310345",
+      "name": "Shanya Premium Matte Mini Claw Clip (Colour May Vary)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310284",
+      "name": "Shanya Hair Claw Clip - Pack of 8 (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310277",
+      "name": "Shanya Wave Design Hair Claw Clip (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310291",
+      "name": "Shanya Matte Finish Hair Claw Clip (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310253",
+      "name": "Shanya Bow Tie Design Claw Clip (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310239",
+      "name": "Shanya Matte Finish Premium Claw Clip (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310246",
+      "name": "Shanya Flower Leaf Claw Clip (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310260",
+      "name": "Shanya Flower Claw Clip (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 12,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310192",
+      "name": "Shanya Shoe Cleaning Wipes",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310178",
+      "name": "Shanya Shoe Cleaning Wipes",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310208",
+      "name": "Shanya Soap Dispenser with Hand Wash & Scrub Holder (Plastic)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310215",
+      "name": "Shanya Multi-Functional Floor Wiper",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310185",
+      "name": "Shanya Analog Wall Clock (White)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310123",
+      "name": "Shanya Self-Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310017",
+      "name": "Shanya Adhesive Wall Hooks (Stainless Steel, Transparent)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310130",
+      "name": "Shanya Anti-Skid Baking Mat (Silicone)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310116",
+      "name": "Shanya Classic 2-Fold Manual Button Umbrella (Black)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310093",
+      "name": "Shanya Nylon Cloth Rope with Clips (Multicolour)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310109",
+      "name": "Shanya 3-Fold Windproof Compact Umbrella (Black)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310079",
+      "name": "Shanya Self Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310055",
+      "name": "Shanya Ice Tray Set (Silicone)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310031",
+      "name": "Shanya Ice Tray (Silicone)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199310000",
+      "name": "Shanya Adhesive Wall Hooks Transparent (Stainless Steel, Transparent)",
+      "comboSizes": [],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313285",
+      "name": "6PC Silver Hook",
+      "comboSizes": [
+        2
+      ],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 15,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313292",
+      "name": "6PC Green Hook",
+      "comboSizes": [
+        2
+      ],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 15,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313353",
+      "name": "Matte Black U Hook",
+      "comboSizes": [
+        5
+      ],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313360",
+      "name": "Matte Silver U Hook",
+      "comboSizes": [
+        5
+      ],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313377",
+      "name": "Matte Silver Hook",
+      "comboSizes": [
+        2,
+        4
+      ],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313384",
+      "name": "Matte Black Hook",
+      "comboSizes": [
+        2,
+        4
+      ],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313414",
+      "name": "U Transparent Hook",
+      "comboSizes": [
+        10,
+        15,
+        20
+      ],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": 1.7,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313421",
+      "name": "S Transparent Hook",
+      "comboSizes": [
+        10,
+        15,
+        20
+      ],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313438",
+      "name": "Cloth Rope",
+      "comboSizes": [
+        2
+      ],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313445",
+      "name": "Bathroom Shelf Black & White",
+      "comboSizes": [
+        2
+      ],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313452",
+      "name": "Plastic Oil Dispenser",
+      "comboSizes": [
+        2
+      ],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313469",
+      "name": "Silicone Baking Mat",
+      "comboSizes": [
+        2
+      ],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313483",
+      "name": "Shoe Cleaning Wipes",
+      "comboSizes": [
+        2
+      ],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313490",
+      "name": "Ice Cube Tray Hexagonal",
+      "comboSizes": [
+        2
+      ],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    },
+    {
+      "ean": "8906199313506",
+      "name": "Ice Cube Tray Circle",
+      "comboSizes": [
+        2
+      ],
+      "barcodes": [],
+      "reorderLevel": 0,
+      "sellingPrice": null,
+      "purchasePrice": null,
+      "imageUrl": null
+    }
+  ],
+  "users": [
+    {
+      "id": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "username": "admin",
+      "name": "Administrator",
+      "role": "admin",
+      "passwordHash": "0971b29e58751da6c6c6d55c45f206cd:eeb020f89a8bc78db302abd837f268d01e6bc9a52387f3d9dd1f6bbb08389984f9329f5edef8b3c0aa748aac7fc178db6b29a85f65e137896c2aeb4c0ebc8707",
+      "active": true,
+      "createdAt": "2026-06-16T08:11:44.734Z"
+    },
+    {
+      "id": "0df01930-4868-46a5-8db2-d102701f01b6",
+      "username": "manager",
+      "name": "Manager",
+      "role": "staff",
+      "passwordHash": "b261bcb05a30a4da41a5e0cec6377e60:b33fdad1e139d4b1f783da79732c524490627ffa5f95ef1812af6403646d0f23ed32456e38da3b3fb34439f20a58b60f7ea16d229096065384ab0df3280da5b8",
+      "active": false,
+      "createdAt": "2026-06-16T09:47:30.255Z"
+    },
+    {
+      "id": "213a1a27-549b-48ad-aaab-bb287c5ec9ed",
+      "username": "staff",
+      "name": "Staff",
+      "role": "staff",
+      "passwordHash": "4ca4d3306bb6b63a759fc6981d1a5cdb:6fb1b29243bb9c590c223ae9d6e45bb44ba63eb79d0820cfd6fb5b8942507a2cb11c707ba902f11b2c053127e49354ac8f013d7204387a298356f87464910162",
+      "active": true,
+      "createdAt": "2026-06-16T09:47:30.418Z"
+    },
+    {
+      "id": "c40afacc-ae5d-47c4-99bf-798b7d76d962",
+      "username": "manger",
+      "name": "rakesh",
+      "role": "staff",
+      "passwordHash": "e716ff73ad6f420df4920ac4cc5998c3:56e0c36cb186c7acf3229736741e0ebb7b8bdb02928139f40dc1abb26e3bfbf299b68baea864a12e64c96582e6d519f57a92a520a031cf6616e0825c08f22288",
+      "active": true,
+      "createdAt": "2026-06-17T08:54:33.508Z"
+    }
+  ],
+  "sessions": [
+    {
+      "token": "5242043ed95850b4de10099567d310ddcb671d228cf714f048078f828f809914",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-18T11:27:27.941Z",
+      "expiresAt": "2026-06-25T11:27:27.941Z"
+    },
+    {
+      "token": "7fe3bd517ebdba248d1b0dc25c6764a29f4363e2c486a1b1ecfef05dc76dd952",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-18T11:27:37.763Z",
+      "expiresAt": "2026-06-25T11:27:37.763Z"
+    },
+    {
+      "token": "1ece565b4881d97d4de6ca3c8e2e05dec7bef5143e82c8481f03d3903445c1ef",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-18T11:50:23.312Z",
+      "expiresAt": "2026-06-25T11:50:23.312Z"
+    },
+    {
+      "token": "e8ff1515ec007d64ee5bd62fe4dd2743a6f0244ff5476bad07485ccd3614eaac",
+      "userId": "213a1a27-549b-48ad-aaab-bb287c5ec9ed",
+      "createdAt": "2026-06-18T11:51:05.537Z",
+      "expiresAt": "2026-06-25T11:51:05.537Z"
+    },
+    {
+      "token": "4eb810fbe2905b25abafd4b36b2a801a6a18844cc2c63d523d52d4e330c63a34",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-19T08:25:29.829Z",
+      "expiresAt": "2026-06-26T08:25:29.829Z"
+    },
+    {
+      "token": "8145e4179917eabbeee1d558b47ef69c0d2bcea6de17506a51eb2547e20dc4f3",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-19T08:25:38.698Z",
+      "expiresAt": "2026-06-26T08:25:38.698Z"
+    },
+    {
+      "token": "57dfae07dc5d080d36b3d870096bde74a28ae7cf2f6ee690c8493ffcb37cf752",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-19T08:55:02.258Z",
+      "expiresAt": "2026-06-26T08:55:02.258Z"
+    },
+    {
+      "token": "fbe6bc07727bfab21a71900ad3998c90ba3fe09473b7401fb805aca8c5e171ac",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-19T09:00:19.973Z",
+      "expiresAt": "2026-06-26T09:00:19.973Z"
+    },
+    {
+      "token": "54be2b59fc6de40ebb589fe1f403dcdf1169384eec651ff87032efe4710eec0b",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-19T15:39:19.237Z",
+      "expiresAt": "2026-06-26T15:39:19.237Z"
+    },
+    {
+      "token": "f238ad5b97091d743c21ffc0eb4ea7b32721ff9af0f68dbe2e0718e949b89266",
+      "userId": "213a1a27-549b-48ad-aaab-bb287c5ec9ed",
+      "createdAt": "2026-06-20T07:50:06.996Z",
+      "expiresAt": "2026-06-27T07:50:06.996Z"
+    },
+    {
+      "token": "a2ea870d198dee0fd4f0c3babdb33db3215f0384b172d308d8418c63f313e17b",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T08:32:47.398Z",
+      "expiresAt": "2026-06-27T08:32:47.398Z"
+    },
+    {
+      "token": "d4268fefc2380fa76612868d5b328a701d1029871f67e9e667889d613982beaf",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T08:33:22.411Z",
+      "expiresAt": "2026-06-27T08:33:22.411Z"
+    },
+    {
+      "token": "0e6896f74e60c4ebc36b26004f362b539d34c971705df824daa04ab6a60548b2",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T08:34:39.590Z",
+      "expiresAt": "2026-06-27T08:34:39.590Z"
+    },
+    {
+      "token": "d0c9a9e6c8f4282249b7b3e34f8474a61750e659110cbbc95c46697b6d34406b",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T08:35:11.818Z",
+      "expiresAt": "2026-06-27T08:35:11.818Z"
+    },
+    {
+      "token": "0856486eb0b270ba3facf6c0c62743efbd4a7a271fe8a84e1b01906f20bf6930",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T08:35:25.465Z",
+      "expiresAt": "2026-06-27T08:35:25.465Z"
+    },
+    {
+      "token": "816701bef797f174307a8665e05a89f4468c5b7b6377318b796410038f246c8f",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T08:36:49.997Z",
+      "expiresAt": "2026-06-27T08:36:49.997Z"
+    },
+    {
+      "token": "653820fdd7760303880c03907d25f84cf73a5651678e74f57452a9009c211e10",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T09:23:41.117Z",
+      "expiresAt": "2026-06-27T09:23:41.117Z"
+    },
+    {
+      "token": "6049c8cafd2f8e679316b98add86294c207d3aae19c5676a5e37bf73e1f48203",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T09:24:04.808Z",
+      "expiresAt": "2026-06-27T09:24:04.808Z"
+    },
+    {
+      "token": "e612f14e141b065ac4b0d67dfc26f9a8f826d321f8058c2a9c9cf4502bb54196",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T09:32:37.739Z",
+      "expiresAt": "2026-06-27T09:32:37.739Z"
+    },
+    {
+      "token": "361114082109c3bfdb987693399d545e4e705f68365ef332a7f5deda1135e32f",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T09:44:44.059Z",
+      "expiresAt": "2026-06-27T09:44:44.059Z"
+    },
+    {
+      "token": "ef758c85a1c0221b0492dcc080334f5f82f95bd91d2b2d627091aabdb6109e8d",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T09:45:20.023Z",
+      "expiresAt": "2026-06-27T09:45:20.023Z"
+    },
+    {
+      "token": "74349f311eae7f2d49fed0d5d8adbbe1a509f2673092df64cb669acc67d8406d",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T09:50:22.723Z",
+      "expiresAt": "2026-06-27T09:50:22.723Z"
+    },
+    {
+      "token": "73f5498057d066c12e787f1a340a0d3a791324c7dccdbf359091098beb56114e",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T10:01:56.325Z",
+      "expiresAt": "2026-06-27T10:01:56.325Z"
+    },
+    {
+      "token": "ca67092224e91b8ce5e13e0c0ab7c4ecb96473f1d1173749203ce9e7447a41a0",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T10:02:37.029Z",
+      "expiresAt": "2026-06-27T10:02:37.029Z"
+    },
+    {
+      "token": "d1544945ea8ac3cd143a483b9dc5480bca8588c249c1edd58fe470cfaacde5fc",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T10:41:35.198Z",
+      "expiresAt": "2026-06-27T10:41:35.198Z"
+    },
+    {
+      "token": "b1c3a315f0d8258fcef821ef14211349be09f3d4e2d83c2a24a79e393ca8c8b5",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T10:48:26.751Z",
+      "expiresAt": "2026-06-27T10:48:26.751Z"
+    },
+    {
+      "token": "fa6b753c0dddea28a1795149e128e54fc13719a3ee11c10f66c066991a719a6d",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T11:29:55.083Z",
+      "expiresAt": "2026-06-27T11:29:55.083Z"
+    },
+    {
+      "token": "a7eb6d876c8d471d9cc7ca489595ae788c26d1f19b710cf2926af089dbc4880a",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T11:33:27.379Z",
+      "expiresAt": "2026-06-27T11:33:27.379Z"
+    },
+    {
+      "token": "0e98584509a8af30048c8c9e735237fc5b6bc28ff638d7f11eb23ce365a46f72",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T11:34:16.263Z",
+      "expiresAt": "2026-06-27T11:34:16.263Z"
+    },
+    {
+      "token": "2eebcaa4bbce0e1100dc9509a77d0978c1b9c2c3ba401f7991c60b6101178d98",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T11:56:48.593Z",
+      "expiresAt": "2026-06-27T11:56:48.593Z"
+    },
+    {
+      "token": "bb9fed5124ee2698705e2f0f47c6240ea01eb97fae30c1b333c1c5bc67685f0b",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T11:57:20.338Z",
+      "expiresAt": "2026-06-27T11:57:20.338Z"
+    },
+    {
+      "token": "53565aeadd5d7a1b23e5cc88e46a1e099f974ce8d7bb797b3780a563a15081ce",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T12:07:26.076Z",
+      "expiresAt": "2026-06-27T12:07:26.076Z"
+    },
+    {
+      "token": "d17a9ec4f87a19dbc0a4ca975af8d18b357270b9a40bcaac1a62facd6c6cd8a0",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T12:09:02.808Z",
+      "expiresAt": "2026-06-27T12:09:02.808Z"
+    },
+    {
+      "token": "0bef1aa8ce3618999c0f27b2c47b1d721022f3fecaa99d0d8870ba3590dd9b60",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T12:15:56.121Z",
+      "expiresAt": "2026-06-27T12:15:56.121Z"
+    },
+    {
+      "token": "9e9e34620ee02aeb09c2c61f598db204d976275f8f8f3e92050f7fba7bf21193",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T12:19:17.550Z",
+      "expiresAt": "2026-06-27T12:19:17.550Z"
+    },
+    {
+      "token": "518ccbcb99acc67f6975fd6d74324b0444c67d782e1077d3d5413429098a8549",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T12:32:05.781Z",
+      "expiresAt": "2026-06-27T12:32:05.781Z"
+    },
+    {
+      "token": "1d597e1199ac38aaec34b03958bd6f78963c44d0373ffa66704713c28e68874c",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-20T12:38:24.763Z",
+      "expiresAt": "2026-06-27T12:38:24.763Z"
+    },
+    {
+      "token": "86a28c48c086bd81d62be077fb02f75c439a50c4598c2f7f37fd3d6470488957",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-21T15:06:14.994Z",
+      "expiresAt": "2026-06-28T15:06:14.994Z"
+    },
+    {
+      "token": "57b4bf886e9af93411b6391380c8bdddd111466f1d2160790c3985c900f28894",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-22T07:05:19.563Z",
+      "expiresAt": "2026-06-29T07:05:19.563Z"
+    },
+    {
+      "token": "4c407d5933c991b4c0e02a18bc41855600ecee3ef4622183ff29cc6621de97d8",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-22T07:17:10.551Z",
+      "expiresAt": "2026-06-29T07:17:10.551Z"
+    },
+    {
+      "token": "c8b37931c7f196e9c3472d3ead44e09a601b46cc160d6b30692a27bb062c65ec",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-22T09:40:50.855Z",
+      "expiresAt": "2026-06-29T09:40:50.855Z"
+    },
+    {
+      "token": "bde9d1f6a103cc43056c0b8bf34b5355c9db561055f5ad03d70becebce62bbdd",
+      "userId": "7218fb51-103a-441f-96b6-fd94e03b31c8",
+      "createdAt": "2026-06-22T09:41:05.906Z",
+      "expiresAt": "2026-06-29T09:41:05.906Z"
+    },
+    {
+      "token": "2667145f4443ce5b02e88e5497929b4622e34f55a73ae299c1bf98d38478917c",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-22T09:41:42.888Z",
+      "expiresAt": "2026-06-29T09:41:42.888Z"
+    },
+    {
+      "token": "63e3e326d0664e5cf47b4c03de440c0a969d41875813f1ebb97a054c7d190c1f",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-22T10:04:55.359Z",
+      "expiresAt": "2026-06-29T10:04:55.359Z"
+    },
+    {
+      "token": "bd1336c4544d63a3e97e01d66c37839e20a8f4aef7307b14b360a413f55c650d",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-22T10:18:45.042Z",
+      "expiresAt": "2026-06-29T10:18:45.042Z"
+    },
+    {
+      "token": "5d199454c2be5bf97a92751910697594f06dd28371fe20e4514cf40e9c6f585b",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-22T11:26:54.634Z",
+      "expiresAt": "2026-06-29T11:26:54.634Z"
+    },
+    {
+      "token": "af106dc9b09823e9e7a1e8549da681dd1ada05427785b0920156c6c91dc1247d",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-22T12:31:54.544Z",
+      "expiresAt": "2026-06-29T12:31:54.544Z"
+    }
+  ],
+  "vendors": [
+    {
+      "id": "1996e48b-7b1a-46f9-b5b9-0c496bca42ad",
+      "name": "BESTZONE BK LLP",
+      "createdAt": "2026-06-19T09:04:14.351Z"
+    },
+    {
+      "id": "64732965-50b6-4e2e-bb20-27812fd9f326",
+      "name": "Impression Jewllery",
+      "createdAt": "2026-06-20T15:28:42.057Z"
+    },
+    {
+      "id": "f0dbb011-51dc-49ef-a36a-05bdb7ff4081",
+      "name": "MANAV CREATIONS",
+      "createdAt": "2026-06-21T15:20:14.764Z"
+    },
+    {
+      "id": "ab06e0ad-f40f-48e9-b4cd-ae1e958259f9",
+      "name": "kali Beauty",
+      "createdAt": "2026-06-21T15:24:01.717Z"
+    },
+    {
+      "id": "b6af61ec-f384-4c8f-8c7a-0bece856c8f2",
+      "name": "BRITE INTERNATIONAL",
+      "createdAt": "2026-06-21T15:36:38.156Z"
+    },
+    {
+      "id": "be164463-2398-42d6-aee4-54e22989859b",
+      "name": "Utking Surat",
+      "createdAt": "2026-06-22T09:40:58.101Z"
+    }
+  ],
+  "customers": [
+    {
+      "id": "53bfc829-16cd-4f97-916b-80995fbc25ec",
+      "name": "Sopify",
+      "createdAt": "2026-06-17T07:20:41.576Z",
+      "phone": "07369954206",
+      "gstin": "gst45678943hhhggh",
+      "address": "Hazaribagh",
+      "note": "testing"
+    },
+    {
+      "id": "adc2ea46-bfec-4268-b595-2e459a873f7a",
+      "name": "tee",
+      "createdAt": "2026-06-18T08:54:11.235Z"
+    },
+    {
+      "id": "8ae935eb-4f92-4cda-bfc0-4db3e1d5ea4f",
+      "name": "blinkit",
+      "createdAt": "2026-06-19T08:58:53.569Z"
+    },
+    {
+      "id": "9682c4d7-66ff-4908-ac83-6ec4448381e1",
+      "name": "instamart",
+      "createdAt": "2026-06-19T10:16:51.152Z"
+    },
+    {
+      "id": "b4ae3353-90b0-4a62-ad16-e90e49888499",
+      "name": "etred",
+      "createdAt": "2026-06-19T11:59:16.089Z"
+    }
+  ],
+  "stock": [],
+  "receipts": [],
+  "dispatches": [],
+  "comboDispatches": [],
+  "adjustments": [],
+  "transfers": [],
+  "approvals": [
+    {
+      "id": "431e64c3-60ca-42ae-aacf-75b391a151c0",
+      "type": "receive",
+      "warehouseId": "wh-mumbai",
+      "payload": {
+        "ean": "96325874196325",
+        "quantity": 1000,
+        "name": null,
+        "comboSizes": null,
+        "vendorName": "Samosha",
+        "bill": "2026-100",
+        "date": "2026-06-17",
+        "purchasePrice": 10
+      },
+      "status": "rejected",
+      "requestedBy": "213a1a27-549b-48ad-aaab-bb287c5ec9ed",
+      "requestedByName": "Staff",
+      "createdAt": "2026-06-17T07:15:47.861Z",
+      "decidedBy": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "decidedByName": "Administrator",
+      "decidedAt": "2026-06-17T07:17:20.961Z"
+    }
+  ],
+  "combos": [],
+  "purchaseOrders": []
+}
