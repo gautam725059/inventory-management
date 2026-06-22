@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { listCatalog, deleteProducts } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, hasRole } from "@/lib/auth";
 import { toCsv, csvResponse } from "@/lib/csv";
 
 export async function GET(request: Request) {
@@ -36,7 +36,9 @@ export async function GET(request: Request) {
 /** Bulk-delete products by EAN. Body: { eans: string[] }. */
 export async function DELETE(request: Request) {
   const me = await getCurrentUser(request);
-  if (!me) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+  if (!hasRole(me, "admin")) {
+    return NextResponse.json({ error: "Admin only." }, { status: 403 });
+  }
 
   let body: unknown;
   try {

@@ -473,6 +473,15 @@
       "passwordHash": "496874a0043e6f3e0c1dbc8ce333e2f7:3f7c7a47a949172ec3210f3d09277be0fb72510bdf608bbf5c1ed6f70f74d8b0e5eaada311ad54416941053ccfc5ca53137b1f9d4c7fc300fb2a329f8b09e46e",
       "active": true,
       "createdAt": "2026-06-16T09:47:30.418Z"
+    },
+    {
+      "id": "4504202d-553e-4940-a1a4-b9f8c2f56335",
+      "username": "ztemp_staff",
+      "name": "Temp",
+      "role": "staff",
+      "passwordHash": "33ed05c8933e7dafe0a3b7339ea36476:959c6ed96ef19a4f6e3a69e796fa63a8198fdad299d86708533f22601365988d1194221e6ce5ed655f46972d65b44d461ea2472bd6948caf2ec76ddf82d885ba",
+      "active": false,
+      "createdAt": "2026-06-22T06:26:30.452Z"
     }
   ],
   "sessions": [
@@ -535,6 +544,30 @@
       "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
       "createdAt": "2026-06-19T11:29:20.080Z",
       "expiresAt": "2026-06-26T11:29:20.080Z"
+    },
+    {
+      "token": "09feeb1b2208d087754044082b5317ac97a7e103842cee3c13b9c81def828d1e",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-22T06:14:20.523Z",
+      "expiresAt": "2026-06-29T06:14:20.523Z"
+    },
+    {
+      "token": "bedabd7214f8a9ba1eb90e3a1fc53d79ff557c9d1b332df639cdda7c7f3ca1f5",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-22T06:15:06.411Z",
+      "expiresAt": "2026-06-29T06:15:06.411Z"
+    },
+    {
+      "token": "527fbcde502426e8a5f8ff18a7134e8812a0ec2a4ccee2728f206a8d081711ea",
+      "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+      "createdAt": "2026-06-22T06:26:30.286Z",
+      "expiresAt": "2026-06-29T06:26:30.286Z"
+    },
+    {
+      "token": "e9726754668cd37184588783f0ba2b018b6e66a62fd76bec0e95c1e36f2613fd",
+      "userId": "4504202d-553e-4940-a1a4-b9f8c2f56335",
+      "createdAt": "2026-06-22T06:26:30.543Z",
+      "expiresAt": "2026-06-29T06:26:30.543Z"
     }
   ],
   "vendors": [
@@ -548,18 +581,7 @@
     }
   ],
   "customers": [],
-  "stock": [
-    {
-      "warehouseId": "wh-delhi",
-      "ean": "5012345678900",
-      "quantity": 10123
-    },
-    {
-      "warehouseId": "wh-bengaluru",
-      "ean": "9988224455667",
-      "quantity": 8945
-    }
-  ],
+  "stock": [],
   "receipts": [
     {
       "id": "19fd0e9f-07c9-46fa-ba8d-986a48c5f6f9",

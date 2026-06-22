@@ -15,6 +15,18 @@ function formatDate(iso: string): string {
   });
 }
 
+/** Format a "YYYY-MM-DD" document date (no timezone shift). */
+function formatDocDate(d?: string): string {
+  if (!d) return "—";
+  const [y, m, day] = d.split("-").map(Number);
+  if (!y || !m || !day) return d;
+  return new Date(y, m - 1, day).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 const TYPE_BADGE: Record<Movement["type"], { label: string; cls: string }> = {
   in: { label: "Stock In", cls: "bg-emerald-100 text-emerald-700" },
   out: { label: "Stock Out", cls: "bg-brand-100 text-brand-700" },
@@ -53,6 +65,12 @@ export default function HistoryPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+
+  // Pre-fill the filter from ?ean=… (e.g. when arriving from the Catalog).
+  useEffect(() => {
+    const ean = new URLSearchParams(window.location.search).get("ean");
+    if (ean) setQuery(ean);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -145,6 +163,7 @@ export default function HistoryPage({
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
                 <th className="px-4 py-3 font-medium">Date</th>
+                <th className="px-4 py-3 font-medium">Recorded</th>
                 <th className="px-4 py-3 font-medium">Type</th>
                 <th className="px-4 py-3 font-medium">Product</th>
                 <th className="px-4 py-3 font-medium">Detail</th>
@@ -157,6 +176,9 @@ export default function HistoryPage({
                   key={m.id}
                   className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
                 >
+                  <td className="whitespace-nowrap px-4 py-3 font-medium text-slate-700">
+                    {formatDocDate(m.date)}
+                  </td>
                   <td className="whitespace-nowrap px-4 py-3 text-slate-500">
                     {formatDate(m.createdAt)}
                   </td>

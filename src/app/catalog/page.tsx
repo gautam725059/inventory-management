@@ -4,9 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import ImageEditor from "@/components/ImageEditor";
 import BarcodeEditor from "@/components/BarcodeEditor";
+import { useMe } from "@/lib/useMe";
 import type { ProductCatalogEntry } from "@/lib/types";
 
 export default function CatalogPage() {
+  const { me } = useMe();
+  const isAdmin = me?.role === "admin";
   const [products, setProducts] = useState<ProductCatalogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -144,7 +147,7 @@ export default function CatalogPage() {
         className="mb-5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
       />
 
-      {selected.size > 0 && (
+      {isAdmin && selected.size > 0 && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
           <span className="text-sm font-medium text-red-700">
             {selected.size} product{selected.size === 1 ? "" : "s"} selected
@@ -180,15 +183,17 @@ export default function CatalogPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
-                <th className="px-4 py-3">
-                  <input
-                    type="checkbox"
-                    checked={allFilteredSelected}
-                    onChange={toggleAll}
-                    aria-label="Select all"
-                    className="h-4 w-4 cursor-pointer accent-brand-600 align-middle"
-                  />
-                </th>
+                {isAdmin && (
+                  <th className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={allFilteredSelected}
+                      onChange={toggleAll}
+                      aria-label="Select all"
+                      className="h-4 w-4 cursor-pointer accent-brand-600 align-middle"
+                    />
+                  </th>
+                )}
                 <th className="px-4 py-3 font-medium">Image</th>
                 <th className="px-4 py-3 font-medium">Product</th>
                 {warehouseNames.map((n) => (
@@ -218,37 +223,56 @@ export default function CatalogPage() {
                     selected.has(p.ean) ? "bg-brand-50/50" : ""
                   }`}
                 >
+                  {isAdmin && (
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(p.ean)}
+                        onChange={() => toggle(p.ean)}
+                        aria-label={`Select ${p.name}`}
+                        className="h-4 w-4 cursor-pointer accent-brand-600 align-middle"
+                      />
+                    </td>
+                  )}
                   <td className="px-4 py-3">
-                    <input
-                      type="checkbox"
-                      checked={selected.has(p.ean)}
-                      onChange={() => toggle(p.ean)}
-                      aria-label={`Select ${p.name}`}
-                      className="h-4 w-4 cursor-pointer accent-brand-600 align-middle"
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => setEditingEan(p.ean)}
-                      title="Add or change image"
-                      className="group relative block h-12 w-12 overflow-hidden rounded-lg border border-slate-200 bg-slate-50"
-                    >
-                      {p.imageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={p.imageUrl}
-                          alt={p.name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <span className="flex h-full w-full items-center justify-center text-lg text-slate-300">
-                          📷
+                    {isAdmin ? (
+                      <button
+                        onClick={() => setEditingEan(p.ean)}
+                        title="Add or change image"
+                        className="group relative block h-12 w-12 overflow-hidden rounded-lg border border-slate-200 bg-slate-50"
+                      >
+                        {p.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={p.imageUrl}
+                            alt={p.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="flex h-full w-full items-center justify-center text-lg text-slate-300">
+                            📷
+                          </span>
+                        )}
+                        <span className="absolute inset-0 hidden items-center justify-center bg-slate-900/50 text-xs font-medium text-white group-hover:flex">
+                          Edit
                         </span>
-                      )}
-                      <span className="absolute inset-0 hidden items-center justify-center bg-slate-900/50 text-xs font-medium text-white group-hover:flex">
-                        Edit
-                      </span>
-                    </button>
+                      </button>
+                    ) : (
+                      <div className="block h-12 w-12 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                        {p.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={p.imageUrl}
+                            alt={p.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="flex h-full w-full items-center justify-center text-lg text-slate-300">
+                            📷
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -268,19 +292,31 @@ export default function CatalogPage() {
                         </span>
                       )}
                     </div>
-                    <button
-                      onClick={() => setBarcodesEan(p.ean)}
-                      className="mt-1 text-xs font-medium text-brand-600 hover:underline"
-                    >
-                      🏷 Barcodes
-                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={() => setBarcodesEan(p.ean)}
+                        className="mt-1 text-xs font-medium text-brand-600 hover:underline"
+                      >
+                        🏷 Barcodes
+                      </button>
+                    )}
                   </td>
                   {p.byWarehouse.map((b) => (
                     <td
                       key={b.warehouseId}
-                      className="px-4 py-3 text-right tabular-nums text-slate-600"
+                      className="px-4 py-3 text-right tabular-nums"
                     >
-                      {b.quantity.toLocaleString()}
+                      {b.quantity > 0 ? (
+                        <Link
+                          href={`/warehouse/${b.warehouseId}/history?ean=${p.ean}`}
+                          title={`View ${b.warehouseName} history for this product`}
+                          className="font-medium text-brand-600 hover:underline"
+                        >
+                          {b.quantity.toLocaleString()}
+                        </Link>
+                      ) : (
+                        <span className="text-slate-400">0</span>
+                      )}
                     </td>
                   ))}
                   <td className="px-4 py-3 text-right font-bold tabular-nums text-slate-900">
