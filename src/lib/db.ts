@@ -47,6 +47,10 @@ import type {
   ComboDispatch,
   ComboDispatchComponent,
   ComboDispatchInput,
+  PurchaseOrder,
+  POLineItem,
+  POLineInput,
+  PurchaseOrderInput,
 } from "./types";
 
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -75,6 +79,7 @@ function emptyStore(): Store {
     transfers: [],
     approvals: [],
     combos: [],
+    purchaseOrders: [],
   };
 }
 
@@ -150,6 +155,9 @@ function normalizeStore(parsed: Partial<Store>): Store {
               )
             : [],
         }))
+      : [],
+    purchaseOrders: Array.isArray(parsed.purchaseOrders)
+      ? parsed.purchaseOrders
       : [],
   };
 }
@@ -1479,6 +1487,152 @@ export async function dispatchCombo(
     };
     store.comboDispatches.push(record);
     return [store, record];
+  });
+}
+
+// ---- Purchase orders --------------------------------------------------------
+
+function round2(n: number): number {
+  return Math.round((n + Number.EPSILON) * 100) / 100;
+}
+
+/** Compute the carton/qty/tax totals for one PO line from its raw inputs. */
+function computePOLine(input: POLineInput): POLineItem {
+  const cartonSize = Math.max(0, Math.floor(Number(input.cartonSize) || 0));
+  const cartonQty = Math.max(0, Math.floor(Number(input.cartonQty) || 0));
+  const totalQty = cartonSize * cartonQty;
+  const rate = Math.max(0, Number(input.rate) || 0);
+  const taxRate = Math.max(0, Number(input.taxRate) || 0);
+  const taxAmount = round2((rate * taxRate) / 100);
+  const amount = round2(rate + taxAmount);
+  const totalAmount = round2(amount * totalQty);
+  return {
+    hsnCode: input.hsnCode?.trim() || undefined,
+    ean: input.ean.trim(),
+    productCode: input.productCode?.trim() || undefined,
+    description: input.description.trim(),
+    cartonSize,
+    cartonQty,
+    totalQty,
+    rate,
+    taxRate,
+    taxAmount,
+    amount,
+    totalAmount,
+  };
+}
+
+/** Next sequential PO number, e.g. "PO-0001". */
+function nextPONumber(store: Store): string {
+  let max = 0;
+  for (const po of store.purchaseOrders) {
+    const m = /(\d+)\s*$/.exec(po.poNumber || "");
+    if (m) max = Math.max(max, Number(m[1]));
+  }
+  return `PO-${String(max + 1).padStart(4, "0")}`;
+}
+
+type POResult =
+  | { ok: true; po: PurchaseOrder }
+  | { ok: false; error: string };
+
+export async function listPurchaseOrders(): Promise<PurchaseOrder[]> {
+  const store = await readStore();
+  return [...store.purchaseOrders].sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt)
+  );
+}
+
+export async function getPurchaseOrder(
+  id: string
+): Promise<PurchaseOrder | undefined> {
+  const store = await readStore();
+  return store.purchaseOrders.find((p) => p.id === id);
+}
+
+/** Create a purchase order. Admins get a "confirmed" PO directly; everyone else
+ *  gets a "pending" PO awaiting admin approval. */
+export async function createPurchaseOrder(
+  input: PurchaseOrderInput,
+  by: { id: string; name: string },
+  isAdmin: boolean
+): Promise<POResult> {
+  return mutate<POResult>((store) => {
+    const vendorName =
+      typeof input.vendorName === "string" ? input.vendorName.trim() : "";
+    if (!vendorName) return [store, { ok: false, error: "Vendor name is required." }];
+    const date = typeof input.date === "string" ? input.date.trim() : "";
+    if (!date) return [store, { ok: false, error: "Date is required." }];
+
+    const rawItems = Array.isArray(input.items) ? input.items : [];
+    const items = rawItems
+      .map(computePOLine)
+      .filter((it) => it.ean && it.description && it.totalQty > 0);
+    if (items.length === 0) {
+      return [
+        store,
+        { ok: false, error: "Add at least one line with an EAN, description and quantity." },
+      ];
+    }
+
+    const warehouseId =
+      input.warehouseId && store.warehouses.some((w) => w.id === input.warehouseId)
+        ? input.warehouseId
+        : undefined;
+    const vendorId = upsertPartyByName(store.vendors, vendorName);
+    const grandTotal = round2(items.reduce((s, it) => s + it.totalAmount, 0));
+    const now = new Date().toISOString();
+
+    const po: PurchaseOrder = {
+      id: randomUUID(),
+      poNumber: nextPONumber(store),
+      date,
+      warehouseId,
+      vendorName,
+      vendorId,
+      invoiceNumber:
+        typeof input.invoiceNumber === "string"
+          ? input.invoiceNumber.trim() || undefined
+          : undefined,
+      items,
+      grandTotal,
+      status: isAdmin ? "confirmed" : "pending",
+      requestedBy: by.id,
+      requestedByName: by.name,
+      createdAt: now,
+      // Admin-created orders are confirmed immediately.
+      decidedBy: isAdmin ? by.id : undefined,
+      decidedByName: isAdmin ? by.name : undefined,
+      decidedAt: isAdmin ? now : undefined,
+    };
+    store.purchaseOrders.push(po);
+    return [store, { ok: true, po }];
+  });
+}
+
+/** Admin: approve (→ confirmed) or reject a pending purchase order. Returns the
+ *  updated PO, or null if not found / already decided. */
+export async function decidePurchaseOrder(
+  id: string,
+  action: "approve" | "reject",
+  decidedBy: { id: string; name: string }
+): Promise<PurchaseOrder | null> {
+  return mutate((store) => {
+    const po = store.purchaseOrders.find((p) => p.id === id);
+    if (!po || po.status !== "pending") return [store, null];
+    po.status = action === "approve" ? "confirmed" : "rejected";
+    po.decidedBy = decidedBy.id;
+    po.decidedByName = decidedBy.name;
+    po.decidedAt = new Date().toISOString();
+    return [store, po];
+  });
+}
+
+export async function deletePurchaseOrder(id: string): Promise<boolean> {
+  return mutate((store) => {
+    const before = store.purchaseOrders.length;
+    store.purchaseOrders = store.purchaseOrders.filter((p) => p.id !== id);
+    return [store, store.purchaseOrders.length !== before];
   });
 }
 

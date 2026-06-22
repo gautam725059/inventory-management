@@ -294,6 +294,67 @@ export interface ComboDispatchInput {
 }
 
 /** The whole persisted store. */
+// ---- Purchase Orders --------------------------------------------------------
+
+/** One line on a purchase order. Carton/qty/tax totals are computed on save. */
+export interface POLineItem {
+  hsnCode?: string;
+  ean: string; // Product UPC
+  productCode?: string;
+  description: string;
+  cartonSize: number; // pieces per carton
+  cartonQty: number; // number of cartons
+  totalQty: number; // cartonSize * cartonQty
+  rate: number; // price per piece (pre-tax)
+  taxRate: number; // %
+  taxAmount: number; // per-unit tax = rate * taxRate / 100
+  amount: number; // per-unit incl tax = rate + taxAmount
+  totalAmount: number; // amount * totalQty
+}
+
+/** A purchase order raised to a vendor. Staff orders need admin approval before
+ *  they are confirmed; admins create confirmed orders directly. Confirming does
+ *  NOT add stock — goods are received separately via Stock In when they arrive. */
+export interface PurchaseOrder {
+  id: string;
+  poNumber: string; // e.g. PO-0001
+  date: string; // YYYY-MM-DD
+  warehouseId?: string; // where goods will be received
+  vendorName: string;
+  vendorId?: string;
+  invoiceNumber?: string;
+  items: POLineItem[];
+  grandTotal: number;
+  status: "pending" | "confirmed" | "rejected";
+  requestedBy?: string;
+  requestedByName?: string;
+  decidedBy?: string;
+  decidedByName?: string;
+  createdAt: string;
+  decidedAt?: string;
+}
+
+/** A line item as submitted by the form (totals are derived server-side). */
+export interface POLineInput {
+  hsnCode?: string;
+  ean: string;
+  productCode?: string;
+  description: string;
+  cartonSize: number;
+  cartonQty: number;
+  rate: number;
+  taxRate: number;
+}
+
+/** Body accepted by the create-purchase-order endpoint. */
+export interface PurchaseOrderInput {
+  date: string;
+  warehouseId?: string;
+  vendorName: string;
+  invoiceNumber?: string;
+  items: POLineInput[];
+}
+
 export interface Store {
   users: User[];
   sessions: Session[];
@@ -309,6 +370,7 @@ export interface Store {
   transfers: Transfer[];
   approvals: Approval[];
   combos: Combo[];
+  purchaseOrders: PurchaseOrder[];
 }
 
 // ---- Computed / view shapes returned by the API -----------------------------
