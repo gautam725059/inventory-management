@@ -34,6 +34,9 @@ export default function AdminPage() {
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [users, setUsers] = useState<PublicUser[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [showAllProducts, setShowAllProducts] = useState(false);
+
+  const PRODUCT_PREVIEW = 4;
 
   const load = useCallback(async () => {
     setError(null);
@@ -376,12 +379,38 @@ export default function AdminPage() {
             No products yet.
           </div>
         ) : (
-          <ProductValueTable
-            products={valuation.products}
-            onSave={savePrice}
-            totalProductValue={valuation.totalProductValue}
-            totalPurchaseValue={valuation.totalPurchaseValue}
-          />
+          (() => {
+            // Show the products with the most inventory first.
+            const sorted = [...valuation.products].sort(
+              (a, b) => b.quantity - a.quantity
+            );
+            const shown = showAllProducts
+              ? sorted
+              : sorted.slice(0, PRODUCT_PREVIEW);
+            const hidden = sorted.length - shown.length;
+            return (
+              <>
+                <ProductValueTable
+                  products={shown}
+                  onSave={savePrice}
+                  totalProductValue={valuation.totalProductValue}
+                  totalPurchaseValue={valuation.totalPurchaseValue}
+                />
+                {sorted.length > PRODUCT_PREVIEW && (
+                  <div className="mt-3 text-center">
+                    <button
+                      onClick={() => setShowAllProducts((v) => !v)}
+                      className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-brand-600 shadow-sm transition hover:bg-slate-50"
+                    >
+                      {showAllProducts
+                        ? "Show fewer products"
+                        : `More products (${hidden} more)`}
+                    </button>
+                  </div>
+                )}
+              </>
+            );
+          })()
         )}
       </section>
 
