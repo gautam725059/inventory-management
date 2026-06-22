@@ -27,12 +27,18 @@ export async function POST(request: Request, { params }: Context) {
     );
   }
 
-  const result = await decideApproval(id, action, { id: me!.id, name: me!.name });
-  if (!result) {
-    return NextResponse.json(
-      { error: "Request not found or already decided." },
-      { status: 404 }
-    );
+  try {
+    const result = await decideApproval(id, action, { id: me!.id, name: me!.name });
+    if (!result) {
+      return NextResponse.json(
+        { error: "Request not found or already decided." },
+        { status: 404 }
+      );
+    }
+    return NextResponse.json(result);
+  } catch (err) {
+    // Applying the change failed (e.g. an adjustment would make stock negative).
+    const message = err instanceof Error ? err.message : "Failed to apply the request.";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
-  return NextResponse.json(result);
 }

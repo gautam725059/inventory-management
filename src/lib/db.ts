@@ -23,6 +23,7 @@ import type {
   DispatchInput,
   ProductUpdateInput,
   Approval,
+  AdjustPayload,
   Adjustment,
   Transfer,
   Vendor,
@@ -1000,7 +1001,7 @@ export async function getReports(from?: string, to?: string): Promise<Report> {
   };
 }
 
-// ---- Admin: stock-in approvals ----------------------------------------------
+// ---- Admin: approvals (stock-in & stock adjustments) ------------------------
 
 /** Queue a regular user's stock-in for admin approval (stock is not changed
  *  until approved). */
@@ -1015,6 +1016,29 @@ export async function createApproval(
       type: "receive",
       warehouseId,
       payload,
+      status: "pending",
+      requestedBy: requestedBy?.id,
+      requestedByName: requestedBy?.name,
+      createdAt: new Date().toISOString(),
+    };
+    store.approvals.push(approval);
+    return [store, approval];
+  });
+}
+
+/** Queue a regular user's stock adjustment for admin approval (stock is not
+ *  changed until approved). */
+export async function createAdjustApproval(
+  warehouseId: string,
+  adjustPayload: AdjustPayload,
+  requestedBy?: { id: string; name: string }
+): Promise<Approval> {
+  return mutate((store) => {
+    const approval: Approval = {
+      id: randomUUID(),
+      type: "adjust",
+      warehouseId,
+      adjustPayload,
       status: "pending",
       requestedBy: requestedBy?.id,
       requestedByName: requestedBy?.name,
@@ -1045,8 +1069,19 @@ export async function decideApproval(
   const approval = (await readStore()).approvals.find((a) => a.id === id);
   if (!approval || approval.status !== "pending") return null;
 
+  // Apply the change (each has its own mutate) before marking decided, so stock
+  // and status move together. If the apply throws (e.g. stock would go
+  // negative), it propagates and the approval stays pending.
   if (action === "approve") {
-    await receiveStock(approval.warehouseId, approval.payload);
+    const by = approval.requestedBy
+      ? { id: approval.requestedBy, name: approval.requestedByName ?? "" }
+      : undefined;
+    if (approval.type === "adjust" && approval.adjustPayload) {
+      const ap = approval.adjustPayload;
+      await adjustStock(approval.warehouseId, ap.ean, ap.delta, ap.reason, ap.note, by);
+    } else if (approval.payload) {
+      await receiveStock(approval.warehouseId, approval.payload);
+    }
   }
 
   return mutate((store) => {

@@ -95,6 +95,77 @@ export default function HistoryPage({
     );
   }, [movements, query]);
 
+  /** Download the currently-shown (filtered) movements as a CSV. When the list
+   *  is filtered to one product this is that single product's history. */
+  function downloadCsv() {
+    const TYPE_LABEL: Record<Movement["type"], string> = {
+      in: "Stock In",
+      out: "Stock Out",
+      adjust: "Adjustment",
+      "transfer-in": "Transfer In",
+      "transfer-out": "Transfer Out",
+      "combo-out": "Combo Out",
+    };
+    const headers = [
+      "Date",
+      "Recorded",
+      "Type",
+      "Product",
+      "EAN",
+      "Pieces",
+      "Invoice",
+      "Reference",
+      "Customer",
+      "Vendor",
+      "Bill",
+      "Reason / Counterparty",
+      "Note",
+      "By",
+    ];
+    const esc = (v: unknown) => {
+      const s = String(v ?? "");
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = filtered.map((m) => {
+      const dir =
+        m.type === "out" || m.type === "transfer-out" || m.type === "combo-out"
+          ? -1
+          : 1;
+      const signed = m.type === "adjust" ? m.quantity : dir * m.quantity;
+      return [
+        m.date ?? "",
+        m.createdAt,
+        TYPE_LABEL[m.type] ?? m.type,
+        m.name,
+        m.ean,
+        (signed >= 0 ? "+" : "") + signed,
+        m.invoiceNo ?? "",
+        m.referenceNo ?? "",
+        m.customerName ?? "",
+        m.vendorName ?? "",
+        m.bill ?? "",
+        m.reason ?? m.counterparty ?? "",
+        m.note ?? m.comboItems ?? "",
+        m.byName ?? "",
+      ]
+        .map(esc)
+        .join(",");
+    });
+    const csv = [headers.map(esc).join(","), ...lines].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const suffix = query.trim()
+      ? `-${query.trim().replace(/[^a-z0-9]+/gi, "_")}`
+      : "";
+    a.download = `movements-${id}${suffix}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="mx-auto max-w-5xl px-5 py-10">
       <Link
@@ -114,12 +185,12 @@ export default function HistoryPage({
           </p>
         </div>
         {movements.length > 0 && (
-          <a
-            href={`/api/warehouses/${id}/movements?format=csv`}
+          <button
+            onClick={downloadCsv}
             className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
           >
-            ⬇ Export CSV
-          </a>
+            ⬇ {query.trim() ? "Export this product" : "Export CSV"}
+          </button>
         )}
       </header>
 
@@ -141,7 +212,13 @@ export default function HistoryPage({
           {query.trim() && (
             <p className="mt-1.5 text-xs text-slate-500">
               Showing <strong className="text-slate-900">{filtered.length}</strong>{" "}
-              of {movements.length} movements for &ldquo;{query.trim()}&rdquo;.
+              of {movements.length} movements for &ldquo;{query.trim()}&rdquo;.{" "}
+              <button
+                onClick={() => setQuery("")}
+                className="font-medium text-brand-600 hover:underline"
+              >
+                Show all
+              </button>
             </p>
           )}
         </div>
@@ -174,7 +251,9 @@ export default function HistoryPage({
               {filtered.map((m) => (
                 <tr
                   key={m.id}
-                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
+                  onClick={() => setQuery(m.ean || m.name)}
+                  title="Click to show only this product's history"
+                  className="cursor-pointer border-b border-slate-100 last:border-0 hover:bg-slate-50"
                 >
                   <td className="whitespace-nowrap px-4 py-3 font-medium text-slate-700">
                     {formatDocDate(m.date)}

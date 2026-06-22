@@ -216,7 +216,7 @@ export default function AdminPage() {
       {/* Pending approvals */}
       <section className="mb-10">
         <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-slate-900">
-          Stock-in approvals
+          Approvals (stock-in &amp; adjustments)
           {pending.length > 0 && (
             <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
               {pending.length} pending
@@ -235,56 +235,94 @@ export default function AdminPage() {
                 <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
                   <th className="px-4 py-3 font-medium">Requested</th>
                   <th className="px-4 py-3 font-medium">By</th>
+                  <th className="px-4 py-3 font-medium">Type</th>
                   <th className="px-4 py-3 font-medium">Product / EAN</th>
                   <th className="px-4 py-3 text-right font-medium">Qty</th>
-                  <th className="px-4 py-3 font-medium">Vendor / Bill</th>
+                  <th className="px-4 py-3 font-medium">Details</th>
                   <th className="px-4 py-3 text-right font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {pending.map((a) => (
-                  <tr key={a.id} className="border-b border-slate-100 last:border-0">
-                    <td className="whitespace-nowrap px-4 py-3 text-slate-500">
-                      {formatDateTime(a.createdAt)}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">
-                      {a.requestedByName || "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-slate-900">
-                        {a.payload.name || "(existing product)"}
-                      </div>
-                      <div className="text-xs text-slate-400">EAN {a.payload.ean}</div>
-                    </td>
-                    <td className="px-4 py-3 text-right tabular-nums text-slate-700">
-                      {a.payload.quantity}
-                    </td>
-                    <td className="px-4 py-3 text-slate-500">
-                      <div>{a.payload.vendorName}</div>
-                      <div className="text-xs text-slate-400">
-                        Bill {a.payload.bill} · {a.payload.date}
-                        {typeof a.payload.purchasePrice === "number" &&
-                          ` · ${inr(a.payload.purchasePrice)}/pc`}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => decide(a.id, "approve")}
-                          className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700"
+                {pending.map((a) => {
+                  const adj = a.type === "adjust";
+                  const ap = a.adjustPayload;
+                  const pl = a.payload;
+                  return (
+                    <tr key={a.id} className="border-b border-slate-100 last:border-0">
+                      <td className="whitespace-nowrap px-4 py-3 text-slate-500">
+                        {formatDateTime(a.createdAt)}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600">
+                        {a.requestedByName || "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                            adj
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-emerald-100 text-emerald-700"
+                          }`}
                         >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => decide(a.id, "reject")}
-                          className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50"
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          {adj ? "Adjust" : "Stock In"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-slate-900">
+                          {adj
+                            ? ap?.productName || "(product)"
+                            : pl?.name || "(existing product)"}
+                        </div>
+                        <div className="text-xs text-slate-400">
+                          EAN {adj ? ap?.ean : pl?.ean}
+                        </div>
+                      </td>
+                      <td
+                        className={`px-4 py-3 text-right font-semibold tabular-nums ${
+                          adj && (ap?.delta ?? 0) < 0 ? "text-red-600" : "text-slate-700"
+                        }`}
+                      >
+                        {adj
+                          ? `${(ap?.delta ?? 0) > 0 ? "+" : ""}${ap?.delta ?? 0}`
+                          : pl?.quantity}
+                      </td>
+                      <td className="px-4 py-3 text-slate-500">
+                        {adj ? (
+                          <>
+                            <div>{ap?.reason}</div>
+                            {ap?.note && (
+                              <div className="text-xs text-slate-400">{ap.note}</div>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <div>{pl?.vendorName}</div>
+                            <div className="text-xs text-slate-400">
+                              Bill {pl?.bill} · {pl?.date}
+                              {typeof pl?.purchasePrice === "number" &&
+                                ` · ${inr(pl.purchasePrice)}/pc`}
+                            </div>
+                          </>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => decide(a.id, "approve")}
+                            className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => decide(a.id, "reject")}
+                            className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -307,7 +345,14 @@ export default function AdminPage() {
                   >
                     {a.status}
                   </span>
-                  {a.payload.ean} · {a.payload.quantity} pcs → {a.warehouseId}
+                  <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-500">
+                    {a.type === "adjust" ? "Adjust" : "Stock In"}
+                  </span>
+                  {a.type === "adjust"
+                    ? `${a.adjustPayload?.ean} · ${
+                        (a.adjustPayload?.delta ?? 0) > 0 ? "+" : ""
+                      }${a.adjustPayload?.delta} (${a.adjustPayload?.reason}) → ${a.warehouseId}`
+                    : `${a.payload?.ean} · ${a.payload?.quantity} pcs → ${a.warehouseId}`}
                   {a.decidedByName && (
                     <span className="text-xs text-slate-400">
                       by {a.decidedByName}

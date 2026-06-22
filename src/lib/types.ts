@@ -174,12 +174,23 @@ export interface Transfer {
   createdAt: string;
 }
 
-/** A regular user's stock-in request awaiting admin approval. */
+/** Payload for a stock-adjustment approval request. */
+export interface AdjustPayload {
+  ean: string;
+  productName?: string; // display snapshot at request time
+  delta: number; // signed (+ add / − remove)
+  reason: string;
+  note?: string;
+}
+
+/** A regular user's request awaiting admin approval — a stock-in (receive) or a
+ *  stock adjustment. */
 export interface Approval {
   id: string;
-  type: "receive";
+  type: "receive" | "adjust";
   warehouseId: string;
-  payload: ReceiveInput;
+  payload?: ReceiveInput; // present for type "receive"
+  adjustPayload?: AdjustPayload; // present for type "adjust"
   status: "pending" | "approved" | "rejected";
   requestedBy?: string; // user id who submitted it
   requestedByName?: string; // display name snapshot

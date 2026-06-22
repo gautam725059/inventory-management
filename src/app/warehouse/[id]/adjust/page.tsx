@@ -25,7 +25,8 @@ export default function AdjustPage({
 }) {
   const { id } = use(params);
   const { me, loading: meLoading } = useMe();
-  const allowed = !!me; // any logged-in user can add/remove inventory
+  const allowed = !!me; // any logged-in user can submit
+  const isAdmin = me?.role === "admin";
 
   const [detail, setDetail] = useState<WarehouseDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -73,15 +74,27 @@ export default function AdjustPage({
       const res = await fetch(`/api/warehouses/${id}/adjust`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ean, delta, reason, note: note || undefined }),
+        body: JSON.stringify({
+          ean,
+          delta,
+          reason,
+          note: note || undefined,
+          productName: selected?.name,
+        }),
       });
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Failed to adjust stock.");
       }
-      setSuccess(
-        `Stock adjusted (${delta > 0 ? "+" : ""}${delta}). Reason: ${reason}.`
-      );
+      if (data.pending) {
+        setSuccess(
+          "Adjustment submitted for admin approval. Stock will update once an admin approves it."
+        );
+      } else {
+        setSuccess(
+          `Stock adjusted (${delta > 0 ? "+" : ""}${delta}). Reason: ${reason}.`
+        );
+      }
       setEan("");
       setAmount("");
       setNote("");
@@ -126,6 +139,12 @@ export default function AdjustPage({
           Add (+) or remove (−) stock with a reason (damage, expiry, recount…).
           Every change is logged with your name and reason.
         </p>
+        {!isAdmin && (
+          <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800">
+            🔒 Your adjustments need <strong>admin approval</strong> before stock
+            changes. They&rsquo;ll appear in the admin panel as a pending request.
+          </div>
+        )}
       </header>
 
       {error && (
@@ -245,7 +264,11 @@ export default function AdjustPage({
               disabled={saving || !selected || invalid}
               className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {saving ? "Adjusting…" : "Apply adjustment"}
+              {saving
+                ? "Submitting…"
+                : isAdmin
+                  ? "Apply adjustment"
+                  : "Submit for approval"}
             </button>
           </div>
         </form>
