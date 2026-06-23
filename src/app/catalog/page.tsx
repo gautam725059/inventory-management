@@ -18,7 +18,8 @@ export default function CatalogPage() {
   const [barcodesEan, setBarcodesEan] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
-  const [sortTotal, setSortTotal] = useState<"none" | "asc" | "desc">("none");
+  // Default: highest total quantity first.
+  const [sortTotal, setSortTotal] = useState<"none" | "asc" | "desc">("desc");
 
   const load = useCallback(async () => {
     try {

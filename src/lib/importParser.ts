@@ -112,10 +112,7 @@ export function parseCatalogText(text: string): ParseOutput {
         continue;
       }
       if (!packEan || !isValidEan(packEan)) {
-        // No barcode for this pack: Excel mangled it, OR (the common case) the
-        // sheet simply lists pack sizes with no per-pack barcode. Either way we
-        // keep the size as a sellable combo size on the master, rather than
-        // dropping the pack. (size 1 = single, already implicit, so skip it.)
+        
         if (looksScientific(packEan)) {
           errors.push(
             `Row ${i + 1}: "${packCode}" — EAN looks broken by Excel (scientific notation) — kept as a pack size only.`

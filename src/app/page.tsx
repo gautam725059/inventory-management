@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import WarehouseCard from "@/components/WarehouseCard";
 import type { WarehouseSummary, ProductCatalogEntry } from "@/lib/types";
 
@@ -36,13 +37,21 @@ export default function Dashboard() {
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-10">
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Warehouse Dashboard
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Select a warehouse to receive stock and manage combos.
-        </p>
+      <header className="mb-8 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            Warehouse Dashboard
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Select a warehouse to receive stock and manage combos.
+          </p>
+        </div>
+        <Link
+          href="/b2b"
+          className="inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-indigo-600 to-indigo-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-200 transition hover:from-indigo-700 hover:to-indigo-800"
+        >
+          🏢 B2B
+        </Link>
       </header>
 
       {error && (

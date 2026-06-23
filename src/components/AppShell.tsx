@@ -20,6 +20,7 @@ const NAV: NavItem[] = [
   { href: "/vendors", label: "Vendors", icon: "🏭" },
   { href: "/customers", label: "Customers", icon: "🧾" },
   { href: "/purchase-orders", label: "Purchase Orders", icon: "🛒" },
+  { href: "/release-orders", label: "Release Orders", icon: "🚚" },
   { href: "/reports", label: "Reports", icon: "📊", adminOnly: true },
   { href: "/admin", label: "Admin", icon: "🔐", adminOnly: true },
 ];

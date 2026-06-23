@@ -53,6 +53,9 @@ import type {
   POLineItem,
   POLineInput,
   PurchaseOrderInput,
+  ReleaseOrder,
+  ROLineItem,
+  ReleaseOrderInput,
 } from "./types";
 
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -82,6 +85,7 @@ function emptyStore(): Store {
     approvals: [],
     combos: [],
     purchaseOrders: [],
+    releaseOrders: [],
   };
 }
 
@@ -160,6 +164,9 @@ function normalizeStore(parsed: Partial<Store>): Store {
       : [],
     purchaseOrders: Array.isArray(parsed.purchaseOrders)
       ? parsed.purchaseOrders
+      : [],
+    releaseOrders: Array.isArray(parsed.releaseOrders)
+      ? parsed.releaseOrders
       : [],
   };
 }
@@ -1709,6 +1716,165 @@ export async function deletePurchaseOrder(id: string): Promise<boolean> {
     const before = store.purchaseOrders.length;
     store.purchaseOrders = store.purchaseOrders.filter((p) => p.id !== id);
     return [store, store.purchaseOrders.length !== before];
+  });
+}
+
+// ---- Release orders (incoming orders → stock-out) ---------------------------
+
+function nextRONumber(store: Store): string {
+  let max = 0;
+  for (const ro of store.releaseOrders) {
+    const m = /(\d+)\s*$/.exec(ro.roNumber || "");
+    if (m) max = Math.max(max, Number(m[1]));
+  }
+  return `RO-${String(max + 1).padStart(4, "0")}`;
+}
+
+type ROResult = { ok: true; ro: ReleaseOrder } | { ok: false; error: string };
+
+export async function listReleaseOrders(): Promise<ReleaseOrder[]> {
+  const store = await readStore();
+  return [...store.releaseOrders].sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt)
+  );
+}
+
+export async function getReleaseOrder(
+  id: string
+): Promise<ReleaseOrder | undefined> {
+  const store = await readStore();
+  return store.releaseOrders.find((r) => r.id === id);
+}
+
+/** Create a release order and dispatch it: deduct each line's quantity from the
+ *  warehouse (all-or-nothing) and log a dispatch per line. Throws on any EAN
+ *  that doesn't resolve / isn't stocked / is short. */
+export async function createReleaseOrder(
+  input: ReleaseOrderInput,
+  by?: { id: string; name: string }
+): Promise<ROResult> {
+  return mutate<ROResult>((store) => {
+    const warehouse = store.warehouses.find((w) => w.id === input.warehouseId);
+    if (!warehouse) return [store, { ok: false, error: "Warehouse not found." }];
+    const date = typeof input.date === "string" ? input.date.trim() : "";
+    if (!date) return [store, { ok: false, error: "Date is required." }];
+    const rawLines = Array.isArray(input.lines) ? input.lines : [];
+    if (rawLines.length === 0) {
+      return [store, { ok: false, error: "Add at least one line." }];
+    }
+
+    // Resolve each line to a product + piece count.
+    const resolved = rawLines.map((ln) => {
+      const scanned = String(ln.ean ?? "").trim();
+      const product =
+        store.products.find((p) => p.ean === scanned) ??
+        store.products.find((p) => p.barcodes.some((b) => b.ean === scanned));
+      const quantity = Math.max(0, Math.floor(Number(ln.quantity) || 0));
+      const landingRate = Math.max(0, Number(ln.landingRate) || 0);
+      const gstRate = Math.max(0, Number(ln.gstRate) || 0);
+      return { ln, scanned, product, stockEan: product?.ean ?? scanned, quantity, landingRate, gstRate };
+    });
+
+    // Validate: every EAN resolves, quantity > 0, and combined stock is enough.
+    const need = new Map<string, number>();
+    const errors: string[] = [];
+    for (const r of resolved) {
+      if (!r.product) errors.push(`EAN ${r.scanned} not in catalog`);
+      if (r.quantity <= 0) errors.push(`EAN ${r.scanned}: quantity must be > 0`);
+      need.set(r.stockEan, (need.get(r.stockEan) ?? 0) + r.quantity);
+    }
+    for (const [stockEan, total] of need) {
+      const have =
+        store.stock.find((s) => s.warehouseId === input.warehouseId && s.ean === stockEan)
+          ?.quantity ?? 0;
+      if (total > have) {
+        const name = store.products.find((p) => p.ean === stockEan)?.name ?? stockEan;
+        errors.push(`"${name}" — need ${total}, only ${have} in stock`);
+      }
+    }
+    if (errors.length) {
+      return [store, { ok: false, error: errors.join("; ") + "." }];
+    }
+
+    // Deduct + log dispatches; build the RO line items.
+    const customerId = upsertPartyByName(
+      store.customers,
+      input.customerName || input.source
+    );
+    const now = new Date().toISOString();
+    const roNumber = nextRONumber(store);
+    const items: ROLineItem[] = [];
+    let totalQuantity = 0;
+    let totalAmount = 0;
+
+    for (const r of resolved) {
+      const row = store.stock.find(
+        (s) => s.warehouseId === input.warehouseId && s.ean === r.stockEan
+      )!;
+      row.quantity -= r.quantity;
+
+      const taxAmount = round2((r.landingRate * r.gstRate) / (100 + r.gstRate));
+      const lineTotal = round2(r.landingRate * r.quantity);
+      totalQuantity += r.quantity;
+      totalAmount += lineTotal;
+
+      items.push({
+        itemCode: r.ln.itemCode?.trim() || undefined,
+        ean: r.stockEan,
+        description: r.ln.description?.trim() || r.product!.name,
+        grammage: r.ln.grammage?.trim() || undefined,
+        gstRate: r.gstRate,
+        taxAmount,
+        landingRate: r.landingRate,
+        quantity: r.quantity,
+        mrp: typeof r.ln.mrp === "number" ? r.ln.mrp : undefined,
+        totalAmount: lineTotal,
+      });
+
+      store.dispatches.push({
+        id: randomUUID(),
+        warehouseId: input.warehouseId,
+        ean: r.stockEan,
+        unitSize: 1,
+        packs: r.quantity,
+        quantity: r.quantity,
+        date,
+        invoiceNo: roNumber,
+        referenceNo: input.source || undefined,
+        customerName: input.customerName?.trim() || input.source || undefined,
+        customerId,
+        createdAt: now,
+      });
+    }
+
+    const cartDiscount = Math.max(0, Number(input.cartDiscount) || 0);
+    totalAmount = round2(totalAmount);
+    const ro: ReleaseOrder = {
+      id: randomUUID(),
+      roNumber,
+      date,
+      source: input.source?.trim() || undefined,
+      warehouseId: input.warehouseId,
+      customerName: input.customerName?.trim() || undefined,
+      items,
+      totalQuantity,
+      totalAmount,
+      cartDiscount,
+      netAmount: round2(totalAmount - cartDiscount),
+      createdBy: by?.id,
+      createdByName: by?.name,
+      createdAt: now,
+    };
+    store.releaseOrders.push(ro);
+    return [store, { ok: true, ro }];
+  });
+}
+
+export async function deleteReleaseOrder(id: string): Promise<boolean> {
+  return mutate((store) => {
+    const before = store.releaseOrders.length;
+    store.releaseOrders = store.releaseOrders.filter((r) => r.id !== id);
+    return [store, store.releaseOrders.length !== before];
   });
 }
 

@@ -371,6 +371,65 @@ export interface Store {
   approvals: Approval[];
   combos: Combo[];
   purchaseOrders: PurchaseOrder[];
+  releaseOrders: ReleaseOrder[];
+}
+
+// ---- Release Orders (incoming platform orders → stock-out) ------------------
+
+/** One line on a release order (e.g. a Blinkit order). Tax/total are computed
+ *  on save; the landing rate is treated as tax-inclusive. */
+export interface ROLineItem {
+  itemCode?: string;
+  ean: string; // Product UPC
+  description: string;
+  grammage?: string; // "1 pc" / "1 unit" / "1 set"
+  gstRate: number; // total GST % (CGST + SGST, or IGST)
+  taxAmount: number; // per-unit tax within the landing rate
+  landingRate: number; // tax-inclusive rate per unit
+  quantity: number;
+  mrp?: number;
+  totalAmount: number; // landingRate * quantity
+}
+
+/** A release order fulfilled by stock-out. Saving an RO deducts each line's
+ *  quantity from the warehouse (all-or-nothing) and logs a dispatch. */
+export interface ReleaseOrder {
+  id: string;
+  roNumber: string; // RO-0001
+  date: string; // YYYY-MM-DD
+  source?: string; // Blinkit / other platform
+  warehouseId: string;
+  customerName?: string;
+  items: ROLineItem[];
+  totalQuantity: number;
+  totalAmount: number;
+  cartDiscount: number;
+  netAmount: number;
+  createdBy?: string;
+  createdByName?: string;
+  createdAt: string;
+}
+
+/** A release-order line as submitted by the form (totals derived server-side). */
+export interface ROLineInput {
+  itemCode?: string;
+  ean: string;
+  description?: string;
+  grammage?: string;
+  gstRate?: number;
+  landingRate?: number;
+  quantity: number;
+  mrp?: number;
+}
+
+/** Body accepted by the create-release-order endpoint. */
+export interface ReleaseOrderInput {
+  date: string;
+  source?: string;
+  warehouseId: string;
+  customerName?: string;
+  cartDiscount?: number;
+  lines: ROLineInput[];
 }
 
 // ---- Computed / view shapes returned by the API -----------------------------
