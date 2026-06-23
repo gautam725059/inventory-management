@@ -550,6 +550,28 @@ export interface DispatchInput {
   customerName?: string; // who the goods were sold to (optional)
 }
 
+/** One line of a bulk (multi-product) stock-out. */
+export interface BulkDispatchLine {
+  ean: string;
+  unitSize: number; // pieces per pack (1 = single)
+  packs: number;
+}
+
+/** Body accepted by the bulk "dispatch goods" endpoint. The date / invoice /
+ *  customer are shared across all lines. */
+export interface BulkDispatchInput {
+  date: string;
+  invoiceNo: string;
+  referenceNo?: string;
+  customerName?: string;
+  lines: BulkDispatchLine[];
+}
+
+export interface BulkDispatchResult {
+  dispatched: number; // number of lines dispatched
+  totalPieces: number;
+}
+
 /** One master product + its packs, for the bulk catalog import. */
 export interface ImportItem {
   ean: string; // master/primary EAN (or a generated key when none is given)

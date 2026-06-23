@@ -4,6 +4,7 @@ import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import StockOutForm from "@/components/StockOutForm";
 import ComboOutForm from "@/components/ComboOutForm";
+import BulkStockOutForm from "@/components/BulkStockOutForm";
 import StockCard from "@/components/StockCard";
 import type { WarehouseDetail } from "@/lib/types";
 
@@ -18,7 +19,7 @@ export default function StockOutPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [mode, setMode] = useState<"product" | "combo">("product");
+  const [mode, setMode] = useState<"product" | "bulk" | "combo">("product");
 
   async function load() {
     try {
@@ -78,6 +79,16 @@ export default function StockOutPage({
           📤 Product
         </button>
         <button
+          onClick={() => setMode("bulk")}
+          className={`rounded-md px-4 py-1.5 text-sm font-semibold transition ${
+            mode === "bulk"
+              ? "bg-brand-600 text-white shadow-sm"
+              : "text-slate-600 hover:bg-slate-50"
+          }`}
+        >
+          📋 Bulk
+        </button>
+        <button
           onClick={() => setMode("combo")}
           className={`rounded-md px-4 py-1.5 text-sm font-semibold transition ${
             mode === "combo"
@@ -97,6 +108,19 @@ export default function StockOutPage({
           lines={detail?.lines ?? []}
           onDispatched={async () => {
             setSuccess("Stock dispatched.");
+            await load();
+          }}
+          onError={(message) => {
+            setError(message || null);
+            if (message) setSuccess(null);
+          }}
+        />
+      ) : mode === "bulk" ? (
+        <BulkStockOutForm
+          warehouseId={id}
+          lines={detail?.lines ?? []}
+          onDispatched={async () => {
+            setSuccess("Bulk stock dispatched.");
             await load();
           }}
           onError={(message) => {

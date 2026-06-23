@@ -21,6 +21,8 @@ import type {
   ProductCatalogEntry,
   ReceiveInput,
   DispatchInput,
+  BulkDispatchInput,
+  BulkDispatchResult,
   ProductUpdateInput,
   Approval,
   AdjustPayload,
@@ -595,6 +597,80 @@ export async function dispatchStock(
     });
 
     return [store, buildLine(product, stockEan, row.quantity)];
+  });
+}
+
+/** Dispatch several products out of a warehouse in one go (bulk stock-out).
+ *  All-or-nothing: if any line is short on stock, nothing is dispatched and an
+ *  error listing the shortfalls is thrown. Lines hitting the same product are
+ *  validated against the combined quantity. */
+export async function dispatchStockBulk(
+  warehouseId: string,
+  input: BulkDispatchInput
+): Promise<BulkDispatchResult> {
+  return mutate((store) => {
+    const warehouse = store.warehouses.find((w) => w.id === warehouseId);
+    if (!warehouse) throw new Error("Warehouse not found.");
+    if (!input.lines.length) throw new Error("Add at least one line to dispatch.");
+
+    // Resolve each line to a product + its stock-keyed EAN and piece count.
+    const resolved = input.lines.map((ln) => {
+      const scanned = ln.ean.trim();
+      const product =
+        store.products.find((p) => p.ean === scanned) ??
+        store.products.find((p) => p.barcodes.some((b) => b.ean === scanned));
+      return {
+        product,
+        stockEan: product?.ean ?? scanned,
+        unitSize: ln.unitSize,
+        packs: ln.packs,
+        pieces: ln.unitSize * ln.packs,
+      };
+    });
+
+    // Validate the combined requirement per product against available stock.
+    const need = new Map<string, number>();
+    for (const r of resolved) need.set(r.stockEan, (need.get(r.stockEan) ?? 0) + r.pieces);
+    const errors: string[] = [];
+    for (const [stockEan, total] of need) {
+      const have =
+        store.stock.find((s) => s.warehouseId === warehouseId && s.ean === stockEan)
+          ?.quantity ?? 0;
+      if (total > have) {
+        const name = store.products.find((p) => p.ean === stockEan)?.name ?? stockEan;
+        errors.push(`"${name}" — need ${total}, only ${have} available`);
+      }
+    }
+    if (errors.length) {
+      throw new Error("Not enough stock. " + errors.join("; ") + ".");
+    }
+
+    // Deduct + log a dispatch per line (shared date / invoice / customer).
+    const customerId = upsertPartyByName(store.customers, input.customerName);
+    const now = new Date().toISOString();
+    let totalPieces = 0;
+    for (const r of resolved) {
+      const row = store.stock.find(
+        (s) => s.warehouseId === warehouseId && s.ean === r.stockEan
+      )!;
+      row.quantity -= r.pieces;
+      totalPieces += r.pieces;
+      store.dispatches.push({
+        id: randomUUID(),
+        warehouseId,
+        ean: r.stockEan,
+        unitSize: r.unitSize,
+        packs: r.packs,
+        quantity: r.pieces,
+        date: input.date,
+        invoiceNo: input.invoiceNo,
+        referenceNo: input.referenceNo,
+        customerName: input.customerName?.trim() || undefined,
+        customerId,
+        createdAt: now,
+      });
+    }
+    return [store, { dispatched: resolved.length, totalPieces }];
   });
 }
 
