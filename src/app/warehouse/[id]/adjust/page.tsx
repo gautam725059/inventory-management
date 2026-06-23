@@ -11,10 +11,10 @@ const labelClass = "mb-1 block text-xs font-medium text-slate-600";
 
 const REASONS = [
   "Damage",
-  "Expiry",
   "Count correction",
   "Theft / Loss",
   "Found / Recount",
+  "add new stock",
   "Other",
 ];
 

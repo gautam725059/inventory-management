@@ -1,1 +1,1077 @@
-{"warehouses":[{"id":"wh-mumbai","name":"Mumbai Warehouse","location":"Bhiwandi, MH"},{"id":"wh-delhi","name":"Delhi Warehouse","location":"Okhla, DL"},{"id":"wh-bengaluru","name":"Bengaluru Warehouse","location":"Whitefield, KA"}],"products":[{"ean":"8906199310604","name":"Knife Set - Black","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199313155","name":"J Hook (Flower J Hook)","comboSizes":[],"barcodes":[{"ean":"8906199310000","size":10,"name":"Shanya Adhesive Wall Hooks Transparent (Stainless Steel, Transparent)","price":null},{"ean":"8906199310017","size":15,"name":"Shanya Adhesive Wall Hooks (Stainless Steel, Transparent)","price":null},{"ean":"8906199310024","size":20,"name":"Shanya Heavy-Duty Adhesive Wall Hooks","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":50,"imageUrl":null},{"ean":"8906199313162","name":"Big J Hook Silver","comboSizes":[],"barcodes":[{"ean":"8906199311212","size":10,"name":"Shanya Transparent Self-Adhesive Wall Hooks","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199313186","name":"Big J Hook Golden","comboSizes":[],"barcodes":[{"ean":"8906199311205","size":10,"name":"Shanya Self Adhesive Wall Hooks","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199313193","name":"Frame Hook","comboSizes":[],"barcodes":[{"ean":"8906199310079","size":10,"name":"Shanya Self Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)","price":null},{"ean":"8906199310321","size":15,"name":"Shanya Self Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)","price":null},{"ean":"8906199310338","size":20,"name":"Shanya Self Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)","price":null},{"ean":"8906199311465","size":10,"name":"Shanya Self Adhesive Wall Hooks (PVC, Transparent)","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199313216","name":"Nut Hook","comboSizes":[],"barcodes":[{"ean":"8906199310123","size":10,"name":"Shanya Self-Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)","price":null},{"ean":"8906199310307","size":15,"name":"Shanya Self-Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)","price":null},{"ean":"8906199310314","size":20,"name":"Shanya Self-Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199313223","name":"369 Rotating Hook","comboSizes":[],"barcodes":[{"ean":"8906199311717","size":5,"name":"Shanya Rotating Ceiling / Wall Hooks (Plastic, Black)","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199313230","name":"Star Hook","comboSizes":[],"barcodes":[{"ean":"8906199312387","size":5,"name":"Shanya Star Self-Adhesive Wall Hooks (Acrylic, Transparent)","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199313247","name":"Shell Hook","comboSizes":[],"barcodes":[{"ean":"8906199312394","size":5,"name":"Shanya Shell Design Self-Adhesive Wall Hooks (Acrylic, Transparent)","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199313254","name":"6PC Transparent Hook","comboSizes":[],"barcodes":[{"ean":"8906199312592","size":2,"name":"Shanya Transparent Self-Adhesive Wall Hooks","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-6pc-silver-hook","name":"6PC Silver Hook","comboSizes":[],"barcodes":[{"ean":"8906199312585","size":2,"name":"Shanya Transparent Self-Adhesive Wall Hooks","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-6pc-green-hook","name":"6PC Green Hook","comboSizes":[],"barcodes":[{"ean":"8906199312578","size":2,"name":"Shanya Self-Adhesive Wall Hooks","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-matte-black-u-hook","name":"Matte Black U Hook","comboSizes":[],"barcodes":[{"ean":"8906199312899","size":5,"name":"Matte Black U Hook P5","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-matte-silver-u-hook","name":"Matte Silver U Hook","comboSizes":[],"barcodes":[{"ean":"8906199312103","size":5,"name":"Matte Silver U Hook P5","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-matte-silver-hook","name":"Matte Silver Hook","comboSizes":[],"barcodes":[{"ean":"8906199312257","size":2,"name":"Matte Silver Hook P2","price":null},{"ean":"21633907","size":4,"name":"Matte Silver Hook P4","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-matte-black-hook","name":"Matte Black Hook","comboSizes":[],"barcodes":[{"ean":"8906199312240","size":2,"name":"Matte Black Hook P2","price":null},{"ean":"21633884","size":4,"name":"Matte Black Hook P4","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-crystal-hook","name":"Crystal Hook","comboSizes":[],"barcodes":[{"ean":"8906199310727","size":10,"name":"Crystal Hook P10","price":null},{"ean":"8906199310758","size":15,"name":"Crystal Hook P15","price":null},{"ean":"8906199310765","size":20,"name":"Crystal Hook P20","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-u-transparent-hook","name":"U Transparent Hook","comboSizes":[],"barcodes":[{"ean":"8906199310611","size":10,"name":"U Transparent Hook P10","price":null},{"ean":"8906199310734","size":15,"name":"U Transparent Hook P15","price":null},{"ean":"8906199310741","size":20,"name":"U Transparent Hook P20","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-s-hook","name":"S Hook","comboSizes":[],"barcodes":[{"ean":"8906199311502","size":10,"name":"S Hook P10","price":20},{"ean":"8906199311519","size":15,"name":"S Hook P15","price":null},{"ean":"8906199311526","size":20,"name":"S Hook P20","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-cloth-rope","name":"Cloth Rope","comboSizes":[],"barcodes":[{"ean":"8906199310093","size":2,"name":"Shanya Nylon Cloth Rope with Clips (Multicolour)","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-bathroom-shelf-black-white","name":"Bathroom Shelf Black & White","comboSizes":[],"barcodes":[{"ean":"8906199311694","size":1,"name":"Shanya Adhesive Bathroom Shelf (Plastic, White)","price":null},{"ean":"8906199311670","size":2,"name":"Shanya Wall Mounted Bathroom Shelf (Plastic, white)","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-bathroom-shelf-white","name":"Bathroom Shelf White","comboSizes":[],"barcodes":[{"ean":"8906199311663","size":2,"name":"Shanya Self Adhesive Bathroom Shelf (Plastic, White)","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199311779","name":"Bathroom Towel Rod Single","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199311762","name":"Bathroom Towel Rod Double","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199310659","name":"Knife Set - Purple","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199310628","name":"Knife Set - Blue","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199310642","name":"Knife Set - Green","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199310635","name":"Knife Set - Red","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-plastic-oil-dispenser","name":"Plastic Oil Dispenser","comboSizes":[],"barcodes":[{"ean":"8906199311755","size":2,"name":"Shanya Plastic Oil Dispenser","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-silicone-baking-mat","name":"Silicone Baking Mat","comboSizes":[],"barcodes":[{"ean":"8906199310130","size":2,"name":"Shanya Anti-Skid Baking Mat (Silicone)","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-shoe-cleaning-wipes","name":"Shoe Cleaning Wipes","comboSizes":[],"barcodes":[{"ean":"8906199310192","size":1,"name":"Shanya Shoe Cleaning Wipes","price":null},{"ean":"8906199310178","size":2,"name":"Shanya Shoe Cleaning Wipes","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-ice-cube-tray-hexagonal","name":"Ice Cube Tray Hexagonal","comboSizes":[],"barcodes":[{"ean":"8906199310031","size":2,"name":"Shanya Ice Tray (Silicone)","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"auto-ice-cube-tray-circle","name":"Ice Cube Tray Circle","comboSizes":[],"barcodes":[{"ean":"8906199310055","size":2,"name":"Shanya Ice Tray Set (Silicone)","price":null}],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199312936","name":"Evil Eye Key Chain - Tree","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199312929","name":"Evil Eye Key Chain - Elephant","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199312943","name":"Evil Eye Key Chain - Dream Catcher","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199312950","name":"Evil Eye Key Chain - Peacock","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199312967","name":"Evil Eye Key Chain - Turtle","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199312974","name":"Evil Eye Key Chain - Owl","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199312875","name":"Guardian Bell - Bronze","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199312868","name":"Guardian Bell - Silver","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199311700","name":"Face Changing Key Chain","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199312882","name":"Butterfly Crown (Princess Tiara)","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199311854","name":"Welcome Baby Boy - Foot (Decoration Kit)","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199311830","name":"Welcome Baby Girl - Foot (Decoration Kit)","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199310987","name":"Welcome Baby Boy - Baby (Foil Balloons Kit)","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"21633861","name":"Welcome Baby Girl - Baby (Decoration Kit)","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null},{"ean":"8906199310970","name":"Welcome Baby Girl - Baby (Foil Balloon Kit)","comboSizes":[],"barcodes":[],"reorderLevel":0,"sellingPrice":null,"purchasePrice":null,"imageUrl":null}],"users":[{"id":"d364e0f6-76ff-4b8a-b1ad-35650486906a","username":"admin","name":"Administrator","role":"admin","passwordHash":"0971b29e58751da6c6c6d55c45f206cd:eeb020f89a8bc78db302abd837f268d01e6bc9a52387f3d9dd1f6bbb08389984f9329f5edef8b3c0aa748aac7fc178db6b29a85f65e137896c2aeb4c0ebc8707","active":true,"createdAt":"2026-06-16T08:11:44.734Z"},{"id":"0df01930-4868-46a5-8db2-d102701f01b6","username":"manager","name":"Manager","role":"staff","passwordHash":"b261bcb05a30a4da41a5e0cec6377e60:b33fdad1e139d4b1f783da79732c524490627ffa5f95ef1812af6403646d0f23ed32456e38da3b3fb34439f20a58b60f7ea16d229096065384ab0df3280da5b8","active":false,"createdAt":"2026-06-16T09:47:30.255Z"},{"id":"213a1a27-549b-48ad-aaab-bb287c5ec9ed","username":"staff","name":"Staff","role":"staff","passwordHash":"4ca4d3306bb6b63a759fc6981d1a5cdb:6fb1b29243bb9c590c223ae9d6e45bb44ba63eb79d0820cfd6fb5b8942507a2cb11c707ba902f11b2c053127e49354ac8f013d7204387a298356f87464910162","active":true,"createdAt":"2026-06-16T09:47:30.418Z"},{"id":"c40afacc-ae5d-47c4-99bf-798b7d76d962","username":"manger","name":"rakesh","role":"staff","passwordHash":"132422a3a71b28a2e7702378a08d87d2:64278d69237a0d77944e35502a46e0166cac15960ac03de2e5df8b356899e59c7eaf72bac4dd1f2d56e28411557d24cddf90689669a8268d0ba7cd4b95e927ef","active":true,"createdAt":"2026-06-17T08:54:33.508Z"}],"sessions":[{"token":"0003343086194d43488aa838df1093f3d826a3e1e54d5de89f358fb59776a4e0","userId":"213a1a27-549b-48ad-aaab-bb287c5ec9ed","createdAt":"2026-06-17T07:29:31.799Z","expiresAt":"2026-06-24T07:29:31.799Z"},{"token":"7ea97d080111bbf5cdc5fbdcf5d3ec0c701a762fc6c1fcb86b09c97005a854fe","userId":"213a1a27-549b-48ad-aaab-bb287c5ec9ed","createdAt":"2026-06-17T07:30:00.145Z","expiresAt":"2026-06-24T07:30:00.145Z"},{"token":"11b06a0ef6ccf346c06566ca55b148a5b1d2499c84fc7180f5d291c08ad2bfdf","userId":"d364e0f6-76ff-4b8a-b1ad-35650486906a","createdAt":"2026-06-17T07:30:12.304Z","expiresAt":"2026-06-24T07:30:12.304Z"},{"token":"b4bc4bf568c2120f74dbcc3f07d3a4cf128090531db611321674aa2ccdcf3b97","userId":"213a1a27-549b-48ad-aaab-bb287c5ec9ed","createdAt":"2026-06-17T07:33:07.688Z","expiresAt":"2026-06-24T07:33:07.688Z"},{"token":"5259d3186eb811ea8d2eeda460179a1b9ef6798cef6be028c0fe40f143ad73e2","userId":"213a1a27-549b-48ad-aaab-bb287c5ec9ed","createdAt":"2026-06-17T07:33:30.242Z","expiresAt":"2026-06-24T07:33:30.242Z"},{"token":"1030a2c24bb7d90a073acbb00da6f50ce5dd745ae751b45ac7d4bcdb5d3af6d1","userId":"d364e0f6-76ff-4b8a-b1ad-35650486906a","createdAt":"2026-06-17T07:33:39.460Z","expiresAt":"2026-06-24T07:33:39.460Z"},{"token":"8dd25281dcae9b0cdc4b40d64c311feb87770efa82cfddb83dfe0c57df8ee7a6","userId":"213a1a27-549b-48ad-aaab-bb287c5ec9ed","createdAt":"2026-06-17T07:34:10.873Z","expiresAt":"2026-06-24T07:34:10.873Z"},{"token":"4d55741d0a8ce607a1dfc8c5c9f0d6308062857eee7e80352076613d402062c1","userId":"d364e0f6-76ff-4b8a-b1ad-35650486906a","createdAt":"2026-06-17T09:03:24.376Z","expiresAt":"2026-06-24T09:03:24.376Z"},{"token":"49caafbc4a0c8e53e6f7fc47aecd248c6503823cf3fda808685e5f20bfd3216d","userId":"d364e0f6-76ff-4b8a-b1ad-35650486906a","createdAt":"2026-06-17T09:03:36.238Z","expiresAt":"2026-06-24T09:03:36.238Z"},{"token":"dab14c345e03458e216b67d87abcbee7e8d2d13d895bba70db771e9d90f97f7f","userId":"d364e0f6-76ff-4b8a-b1ad-35650486906a","createdAt":"2026-06-17T09:03:49.481Z","expiresAt":"2026-06-24T09:03:49.481Z"},{"token":"503f6839186344eb98788f864df3b029002cf53371f2c7695a616b72d7252227","userId":"d364e0f6-76ff-4b8a-b1ad-35650486906a","createdAt":"2026-06-17T09:03:57.114Z","expiresAt":"2026-06-24T09:03:57.114Z"},{"token":"7e8e67e3d0e1999b3369ab707aae238eaa60f5b0185157b4ee8dd7b696d593f3","userId":"d364e0f6-76ff-4b8a-b1ad-35650486906a","createdAt":"2026-06-17T09:06:50.624Z","expiresAt":"2026-06-24T09:06:50.624Z"},{"token":"eecc1eceef2db642ef4f8cb565c4f74947edfd50f542c6945b13530533b956af","userId":"d364e0f6-76ff-4b8a-b1ad-35650486906a","createdAt":"2026-06-17T09:07:07.152Z","expiresAt":"2026-06-24T09:07:07.152Z"},{"token":"f47136033336b9ee53e94557b9e181f56d647e75b528f49104f2c6bfff05194d","userId":"d364e0f6-76ff-4b8a-b1ad-35650486906a","createdAt":"2026-06-17T10:21:57.859Z","expiresAt":"2026-06-24T10:21:57.859Z"},{"token":"c6632026d6c30fb9d3aafd56f00f68e460d1e10afd42d155198dbcd704fd396a","userId":"d364e0f6-76ff-4b8a-b1ad-35650486906a","createdAt":"2026-06-17T10:22:02.162Z","expiresAt":"2026-06-24T10:22:02.162Z"},{"token":"c73f7bf01f6eb07e8b1b44214d7d4a43b3a60e59192330e2e498c34080041c57","userId":"d364e0f6-76ff-4b8a-b1ad-35650486906a","createdAt":"2026-06-17T10:22:03.913Z","expiresAt":"2026-06-24T10:22:03.913Z"},{"token":"d86ca8563949594b3711bd09700718172330dcb5f6540671550e020cd97f5ed9","userId":"d364e0f6-76ff-4b8a-b1ad-35650486906a","createdAt":"2026-06-17T10:22:10.198Z","expiresAt":"2026-06-24T10:22:10.198Z"},{"token":"7d34b2e476291a1217facbe21d5c11715ab9aaef16a32d6287461d58eb87b172","userId":"213a1a27-549b-48ad-aaab-bb287c5ec9ed","createdAt":"2026-06-17T10:41:52.256Z","expiresAt":"2026-06-24T10:41:52.256Z"},{"token":"695bb5e52063de69e8f18982edb1bd8fbbaf4ce42afbfed21ae29477a9cbadb2","userId":"d364e0f6-76ff-4b8a-b1ad-35650486906a","createdAt":"2026-06-17T13:18:13.638Z","expiresAt":"2026-06-24T13:18:13.638Z"},{"token":"a5480e4ae87288054ccc8cd1555f09db9dd2261b6c04af48488a38c0bb82180e","userId":"d364e0f6-76ff-4b8a-b1ad-35650486906a","createdAt":"2026-06-17T13:18:15.184Z","expiresAt":"2026-06-24T13:18:15.184Z"},{"token":"78920a4cf1bff40fe1aac3793e726c4fcdc6676fff30fee3101a752037f6016f","userId":"213a1a27-549b-48ad-aaab-bb287c5ec9ed","createdAt":"2026-06-17T15:40:13.157Z","expiresAt":"2026-06-24T15:40:13.157Z"},{"token":"d23ea4de2f3b3a5335d92fefcac0014e0f13f7c78bc2b80b8128447bf7742955","userId":"d364e0f6-76ff-4b8a-b1ad-35650486906a","createdAt":"2026-06-18T06:13:29.215Z","expiresAt":"2026-06-25T06:13:29.215Z"},{"token":"e75dd6976c728f9233168e1c4aa97fb0c09774860baf356f0d16ac23233261d2","userId":"213a1a27-549b-48ad-aaab-bb287c5ec9ed","createdAt":"2026-06-18T06:14:07.047Z","expiresAt":"2026-06-25T06:14:07.047Z"}],"vendors":[{"id":"96912932-753b-48b4-9bc3-3cdd172fa612","name":"ttt","createdAt":"2026-06-16T11:11:36.698Z","phone":"07369954206","gstin":"gh45657hhvhgv65676","address":"Hazaribagh"},{"id":"fbb327a3-67be-402d-8e7d-c51255c2b4b5","name":"aluu","createdAt":"2026-06-16T11:56:22.326Z"},{"id":"9dda87bc-e242-4d7e-a227-8a2a79864a13","name":"baigan","createdAt":"2026-06-17T06:24:15.855Z"},{"id":"38497d50-b8da-4f6e-9eb5-436ed85b4e0d","name":"shanya","createdAt":"2026-06-17T08:48:24.250Z"},{"id":"5eecbbca-ceb2-4792-aafe-55462c907b40","name":"random","createdAt":"2026-06-17T09:14:34.537Z"}],"customers":[{"id":"53bfc829-16cd-4f97-916b-80995fbc25ec","name":"Sopify","createdAt":"2026-06-17T07:20:41.576Z"}],"stock":[{"warehouseId":"wh-delhi","ean":"8906199310604","quantity":884},{"warehouseId":"wh-delhi","ean":"8906199313155","quantity":4075}],"receipts":[{"id":"38c59e2e-1abd-4ec6-84b5-4f649b5159d6","warehouseId":"wh-delhi","ean":"8906199310604","quantity":884,"bill":"1234","vendorName":"random","vendorId":"5eecbbca-ceb2-4792-aafe-55462c907b40","date":"2026-04-01","purchasePrice":null,"createdAt":"2026-06-17T09:14:34.537Z"},{"id":"8443d990-c725-4dbf-a5a7-9e7d3a96d288","warehouseId":"wh-delhi","ean":"8906199313155","quantity":75,"bill":"567567","vendorName":"random","vendorId":"5eecbbca-ceb2-4792-aafe-55462c907b40","date":"2026-06-17","purchasePrice":null,"createdAt":"2026-06-17T10:23:17.454Z"},{"id":"60d48959-8481-4fd4-aea8-bfec7702aa88","warehouseId":"wh-delhi","ean":"8906199313155","quantity":4000,"bill":"7003","vendorName":"aluu","vendorId":"fbb327a3-67be-402d-8e7d-c51255c2b4b5","date":"2026-06-18","purchasePrice":50,"createdAt":"2026-06-18T06:17:59.359Z"}],"dispatches":[],"adjustments":[],"transfers":[],"approvals":[{"id":"431e64c3-60ca-42ae-aacf-75b391a151c0","type":"receive","warehouseId":"wh-mumbai","payload":{"ean":"96325874196325","quantity":1000,"name":null,"comboSizes":null,"vendorName":"Samosha","bill":"2026-100","date":"2026-06-17","purchasePrice":10},"status":"rejected","requestedBy":"213a1a27-549b-48ad-aaab-bb287c5ec9ed","requestedByName":"Staff","createdAt":"2026-06-17T07:15:47.861Z","decidedBy":"d364e0f6-76ff-4b8a-b1ad-35650486906a","decidedByName":"Administrator","decidedAt":"2026-06-17T07:17:20.961Z"}]}
+{
+    "warehouses": [
+        {
+            "id": "wh-mumbai",
+            "name": "Mumbai Warehouse",
+            "location": "Bhiwandi, MH"
+        },
+        {
+            "id": "wh-delhi",
+            "name": "Delhi Warehouse",
+            "location": "Okhla, DL"
+        },
+        {
+            "id": "wh-bengaluru",
+            "name": "Bengaluru Warehouse",
+            "location": "Whitefield, KA"
+        }
+    ],
+    "products": [
+        {
+            "ean": "8906199310604",
+            "name": "Knife Set - Black",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199313155",
+            "name": "J Hook (Flower J Hook)",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199310000",
+                    "size": 10,
+                    "name": "Shanya Adhesive Wall Hooks Transparent (Stainless Steel, Transparent)",
+                    "price": null
+                },
+                {
+                    "ean": "8906199310017",
+                    "size": 15,
+                    "name": "Shanya Adhesive Wall Hooks (Stainless Steel, Transparent)",
+                    "price": null
+                },
+                {
+                    "ean": "8906199310024",
+                    "size": 20,
+                    "name": "Shanya Heavy-Duty Adhesive Wall Hooks",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": 50,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199313162",
+            "name": "Big J Hook Silver",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199311212",
+                    "size": 10,
+                    "name": "Shanya Transparent Self-Adhesive Wall Hooks",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199313186",
+            "name": "Big J Hook Golden",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199311205",
+                    "size": 10,
+                    "name": "Shanya Self Adhesive Wall Hooks",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199313193",
+            "name": "Frame Hook",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199310079",
+                    "size": 10,
+                    "name": "Shanya Self Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)",
+                    "price": null
+                },
+                {
+                    "ean": "8906199310321",
+                    "size": 15,
+                    "name": "Shanya Self Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)",
+                    "price": null
+                },
+                {
+                    "ean": "8906199310338",
+                    "size": 20,
+                    "name": "Shanya Self Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)",
+                    "price": null
+                },
+                {
+                    "ean": "8906199311465",
+                    "size": 10,
+                    "name": "Shanya Self Adhesive Wall Hooks (PVC, Transparent)",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199313216",
+            "name": "Nut Hook",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199310123",
+                    "size": 10,
+                    "name": "Shanya Self-Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)",
+                    "price": null
+                },
+                {
+                    "ean": "8906199310307",
+                    "size": 15,
+                    "name": "Shanya Self-Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)",
+                    "price": null
+                },
+                {
+                    "ean": "8906199310314",
+                    "size": 20,
+                    "name": "Shanya Self-Adhesive Wall Hooks (Stainless Steel, PVC, Transparent)",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199313223",
+            "name": "369 Rotating Hook",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199311717",
+                    "size": 5,
+                    "name": "Shanya Rotating Ceiling / Wall Hooks (Plastic, Black)",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199313230",
+            "name": "Star Hook",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199312387",
+                    "size": 5,
+                    "name": "Shanya Star Self-Adhesive Wall Hooks (Acrylic, Transparent)",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199313247",
+            "name": "Shell Hook",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199312394",
+                    "size": 5,
+                    "name": "Shanya Shell Design Self-Adhesive Wall Hooks (Acrylic, Transparent)",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199313254",
+            "name": "6PC Transparent Hook",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199312592",
+                    "size": 2,
+                    "name": "Shanya Transparent Self-Adhesive Wall Hooks",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-6pc-silver-hook",
+            "name": "6PC Silver Hook",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199312585",
+                    "size": 2,
+                    "name": "Shanya Transparent Self-Adhesive Wall Hooks",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-6pc-green-hook",
+            "name": "6PC Green Hook",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199312578",
+                    "size": 2,
+                    "name": "Shanya Self-Adhesive Wall Hooks",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-matte-black-u-hook",
+            "name": "Matte Black U Hook",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199312899",
+                    "size": 5,
+                    "name": "Matte Black U Hook P5",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-matte-silver-u-hook",
+            "name": "Matte Silver U Hook",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199312103",
+                    "size": 5,
+                    "name": "Matte Silver U Hook P5",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-matte-silver-hook",
+            "name": "Matte Silver Hook",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199312257",
+                    "size": 2,
+                    "name": "Matte Silver Hook P2",
+                    "price": null
+                },
+                {
+                    "ean": "21633907",
+                    "size": 4,
+                    "name": "Matte Silver Hook P4",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-matte-black-hook",
+            "name": "Matte Black Hook",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199312240",
+                    "size": 2,
+                    "name": "Matte Black Hook P2",
+                    "price": null
+                },
+                {
+                    "ean": "21633884",
+                    "size": 4,
+                    "name": "Matte Black Hook P4",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-crystal-hook",
+            "name": "Crystal Hook",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199310727",
+                    "size": 10,
+                    "name": "Crystal Hook P10",
+                    "price": null
+                },
+                {
+                    "ean": "8906199310758",
+                    "size": 15,
+                    "name": "Crystal Hook P15",
+                    "price": null
+                },
+                {
+                    "ean": "8906199310765",
+                    "size": 20,
+                    "name": "Crystal Hook P20",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-u-transparent-hook",
+            "name": "U Transparent Hook",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199310611",
+                    "size": 10,
+                    "name": "U Transparent Hook P10",
+                    "price": null
+                },
+                {
+                    "ean": "8906199310734",
+                    "size": 15,
+                    "name": "U Transparent Hook P15",
+                    "price": null
+                },
+                {
+                    "ean": "8906199310741",
+                    "size": 20,
+                    "name": "U Transparent Hook P20",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-s-hook",
+            "name": "S Hook",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199311502",
+                    "size": 10,
+                    "name": "S Hook P10",
+                    "price": 20
+                },
+                {
+                    "ean": "8906199311519",
+                    "size": 15,
+                    "name": "S Hook P15",
+                    "price": null
+                },
+                {
+                    "ean": "8906199311526",
+                    "size": 20,
+                    "name": "S Hook P20",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-cloth-rope",
+            "name": "Cloth Rope",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199310093",
+                    "size": 2,
+                    "name": "Shanya Nylon Cloth Rope with Clips (Multicolour)",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-bathroom-shelf-black-white",
+            "name": "Bathroom Shelf Black & White",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199311694",
+                    "size": 1,
+                    "name": "Shanya Adhesive Bathroom Shelf (Plastic, White)",
+                    "price": null
+                },
+                {
+                    "ean": "8906199311670",
+                    "size": 2,
+                    "name": "Shanya Wall Mounted Bathroom Shelf (Plastic, white)",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-bathroom-shelf-white",
+            "name": "Bathroom Shelf White",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199311663",
+                    "size": 2,
+                    "name": "Shanya Self Adhesive Bathroom Shelf (Plastic, White)",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199311779",
+            "name": "Bathroom Towel Rod Single",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199311762",
+            "name": "Bathroom Towel Rod Double",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199310659",
+            "name": "Knife Set - Purple",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199310628",
+            "name": "Knife Set - Blue",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199310642",
+            "name": "Knife Set - Green",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199310635",
+            "name": "Knife Set - Red",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-plastic-oil-dispenser",
+            "name": "Plastic Oil Dispenser",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199311755",
+                    "size": 2,
+                    "name": "Shanya Plastic Oil Dispenser",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-silicone-baking-mat",
+            "name": "Silicone Baking Mat",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199310130",
+                    "size": 2,
+                    "name": "Shanya Anti-Skid Baking Mat (Silicone)",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-shoe-cleaning-wipes",
+            "name": "Shoe Cleaning Wipes",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199310192",
+                    "size": 1,
+                    "name": "Shanya Shoe Cleaning Wipes",
+                    "price": null
+                },
+                {
+                    "ean": "8906199310178",
+                    "size": 2,
+                    "name": "Shanya Shoe Cleaning Wipes",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-ice-cube-tray-hexagonal",
+            "name": "Ice Cube Tray Hexagonal",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199310031",
+                    "size": 2,
+                    "name": "Shanya Ice Tray (Silicone)",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "auto-ice-cube-tray-circle",
+            "name": "Ice Cube Tray Circle",
+            "comboSizes": [],
+            "barcodes": [
+                {
+                    "ean": "8906199310055",
+                    "size": 2,
+                    "name": "Shanya Ice Tray Set (Silicone)",
+                    "price": null
+                }
+            ],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199312936",
+            "name": "Evil Eye Key Chain - Tree",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199312929",
+            "name": "Evil Eye Key Chain - Elephant",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199312943",
+            "name": "Evil Eye Key Chain - Dream Catcher",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199312950",
+            "name": "Evil Eye Key Chain - Peacock",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199312967",
+            "name": "Evil Eye Key Chain - Turtle",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199312974",
+            "name": "Evil Eye Key Chain - Owl",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199312875",
+            "name": "Guardian Bell - Bronze",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199312868",
+            "name": "Guardian Bell - Silver",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199311700",
+            "name": "Face Changing Key Chain",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199312882",
+            "name": "Butterfly Crown (Princess Tiara)",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199311854",
+            "name": "Welcome Baby Boy - Foot (Decoration Kit)",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199311830",
+            "name": "Welcome Baby Girl - Foot (Decoration Kit)",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199310987",
+            "name": "Welcome Baby Boy - Baby (Foil Balloons Kit)",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "21633861",
+            "name": "Welcome Baby Girl - Baby (Decoration Kit)",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        },
+        {
+            "ean": "8906199310970",
+            "name": "Welcome Baby Girl - Baby (Foil Balloon Kit)",
+            "comboSizes": [],
+            "barcodes": [],
+            "reorderLevel": 0,
+            "sellingPrice": null,
+            "purchasePrice": null,
+            "imageUrl": null
+        }
+    ],
+    "users": [
+        {
+            "id": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "username": "admin",
+            "name": "Administrator",
+            "role": "admin",
+            "passwordHash": "0971b29e58751da6c6c6d55c45f206cd:eeb020f89a8bc78db302abd837f268d01e6bc9a52387f3d9dd1f6bbb08389984f9329f5edef8b3c0aa748aac7fc178db6b29a85f65e137896c2aeb4c0ebc8707",
+            "active": true,
+            "createdAt": "2026-06-16T08:11:44.734Z"
+        },
+        {
+            "id": "0df01930-4868-46a5-8db2-d102701f01b6",
+            "username": "manager",
+            "name": "Manager",
+            "role": "staff",
+            "passwordHash": "b261bcb05a30a4da41a5e0cec6377e60:b33fdad1e139d4b1f783da79732c524490627ffa5f95ef1812af6403646d0f23ed32456e38da3b3fb34439f20a58b60f7ea16d229096065384ab0df3280da5b8",
+            "active": false,
+            "createdAt": "2026-06-16T09:47:30.255Z"
+        },
+        {
+            "id": "213a1a27-549b-48ad-aaab-bb287c5ec9ed",
+            "username": "staff",
+            "name": "Staff",
+            "role": "staff",
+            "passwordHash": "4ca4d3306bb6b63a759fc6981d1a5cdb:6fb1b29243bb9c590c223ae9d6e45bb44ba63eb79d0820cfd6fb5b8942507a2cb11c707ba902f11b2c053127e49354ac8f013d7204387a298356f87464910162",
+            "active": true,
+            "createdAt": "2026-06-16T09:47:30.418Z"
+        },
+        {
+            "id": "c40afacc-ae5d-47c4-99bf-798b7d76d962",
+            "username": "manger",
+            "name": "rakesh",
+            "role": "staff",
+            "passwordHash": "132422a3a71b28a2e7702378a08d87d2:64278d69237a0d77944e35502a46e0166cac15960ac03de2e5df8b356899e59c7eaf72bac4dd1f2d56e28411557d24cddf90689669a8268d0ba7cd4b95e927ef",
+            "active": true,
+            "createdAt": "2026-06-17T08:54:33.508Z"
+        }
+    ],
+    "sessions": [
+        {
+            "token": "0003343086194d43488aa838df1093f3d826a3e1e54d5de89f358fb59776a4e0",
+            "userId": "213a1a27-549b-48ad-aaab-bb287c5ec9ed",
+            "createdAt": "2026-06-17T07:29:31.799Z",
+            "expiresAt": "2026-06-24T07:29:31.799Z"
+        },
+        {
+            "token": "7ea97d080111bbf5cdc5fbdcf5d3ec0c701a762fc6c1fcb86b09c97005a854fe",
+            "userId": "213a1a27-549b-48ad-aaab-bb287c5ec9ed",
+            "createdAt": "2026-06-17T07:30:00.145Z",
+            "expiresAt": "2026-06-24T07:30:00.145Z"
+        },
+        {
+            "token": "11b06a0ef6ccf346c06566ca55b148a5b1d2499c84fc7180f5d291c08ad2bfdf",
+            "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "createdAt": "2026-06-17T07:30:12.304Z",
+            "expiresAt": "2026-06-24T07:30:12.304Z"
+        },
+        {
+            "token": "b4bc4bf568c2120f74dbcc3f07d3a4cf128090531db611321674aa2ccdcf3b97",
+            "userId": "213a1a27-549b-48ad-aaab-bb287c5ec9ed",
+            "createdAt": "2026-06-17T07:33:07.688Z",
+            "expiresAt": "2026-06-24T07:33:07.688Z"
+        },
+        {
+            "token": "5259d3186eb811ea8d2eeda460179a1b9ef6798cef6be028c0fe40f143ad73e2",
+            "userId": "213a1a27-549b-48ad-aaab-bb287c5ec9ed",
+            "createdAt": "2026-06-17T07:33:30.242Z",
+            "expiresAt": "2026-06-24T07:33:30.242Z"
+        },
+        {
+            "token": "1030a2c24bb7d90a073acbb00da6f50ce5dd745ae751b45ac7d4bcdb5d3af6d1",
+            "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "createdAt": "2026-06-17T07:33:39.460Z",
+            "expiresAt": "2026-06-24T07:33:39.460Z"
+        },
+        {
+            "token": "8dd25281dcae9b0cdc4b40d64c311feb87770efa82cfddb83dfe0c57df8ee7a6",
+            "userId": "213a1a27-549b-48ad-aaab-bb287c5ec9ed",
+            "createdAt": "2026-06-17T07:34:10.873Z",
+            "expiresAt": "2026-06-24T07:34:10.873Z"
+        },
+        {
+            "token": "4d55741d0a8ce607a1dfc8c5c9f0d6308062857eee7e80352076613d402062c1",
+            "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "createdAt": "2026-06-17T09:03:24.376Z",
+            "expiresAt": "2026-06-24T09:03:24.376Z"
+        },
+        {
+            "token": "49caafbc4a0c8e53e6f7fc47aecd248c6503823cf3fda808685e5f20bfd3216d",
+            "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "createdAt": "2026-06-17T09:03:36.238Z",
+            "expiresAt": "2026-06-24T09:03:36.238Z"
+        },
+        {
+            "token": "dab14c345e03458e216b67d87abcbee7e8d2d13d895bba70db771e9d90f97f7f",
+            "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "createdAt": "2026-06-17T09:03:49.481Z",
+            "expiresAt": "2026-06-24T09:03:49.481Z"
+        },
+        {
+            "token": "503f6839186344eb98788f864df3b029002cf53371f2c7695a616b72d7252227",
+            "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "createdAt": "2026-06-17T09:03:57.114Z",
+            "expiresAt": "2026-06-24T09:03:57.114Z"
+        },
+        {
+            "token": "7e8e67e3d0e1999b3369ab707aae238eaa60f5b0185157b4ee8dd7b696d593f3",
+            "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "createdAt": "2026-06-17T09:06:50.624Z",
+            "expiresAt": "2026-06-24T09:06:50.624Z"
+        },
+        {
+            "token": "eecc1eceef2db642ef4f8cb565c4f74947edfd50f542c6945b13530533b956af",
+            "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "createdAt": "2026-06-17T09:07:07.152Z",
+            "expiresAt": "2026-06-24T09:07:07.152Z"
+        },
+        {
+            "token": "f47136033336b9ee53e94557b9e181f56d647e75b528f49104f2c6bfff05194d",
+            "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "createdAt": "2026-06-17T10:21:57.859Z",
+            "expiresAt": "2026-06-24T10:21:57.859Z"
+        },
+        {
+            "token": "c6632026d6c30fb9d3aafd56f00f68e460d1e10afd42d155198dbcd704fd396a",
+            "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "createdAt": "2026-06-17T10:22:02.162Z",
+            "expiresAt": "2026-06-24T10:22:02.162Z"
+        },
+        {
+            "token": "c73f7bf01f6eb07e8b1b44214d7d4a43b3a60e59192330e2e498c34080041c57",
+            "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "createdAt": "2026-06-17T10:22:03.913Z",
+            "expiresAt": "2026-06-24T10:22:03.913Z"
+        },
+        {
+            "token": "d86ca8563949594b3711bd09700718172330dcb5f6540671550e020cd97f5ed9",
+            "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "createdAt": "2026-06-17T10:22:10.198Z",
+            "expiresAt": "2026-06-24T10:22:10.198Z"
+        },
+        {
+            "token": "7d34b2e476291a1217facbe21d5c11715ab9aaef16a32d6287461d58eb87b172",
+            "userId": "213a1a27-549b-48ad-aaab-bb287c5ec9ed",
+            "createdAt": "2026-06-17T10:41:52.256Z",
+            "expiresAt": "2026-06-24T10:41:52.256Z"
+        },
+        {
+            "token": "695bb5e52063de69e8f18982edb1bd8fbbaf4ce42afbfed21ae29477a9cbadb2",
+            "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "createdAt": "2026-06-17T13:18:13.638Z",
+            "expiresAt": "2026-06-24T13:18:13.638Z"
+        },
+        {
+            "token": "a5480e4ae87288054ccc8cd1555f09db9dd2261b6c04af48488a38c0bb82180e",
+            "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "createdAt": "2026-06-17T13:18:15.184Z",
+            "expiresAt": "2026-06-24T13:18:15.184Z"
+        },
+        {
+            "token": "78920a4cf1bff40fe1aac3793e726c4fcdc6676fff30fee3101a752037f6016f",
+            "userId": "213a1a27-549b-48ad-aaab-bb287c5ec9ed",
+            "createdAt": "2026-06-17T15:40:13.157Z",
+            "expiresAt": "2026-06-24T15:40:13.157Z"
+        },
+        {
+            "token": "d23ea4de2f3b3a5335d92fefcac0014e0f13f7c78bc2b80b8128447bf7742955",
+            "userId": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "createdAt": "2026-06-18T06:13:29.215Z",
+            "expiresAt": "2026-06-25T06:13:29.215Z"
+        },
+        {
+            "token": "e75dd6976c728f9233168e1c4aa97fb0c09774860baf356f0d16ac23233261d2",
+            "userId": "213a1a27-549b-48ad-aaab-bb287c5ec9ed",
+            "createdAt": "2026-06-18T06:14:07.047Z",
+            "expiresAt": "2026-06-25T06:14:07.047Z"
+        }
+    ],
+    "vendors": [
+        {
+            "id": "96912932-753b-48b4-9bc3-3cdd172fa612",
+            "name": "ttt",
+            "createdAt": "2026-06-16T11:11:36.698Z",
+            "phone": "07369954206",
+            "gstin": "gh45657hhvhgv65676",
+            "address": "Hazaribagh"
+        },
+        {
+            "id": "fbb327a3-67be-402d-8e7d-c51255c2b4b5",
+            "name": "aluu",
+            "createdAt": "2026-06-16T11:56:22.326Z"
+        },
+        {
+            "id": "9dda87bc-e242-4d7e-a227-8a2a79864a13",
+            "name": "baigan",
+            "createdAt": "2026-06-17T06:24:15.855Z"
+        },
+        {
+            "id": "38497d50-b8da-4f6e-9eb5-436ed85b4e0d",
+            "name": "shanya",
+            "createdAt": "2026-06-17T08:48:24.250Z"
+        },
+        {
+            "id": "5eecbbca-ceb2-4792-aafe-55462c907b40",
+            "name": "random",
+            "createdAt": "2026-06-17T09:14:34.537Z"
+        }
+    ],
+    "customers": [
+        {
+            "id": "53bfc829-16cd-4f97-916b-80995fbc25ec",
+            "name": "Sopify",
+            "createdAt": "2026-06-17T07:20:41.576Z"
+        }
+    ],
+    "stock": [
+        {
+            "warehouseId": "wh-delhi",
+            "ean": "8906199310604",
+            "quantity": 884
+        },
+        {
+            "warehouseId": "wh-delhi",
+            "ean": "8906199313155",
+            "quantity": 4075
+        }
+    ],
+    "receipts": [
+        {
+            "id": "38c59e2e-1abd-4ec6-84b5-4f649b5159d6",
+            "warehouseId": "wh-delhi",
+            "ean": "8906199310604",
+            "quantity": 884,
+            "bill": "1234",
+            "vendorName": "random",
+            "vendorId": "5eecbbca-ceb2-4792-aafe-55462c907b40",
+            "date": "2026-04-01",
+            "purchasePrice": null,
+            "createdAt": "2026-06-17T09:14:34.537Z"
+        },
+        {
+            "id": "8443d990-c725-4dbf-a5a7-9e7d3a96d288",
+            "warehouseId": "wh-delhi",
+            "ean": "8906199313155",
+            "quantity": 75,
+            "bill": "567567",
+            "vendorName": "random",
+            "vendorId": "5eecbbca-ceb2-4792-aafe-55462c907b40",
+            "date": "2026-06-17",
+            "purchasePrice": null,
+            "createdAt": "2026-06-17T10:23:17.454Z"
+        },
+        {
+            "id": "60d48959-8481-4fd4-aea8-bfec7702aa88",
+            "warehouseId": "wh-delhi",
+            "ean": "8906199313155",
+            "quantity": 4000,
+            "bill": "7003",
+            "vendorName": "aluu",
+            "vendorId": "fbb327a3-67be-402d-8e7d-c51255c2b4b5",
+            "date": "2026-06-18",
+            "purchasePrice": 50,
+            "createdAt": "2026-06-18T06:17:59.359Z"
+        }
+    ],
+    "dispatches": [],
+    "adjustments": [],
+    "transfers": [],
+    "approvals": [
+        {
+            "id": "431e64c3-60ca-42ae-aacf-75b391a151c0",
+            "type": "receive",
+            "warehouseId": "wh-mumbai",
+            "payload": {
+                "ean": "96325874196325",
+                "quantity": 1000,
+                "name": null,
+                "comboSizes": null,
+                "vendorName": "Samosha",
+                "bill": "2026-100",
+                "date": "2026-06-17",
+                "purchasePrice": 10
+            },
+            "status": "rejected",
+            "requestedBy": "213a1a27-549b-48ad-aaab-bb287c5ec9ed",
+            "requestedByName": "Staff",
+            "createdAt": "2026-06-17T07:15:47.861Z",
+            "decidedBy": "d364e0f6-76ff-4b8a-b1ad-35650486906a",
+            "decidedByName": "Administrator",
+            "decidedAt": "2026-06-17T07:17:20.961Z"
+        }
+    ]
+}

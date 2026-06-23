@@ -172,14 +172,14 @@ export default function AdminPage() {
             {isAdmin && ", and users"}.
           </p>
         </div>
-        {isAdmin && (
+        {/* {isAdmin && (
           <Link
             href="/admin/import"
             className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700"
           >
             📥 Bulk Import
           </Link>
-        )}
+        )} */}
       </header>
 
       {error && (
