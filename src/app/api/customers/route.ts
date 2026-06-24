@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { listCustomers, createCustomer, deleteCustomers } from "@/lib/db";
 import { getCurrentUser, hasRole } from "@/lib/auth";
+import { currentChannel } from "@/lib/channel";
 
 /** Any logged-in user: list customers (used by forms). */
 export async function GET(request: Request) {
   const me = await getCurrentUser(request);
   if (!me) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
-  return NextResponse.json(await listCustomers());
+  return NextResponse.json(await listCustomers(await currentChannel()));
 }
 
 /** Admin only: create a customer. */
@@ -21,7 +22,10 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
-  const result = await createCustomer(body as Record<string, string>);
+  const result = await createCustomer(
+    body as Record<string, string>,
+    await currentChannel()
+  );
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }

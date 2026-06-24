@@ -38,10 +38,16 @@ export interface PublicUser {
   createdAt: string;
 }
 
+/** Sales channel a warehouse serves. ecom = online / e-commerce stock,
+ *  b2b = wholesale / business stock. The same physical location can appear once
+ *  per channel; their inventory is tracked completely separately. */
+export type Channel = "ecom" | "b2b";
+
 export interface Warehouse {
   id: string;
   name: string;
   location: string;
+  channel: Channel;
 }
 
 // ---- Parties: vendors (suppliers) & customers -------------------------------
@@ -54,6 +60,7 @@ interface PartyBase {
   gstin?: string; // tax id
   address?: string;
   note?: string;
+  channel: Channel; // which sales channel this party belongs to
   createdAt: string;
 }
 
@@ -110,6 +117,9 @@ export interface PackBarcode {
  *  can be sold in, e.g. [10, 5] = sold as packs of 10 or packs of 5 pieces. */
 export interface Product {
   ean: string;
+  /** Sales channel this product's catalog entry belongs to. The same EAN can
+   *  exist once per channel as separate records (separate e-com / B2B catalogs). */
+  channel: Channel;
   name: string;
   comboSizes: number[];
   /** Extra barcodes — one EAN per pack size (pack of 10, pack of 5, single …).
@@ -229,6 +239,7 @@ export interface ComboComponent {
  *  not stocked themselves — they're built from on-hand pieces. */
 export interface Combo {
   id: string;
+  channel: Channel; // which sales channel this combo belongs to
   name: string;
   barcode?: string; // optional scannable EAN for the whole combo
   price?: number; // optional combo selling price
@@ -317,6 +328,7 @@ export interface POLineItem {
  *  NOT add stock — goods are received separately via Stock In when they arrive. */
 export interface PurchaseOrder {
   id: string;
+  channel: Channel; // which sales channel this PO belongs to
   poNumber: string; // e.g. PO-0001
   date: string; // YYYY-MM-DD
   warehouseId?: string; // where goods will be received
@@ -395,6 +407,7 @@ export interface ROLineItem {
  *  quantity from the warehouse (all-or-nothing) and logs a dispatch. */
 export interface ReleaseOrder {
   id: string;
+  channel: Channel; // which sales channel this RO belongs to
   roNumber: string; // RO-0001
   date: string; // YYYY-MM-DD
   source?: string; // Blinkit / other platform

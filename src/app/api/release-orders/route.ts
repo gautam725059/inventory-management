@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { listReleaseOrders, createReleaseOrder } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { currentChannel } from "@/lib/channel";
 import type { ReleaseOrderInput, ROLineInput } from "@/lib/types";
 
 const MAX_LINES = 10;
@@ -9,7 +10,7 @@ const MAX_LINES = 10;
 export async function GET(request: Request) {
   const me = await getCurrentUser(request);
   if (!me) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
-  return NextResponse.json(await listReleaseOrders());
+  return NextResponse.json(await listReleaseOrders(await currentChannel()));
 }
 
 /** Any logged-in user (incl. staff): create an RO → dispatches stock. */

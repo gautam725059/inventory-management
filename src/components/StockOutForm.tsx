@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useChannel, scanWord } from "@/lib/useChannel";
 import type { WarehouseStockLine, Customer } from "@/lib/types";
 
 const inputClass =
@@ -43,6 +44,7 @@ export default function StockOutForm({
   onDispatched,
   onError,
 }: Props) {
+  const channel = useChannel();
   const inStock = lines.filter((l) => l.quantity > 0);
 
   const [ean, setEan] = useState("");
@@ -166,25 +168,25 @@ export default function StockOutForm({
         Stock out — scan a pack barcode
       </h3>
       <p className="mb-4 text-sm text-slate-500">
-        Scan or type the EAN. Each pack size (single, pack of 10, pack of 5 …)
-        has its own barcode and auto-fills the pack size.
+        Scan or type the {scanWord(channel)}. Each pack size (single, pack of 10,
+        pack of 5 …) has its own barcode and auto-fills the pack size.
       </p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label htmlFor="ean" className={labelClass}>
-            Scan / enter EAN *
+            Scan / enter {scanWord(channel)} *
           </label>
           <input
             id="ean"
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
-            inputMode="numeric"
+            inputMode={channel === "b2b" ? "text" : "numeric"}
             autoComplete="off"
             className={inputClass}
             value={ean}
             onChange={(e) => setEan(e.target.value)}
-            placeholder="Scan barcode or type the EAN…"
+            placeholder={`Scan barcode or type the ${scanWord(channel)}…`}
             required
           />
           {resolved && (

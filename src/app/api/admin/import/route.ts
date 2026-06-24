@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { importCatalog } from "@/lib/db";
 import { getCurrentUser, hasRole } from "@/lib/auth";
+import { currentChannel } from "@/lib/channel";
 import { parseCatalogText } from "@/lib/importParser";
 
 /** Admin only. Body: { text: string, preview?: boolean }.
@@ -37,6 +38,6 @@ export async function POST(request: Request) {
     });
   }
 
-  const result = await importCatalog(parsed.items);
+  const result = await importCatalog(parsed.items, await currentChannel());
   return NextResponse.json({ imported: true, summary: parsed.summary, result });
 }

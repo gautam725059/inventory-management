@@ -5,10 +5,12 @@ import Link from "next/link";
 import ImageEditor from "@/components/ImageEditor";
 import BarcodeEditor from "@/components/BarcodeEditor";
 import { useMe } from "@/lib/useMe";
+import { useChannel, codeWord } from "@/lib/useChannel";
 import type { ProductCatalogEntry } from "@/lib/types";
 
 export default function CatalogPage() {
   const { me } = useMe();
+  const channel = useChannel();
   const isAdmin = me?.role === "admin";
   const [products, setProducts] = useState<ProductCatalogEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -144,7 +146,7 @@ export default function CatalogPage() {
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search by product name or EAN…"
+        placeholder={`Search by product name or ${codeWord(channel)}…`}
         className="mb-5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
       />
 
@@ -285,7 +287,7 @@ export default function CatalogPage() {
                       )}
                     </div>
                     <div className="text-xs text-slate-400">
-                      EAN {p.ean}
+                      {codeWord(channel)} {p.ean}
                       {p.barcodes.length > 0 && (
                         <span className="ml-2">
                           · {p.barcodes.length} pack barcode

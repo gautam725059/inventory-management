@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useChannel, scanWord } from "@/lib/useChannel";
 import type { WarehouseStockLine, Customer } from "@/lib/types";
 
 const inputClass =
@@ -42,6 +43,7 @@ export default function BulkStockOutForm({
   onDispatched,
   onError,
 }: Props) {
+  const channel = useChannel();
   const inStock = useMemo(() => lines.filter((l) => l.quantity > 0), [lines]);
 
   const [rows, setRows] = useState<Row[]>([{ ...EMPTY_ROW }]);
@@ -213,14 +215,14 @@ export default function BulkStockOutForm({
             <div key={i} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-12 sm:items-end">
                 <div className="sm:col-span-5">
-                  <label className={labelClass}>Scan / enter EAN</label>
+                  <label className={labelClass}>Scan / enter {scanWord(channel)}</label>
                   <input
                     className={inputClass}
-                    inputMode="numeric"
+                    inputMode={channel === "b2b" ? "text" : "numeric"}
                     autoComplete="off"
                     value={row.ean}
                     onChange={(e) => setRow(i, { ean: e.target.value, chosenSize: 1 })}
-                    placeholder="Scan barcode or type EAN…"
+                    placeholder={`Scan barcode or type ${scanWord(channel)}…`}
                   />
                 </div>
                 <div className="sm:col-span-3">

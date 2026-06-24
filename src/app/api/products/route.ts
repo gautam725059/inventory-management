@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { listCatalog, deleteProducts } from "@/lib/db";
 import { getCurrentUser, hasRole } from "@/lib/auth";
+import { currentChannel } from "@/lib/channel";
 import { toCsv, csvResponse } from "@/lib/csv";
 
 export async function GET(request: Request) {
-  const catalog = await listCatalog();
+  const catalog = await listCatalog(await currentChannel());
 
   const format = new URL(request.url).searchParams.get("format");
   if (format === "csv") {
@@ -54,6 +55,6 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "No products selected." }, { status: 400 });
   }
 
-  const deleted = await deleteProducts(eans);
+  const deleted = await deleteProducts(eans, await currentChannel());
   return NextResponse.json({ deleted });
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { updateProduct } from "@/lib/db";
+import { currentChannel } from "@/lib/channel";
 import type { ProductUpdateInput, PackBarcode } from "@/lib/types";
 
 type Context = { params: Promise<{ ean: string }> };
@@ -118,7 +119,7 @@ export async function PUT(request: Request, { params }: Context) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
 
-  const ok = await updateProduct(ean, result.value);
+  const ok = await updateProduct(ean, result.value, await currentChannel());
   if (!ok) {
     return NextResponse.json({ error: "Product not found." }, { status: 404 });
   }

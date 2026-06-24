@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useChannel, codeLabel, codeWord } from "@/lib/useChannel";
 import type { Vendor, ProductCatalogEntry } from "@/lib/types";
 
 function today(): string {
@@ -36,6 +37,7 @@ interface Props {
  *  stock into a warehouse, with an optional product image. Unlike Stock In,
  *  the EAN is typed/scanned here because the product doesn't exist yet. */
 export default function AddProductForm({ warehouseId, onAdded, onError }: Props) {
+  const channel = useChannel();
   const [form, setForm] = useState(EMPTY_FORM);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [products, setProducts] = useState<ProductCatalogEntry[]>([]);
@@ -79,7 +81,7 @@ export default function AddProductForm({ warehouseId, onAdded, onError }: Props)
     e.preventDefault();
     onError("");
     if (!eanValid) {
-      onError("EAN must be 6–14 digits.");
+      onError(`${codeWord(channel)} must be 6–14 digits.`);
       return;
     }
     if (!form.name.trim()) {
@@ -167,21 +169,23 @@ export default function AddProductForm({ warehouseId, onAdded, onError }: Props)
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <label htmlFor="np-ean" className={labelClass}>
-            EAN / Barcode *
+            {codeLabel(channel)} *
           </label>
           <input
             id="np-ean"
             className={inputClass}
             value={form.ean}
             onChange={(e) => setForm({ ...form, ean: e.target.value })}
-            placeholder="Scan or type a new barcode"
+            placeholder={`Scan or type a new ${codeWord(channel)}`}
             inputMode="numeric"
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
             required
           />
           {form.ean.trim() && !eanValid && (
-            <p className="mt-1 text-xs text-red-600">EAN must be 6–14 digits.</p>
+            <p className="mt-1 text-xs text-red-600">
+              {codeWord(channel)} must be 6–14 digits.
+            </p>
           )}
           {existing && (
             <p className="mt-1 text-xs text-amber-600">

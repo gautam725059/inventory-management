@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useChannel, codeLabel, codeWord } from "@/lib/useChannel";
 import type { Vendor, ProductCatalogEntry } from "@/lib/types";
 
 /** Today's date as YYYY-MM-DD, for the date input default. */
@@ -38,6 +39,7 @@ interface Props {
  *  product name is resolved from the catalog (read-only). Receiving is blocked
  *  unless the EAN matches an existing product. */
 export default function ReceiveForm({ warehouseId, onReceived, onError }: Props) {
+  const channel = useChannel();
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -79,7 +81,9 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
     e.preventDefault();
     // Block unless the EAN resolves to an existing product.
     if (!matchedProduct) {
-      onError("EAN does not match any product. Add it via Add New Product first.");
+      onError(
+        `${codeWord(channel)} does not match any product. Add it via Add New Product first.`
+      );
       return;
     }
     setSaving(true);
@@ -131,14 +135,14 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <label htmlFor="ean" className={labelClass}>
-            EAN / Barcode *
+            {codeLabel(channel)} *
           </label>
           <input
             id="ean"
             className={inputClass}
             value={form.ean}
             onChange={(e) => setForm({ ...form, ean: e.target.value })}
-            placeholder="Scan or type the EAN…"
+            placeholder={`Scan or type the ${codeWord(channel)}…`}
             inputMode="numeric"
             autoComplete="off"
             // eslint-disable-next-line jsx-a11y/no-autofocus
@@ -152,7 +156,7 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
           )}
           {noMatch && (
             <p className="mt-1 text-xs font-medium text-red-600">
-              No product matches this EAN.
+              No product matches this {codeWord(channel)}.
             </p>
           )}
         </div>

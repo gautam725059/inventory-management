@@ -10,6 +10,7 @@ import type {
   Session,
   PublicUser,
   Role,
+  Channel,
   Warehouse,
   Product,
   PackBarcode,
@@ -61,12 +62,38 @@ import type {
 const DATA_DIR = path.join(process.cwd(), "data");
 const DATA_FILE = path.join(DATA_DIR, "store.json");
 
-// The three warehouses are seeded on first run. Each holds its own stock.
+// The warehouses are seeded on first run. Each (warehouse × channel) holds its
+// own, separate stock. The same physical locations exist once for e-commerce
+// and once for B2B, so B2B inventory never mixes with the e-com inventory.
 const DEFAULT_WAREHOUSES: Warehouse[] = [
-  { id: "wh-mumbai", name: "Mumbai Warehouse", location: "Bhiwandi, MH" },
-  { id: "wh-delhi", name: "Haryana Warehouse", location: "Farrukhnagar, HR" },
-  { id: "wh-bengaluru", name: "Bengaluru Warehouse", location: "Whitefield, KA" },
+  // E-commerce channel
+  { id: "wh-mumbai", name: "Mumbai Warehouse", location: "Bhiwandi, MH", channel: "ecom" },
+  { id: "wh-delhi", name: "Haryana Warehouse", location: "Farrukhnagar, HR", channel: "ecom" },
+  { id: "wh-bengaluru", name: "Bengaluru Warehouse", location: "Whitefield, KA", channel: "ecom" },
+  // B2B channel
+  { id: "wh-mumbai-b2b", name: "Mumbai Warehouse", location: "Bhiwandi, MH", channel: "b2b" },
+  { id: "wh-delhi-b2b", name: "Haryana Warehouse", location: "Farrukhnagar, HR", channel: "b2b" },
+  { id: "wh-bengaluru-b2b", name: "Bengaluru Warehouse", location: "Whitefield, KA", channel: "b2b" },
 ];
+
+/** Coerce stored warehouses into a clean list: default a missing channel to
+ *  "ecom" (older records), then ensure every default warehouse — including the
+ *  B2B ones added later — exists, so existing stores gain the B2B warehouses. */
+function normalizeWarehouses(raw: unknown): Warehouse[] {
+  const stored = Array.isArray(raw) ? (raw as Partial<Warehouse>[]) : [];
+  const out: Warehouse[] = stored
+    .filter((w) => w && typeof w.id === "string")
+    .map((w) => ({
+      id: w.id as string,
+      name: typeof w.name === "string" ? w.name : (w.id as string),
+      location: typeof w.location === "string" ? w.location : "",
+      channel: w.channel === "b2b" ? "b2b" : "ecom",
+    }));
+  for (const d of DEFAULT_WAREHOUSES) {
+    if (!out.some((w) => w.id === d.id)) out.push({ ...d });
+  }
+  return out;
+}
 
 function emptyStore(): Store {
   return {
@@ -117,14 +144,12 @@ let writeChain: Promise<unknown> = Promise.resolve();
  *  Store, filling in newer fields on older records. */
 function normalizeStore(parsed: Partial<Store>): Store {
   return {
-    warehouses:
-      Array.isArray(parsed.warehouses) && parsed.warehouses.length > 0
-        ? parsed.warehouses
-        : emptyStore().warehouses,
+    warehouses: normalizeWarehouses(parsed.warehouses),
     // Normalize products so older records gain the newer fields.
     products: Array.isArray(parsed.products)
       ? parsed.products.map((p) => ({
           ...p,
+          channel: p.channel === "b2b" ? "b2b" : "ecom",
           comboSizes: Array.isArray(p.comboSizes) ? p.comboSizes : [],
           barcodes: normalizeBarcodes(p.barcodes),
           reorderLevel: typeof p.reorderLevel === "number" ? p.reorderLevel : 0,
@@ -137,8 +162,18 @@ function normalizeStore(parsed: Partial<Store>): Store {
       : [],
     users: Array.isArray(parsed.users) ? parsed.users : [],
     sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [],
-    vendors: Array.isArray(parsed.vendors) ? parsed.vendors : [],
-    customers: Array.isArray(parsed.customers) ? parsed.customers : [],
+    vendors: Array.isArray(parsed.vendors)
+      ? parsed.vendors.map((v) => ({
+          ...v,
+          channel: v.channel === "b2b" ? "b2b" : "ecom",
+        }))
+      : [],
+    customers: Array.isArray(parsed.customers)
+      ? parsed.customers.map((c) => ({
+          ...c,
+          channel: c.channel === "b2b" ? "b2b" : "ecom",
+        }))
+      : [],
     stock: Array.isArray(parsed.stock) ? parsed.stock : [],
     receipts: Array.isArray(parsed.receipts) ? parsed.receipts : [],
     dispatches: Array.isArray(parsed.dispatches) ? parsed.dispatches : [],
@@ -151,6 +186,7 @@ function normalizeStore(parsed: Partial<Store>): Store {
     combos: Array.isArray(parsed.combos)
       ? parsed.combos.map((c) => ({
           ...c,
+          channel: c.channel === "b2b" ? "b2b" : "ecom",
           components: Array.isArray(c.components)
             ? c.components.filter(
                 (k) =>
@@ -163,10 +199,16 @@ function normalizeStore(parsed: Partial<Store>): Store {
         }))
       : [],
     purchaseOrders: Array.isArray(parsed.purchaseOrders)
-      ? parsed.purchaseOrders
+      ? parsed.purchaseOrders.map((p) => ({
+          ...p,
+          channel: p.channel === "b2b" ? "b2b" : "ecom",
+        }))
       : [],
     releaseOrders: Array.isArray(parsed.releaseOrders)
-      ? parsed.releaseOrders
+      ? parsed.releaseOrders.map((r) => ({
+          ...r,
+          channel: r.channel === "b2b" ? "b2b" : "ecom",
+        }))
       : [],
   };
 }
@@ -279,36 +321,82 @@ function buildLine(
   };
 }
 
-/** Find a party by case-insensitive name, creating it if new. Returns its id
- *  (or undefined for a blank name). Mutates the passed list. */
+/** Find a party by case-insensitive name within a channel, creating it if new.
+ *  Returns its id (or undefined for a blank name). Mutates the passed list. */
 function upsertPartyByName(
   list: Vendor[],
-  name: string | undefined
+  name: string | undefined,
+  channel: Channel
 ): string | undefined {
   const n = name?.trim();
   if (!n) return undefined;
-  const existing = list.find((p) => p.name.toLowerCase() === n.toLowerCase());
+  const existing = list.find(
+    (p) => p.channel === channel && p.name.toLowerCase() === n.toLowerCase()
+  );
   if (existing) return existing.id;
   const created: Vendor = {
     id: randomUUID(),
     name: n,
+    channel,
     createdAt: new Date().toISOString(),
   };
   list.push(created);
   return created.id;
 }
 
+// ---- Channel scoping helpers ------------------------------------------------
+
+/** The channel a warehouse belongs to (defaults to "ecom" if not found). */
+function channelOf(store: Store, warehouseId: string): Channel {
+  return store.warehouses.find((w) => w.id === warehouseId)?.channel ?? "ecom";
+}
+
+/** Ids of all warehouses in a channel. */
+function warehouseIdsForChannel(store: Store, channel: Channel): Set<string> {
+  return new Set(
+    store.warehouses.filter((w) => w.channel === channel).map((w) => w.id)
+  );
+}
+
+/** A product in a specific channel's catalog, matched by its primary EAN. */
+function findProduct(
+  store: Store,
+  ean: string,
+  channel: Channel
+): Product | undefined {
+  return store.products.find((p) => p.ean === ean && p.channel === channel);
+}
+
+/** Resolve a scanned code to a product within one channel — primary EAN first,
+ *  then any registered pack barcode. */
+function resolveProduct(
+  store: Store,
+  scanned: string,
+  channel: Channel
+): Product | undefined {
+  return (
+    store.products.find((p) => p.channel === channel && p.ean === scanned) ??
+    store.products.find(
+      (p) => p.channel === channel && p.barcodes.some((b) => b.ean === scanned)
+    )
+  );
+}
+
 // ---- Reads ------------------------------------------------------------------
 
-export async function listWarehouses(): Promise<WarehouseSummary[]> {
+export async function listWarehouses(
+  channel?: Channel
+): Promise<WarehouseSummary[]> {
   const store = await readStore();
-  return store.warehouses.map((w) => {
+  return store.warehouses
+    .filter((w) => !channel || w.channel === channel)
+    .map((w) => {
     const allRows = store.stock.filter((s) => s.warehouseId === w.id);
     const rows = allRows.filter((s) => s.quantity > 0);
     // Low / out of stock: at or below the reorder level. With reorderLevel 0
     // this flags an emptied (quantity 0) line as out of stock.
     const lowStockCount = allRows.filter((r) => {
-      const product = store.products.find((p) => p.ean === r.ean);
+      const product = findProduct(store, r.ean, w.channel);
       const reorderLevel = product?.reorderLevel ?? 0;
       return r.quantity <= reorderLevel;
     }).length;
@@ -331,11 +419,7 @@ export async function getWarehouseDetail(
   const lines: WarehouseStockLine[] = store.stock
     .filter((s) => s.warehouseId === id)
     .map((s) =>
-      buildLine(
-        store.products.find((p) => p.ean === s.ean),
-        s.ean,
-        s.quantity
-      )
+      buildLine(findProduct(store, s.ean, warehouse.channel), s.ean, s.quantity)
     )
     .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -355,7 +439,7 @@ export async function getWarehouseMovements(
   if (!warehouse) return undefined;
 
   const nameFor = (ean: string) =>
-    store.products.find((p) => p.ean === ean)?.name ?? "Unknown product";
+    findProduct(store, ean, warehouse.channel)?.name ?? "Unknown product";
 
   const ins: Movement[] = store.receipts
     .filter((r) => r.warehouseId === id)
@@ -448,12 +532,17 @@ export async function getWarehouseMovements(
   );
 }
 
-/** All distinct products with stock totalled across every warehouse. */
-export async function listCatalog(): Promise<ProductCatalogEntry[]> {
+/** All distinct products in a channel with stock totalled across that channel's
+ *  warehouses. */
+export async function listCatalog(
+  channel: Channel = "ecom"
+): Promise<ProductCatalogEntry[]> {
   const store = await readStore();
+  const warehouses = store.warehouses.filter((w) => w.channel === channel);
   return store.products
+    .filter((p) => p.channel === channel)
     .map((p) => {
-      const byWarehouse = store.warehouses.map((w) => ({
+      const byWarehouse = warehouses.map((w) => ({
         warehouseId: w.id,
         warehouseName: w.name,
         quantity:
@@ -490,17 +579,18 @@ export async function receiveStock(
   return mutate((store) => {
     const warehouse = store.warehouses.find((w) => w.id === warehouseId);
     if (!warehouse) throw new Error("Warehouse not found.");
+    const channel = warehouse.channel;
 
     const scanned = input.ean.trim();
 
-    // Resolve to an existing product by primary EAN first, then pack barcode.
-    let product =
-      store.products.find((p) => p.ean === scanned) ??
-      store.products.find((p) => p.barcodes.some((b) => b.ean === scanned));
+    // Resolve to an existing product in this channel — primary EAN, then pack
+    // barcode.
+    let product = resolveProduct(store, scanned, channel);
 
     if (!product) {
       product = {
         ean: scanned,
+        channel,
         name: input.name?.trim() || `Product ${scanned}`,
         comboSizes: input.comboSizes ?? [],
         barcodes: [],
@@ -533,7 +623,7 @@ export async function receiveStock(
     }
     row.quantity += input.quantity;
 
-    const vendorId = upsertPartyByName(store.vendors, input.vendorName);
+    const vendorId = upsertPartyByName(store.vendors, input.vendorName, channel);
 
     store.receipts.push({
       id: randomUUID(),
@@ -563,13 +653,11 @@ export async function dispatchStock(
   return mutate((store) => {
     const warehouse = store.warehouses.find((w) => w.id === warehouseId);
     if (!warehouse) throw new Error("Warehouse not found.");
+    const channel = warehouse.channel;
 
     const scanned = input.ean.trim();
-    // Resolve the scanned barcode to its product — match the primary EAN first,
-    // then any registered pack barcode.
-    const product =
-      store.products.find((p) => p.ean === scanned) ??
-      store.products.find((p) => p.barcodes.some((b) => b.ean === scanned));
+    // Resolve the scanned barcode to its product within this channel.
+    const product = resolveProduct(store, scanned, channel);
     // Stock is always keyed by the product's primary EAN.
     const stockEan = product?.ean ?? scanned;
 
@@ -586,7 +674,11 @@ export async function dispatchStock(
     }
     row.quantity -= pieces;
 
-    const customerId = upsertPartyByName(store.customers, input.customerName);
+    const customerId = upsertPartyByName(
+      store.customers,
+      input.customerName,
+      channel
+    );
 
     store.dispatches.push({
       id: randomUUID(),
@@ -618,14 +710,13 @@ export async function dispatchStockBulk(
   return mutate((store) => {
     const warehouse = store.warehouses.find((w) => w.id === warehouseId);
     if (!warehouse) throw new Error("Warehouse not found.");
+    const channel = warehouse.channel;
     if (!input.lines.length) throw new Error("Add at least one line to dispatch.");
 
     // Resolve each line to a product + its stock-keyed EAN and piece count.
     const resolved = input.lines.map((ln) => {
       const scanned = ln.ean.trim();
-      const product =
-        store.products.find((p) => p.ean === scanned) ??
-        store.products.find((p) => p.barcodes.some((b) => b.ean === scanned));
+      const product = resolveProduct(store, scanned, channel);
       return {
         product,
         stockEan: product?.ean ?? scanned,
@@ -644,7 +735,7 @@ export async function dispatchStockBulk(
         store.stock.find((s) => s.warehouseId === warehouseId && s.ean === stockEan)
           ?.quantity ?? 0;
       if (total > have) {
-        const name = store.products.find((p) => p.ean === stockEan)?.name ?? stockEan;
+        const name = findProduct(store, stockEan, channel)?.name ?? stockEan;
         errors.push(`"${name}" — need ${total}, only ${have} available`);
       }
     }
@@ -653,7 +744,11 @@ export async function dispatchStockBulk(
     }
 
     // Deduct + log a dispatch per line (shared date / invoice / customer).
-    const customerId = upsertPartyByName(store.customers, input.customerName);
+    const customerId = upsertPartyByName(
+      store.customers,
+      input.customerName,
+      channel
+    );
     const now = new Date().toISOString();
     let totalPieces = 0;
     for (const r of resolved) {
@@ -684,7 +779,10 @@ export async function dispatchStockBulk(
 /** Bulk-import master products with their pack barcodes. Creates new products,
  *  merges packs into existing ones (updating size/name/price on matching EANs).
  *  Pack EANs that collide with another product's primary EAN are skipped. */
-export async function importCatalog(items: ImportItem[]): Promise<ImportResult> {
+export async function importCatalog(
+  items: ImportItem[],
+  channel: Channel = "ecom"
+): Promise<ImportResult> {
   return mutate<ImportResult>((store) => {
     let productsCreated = 0;
     let productsUpdated = 0;
@@ -694,10 +792,11 @@ export async function importCatalog(items: ImportItem[]): Promise<ImportResult> 
       const ean = item.ean.trim();
       if (!ean) continue;
 
-      let product = store.products.find((p) => p.ean === ean);
+      let product = findProduct(store, ean, channel);
       if (!product) {
         product = {
           ean,
+          channel,
           name: item.name.trim() || `Product ${ean}`,
           comboSizes: [],
           barcodes: [],
@@ -719,9 +818,12 @@ export async function importCatalog(items: ImportItem[]): Promise<ImportResult> 
         product.comboSizes = [...merged].sort((a, b) => a - b);
       }
 
-      // EANs owned by OTHER products (can't reuse as a pack barcode here).
+      // EANs owned by OTHER products in this channel (can't reuse as a pack
+      // barcode here).
       const otherPrimary = new Set(
-        store.products.filter((p) => p.ean !== product!.ean).map((p) => p.ean)
+        store.products
+          .filter((p) => p.channel === channel && p.ean !== product!.ean)
+          .map((p) => p.ean)
       );
 
       for (const b of normalizeBarcodes(item.barcodes)) {
@@ -746,10 +848,11 @@ export async function importCatalog(items: ImportItem[]): Promise<ImportResult> 
  *  level. */
 export async function updateProduct(
   ean: string,
-  input: ProductUpdateInput
+  input: ProductUpdateInput,
+  channel: Channel = "ecom"
 ): Promise<boolean> {
   return mutate((store) => {
-    const product = store.products.find((p) => p.ean === ean);
+    const product = findProduct(store, ean, channel);
     if (!product) return [store, false];
     if (typeof input.name === "string" && input.name.trim()) {
       product.name = input.name.trim();
@@ -762,7 +865,7 @@ export async function updateProduct(
       // product's primary EAN or barcode.
       const taken = new Set<string>();
       for (const p of store.products) {
-        if (p.ean === product.ean) continue;
+        if (p.channel !== channel || p.ean === product.ean) continue;
         taken.add(p.ean);
         p.barcodes.forEach((b) => taken.add(b.ean));
       }
@@ -806,16 +909,27 @@ export async function removeStockLine(
  *  stock rows everywhere, and strips the EANs from any combo recipes so they
  *  don't dangle. Historical receipts/dispatches are kept as an audit trail.
  *  Returns the number of products actually removed. */
-export async function deleteProducts(eans: string[]): Promise<number> {
+export async function deleteProducts(
+  eans: string[],
+  channel: Channel = "ecom"
+): Promise<number> {
   const set = new Set(eans.map((e) => e.trim()).filter(Boolean));
   if (set.size === 0) return 0;
   return mutate((store) => {
+    // Only delete products in this channel; collect their stock rows by the
+    // channel's warehouse ids so the other channel's identical EANs are kept.
+    const whIds = warehouseIdsForChannel(store, channel);
     const before = store.products.length;
-    store.products = store.products.filter((p) => !set.has(p.ean));
+    store.products = store.products.filter(
+      (p) => !(p.channel === channel && set.has(p.ean))
+    );
     const removed = before - store.products.length;
     if (removed > 0) {
-      store.stock = store.stock.filter((s) => !set.has(s.ean));
+      store.stock = store.stock.filter(
+        (s) => !(whIds.has(s.warehouseId) && set.has(s.ean))
+      );
       for (const c of store.combos) {
+        if (c.channel !== channel) continue;
         c.components = c.components.filter((k) => !set.has(k.ean));
       }
     }
@@ -864,7 +978,7 @@ export async function adjustStock(
       createdAt: new Date().toISOString(),
     });
 
-    const product = store.products.find((p) => p.ean === ean);
+    const product = findProduct(store, ean, warehouse.channel);
     return [store, buildLine(product, ean, row.quantity)];
   });
 }
@@ -886,6 +1000,9 @@ export async function transferStock(
     const from = store.warehouses.find((w) => w.id === fromWarehouseId);
     const to = store.warehouses.find((w) => w.id === toWarehouseId);
     if (!from || !to) throw new Error("Warehouse not found.");
+    if (from.channel !== to.channel) {
+      throw new Error("Can't transfer stock between different channels.");
+    }
 
     const fromRow = store.stock.find(
       (s) => s.warehouseId === fromWarehouseId && s.ean === ean
@@ -920,7 +1037,7 @@ export async function transferStock(
       createdAt: new Date().toISOString(),
     });
 
-    const product = store.products.find((p) => p.ean === ean);
+    const product = findProduct(store, ean, from.channel);
     return [
       store,
       {
@@ -936,12 +1053,16 @@ export async function transferStock(
 /** Inventory valuation for the admin panel: per-product product value
  *  (stock × selling price) and purchase value (stock × purchase price), plus
  *  grand totals. */
-export async function getValuation(): Promise<InventoryValuation> {
+export async function getValuation(
+  channel: Channel = "ecom"
+): Promise<InventoryValuation> {
   const store = await readStore();
+  const whIds = warehouseIdsForChannel(store, channel);
   const products: ProductValue[] = store.products
+    .filter((p) => p.channel === channel)
     .map((p) => {
       const quantity = store.stock
-        .filter((s) => s.ean === p.ean)
+        .filter((s) => whIds.has(s.warehouseId) && s.ean === p.ean)
         .reduce((sum, s) => sum + s.quantity, 0);
       const sellingPrice = p.sellingPrice ?? 0;
       const purchasePrice = p.purchasePrice ?? 0;
@@ -970,9 +1091,14 @@ export async function getValuation(): Promise<InventoryValuation> {
 /** Business report over an optional [from, to] date range (inclusive,
  *  YYYY-MM-DD). Sales revenue/profit use current product prices; purchase spend
  *  uses each receipt's recorded cost. */
-export async function getReports(from?: string, to?: string): Promise<Report> {
+export async function getReports(
+  from?: string,
+  to?: string,
+  channel: Channel = "ecom"
+): Promise<Report> {
   const store = await readStore();
-  const product = (ean: string) => store.products.find((p) => p.ean === ean);
+  const whIds = warehouseIdsForChannel(store, channel);
+  const product = (ean: string) => findProduct(store, ean, channel);
   const dayOf = (date: string | undefined, createdAt: string) =>
     date || createdAt.slice(0, 10);
   const inRange = (d: string) => (!from || d >= from) && (!to || d <= to);
@@ -1013,6 +1139,7 @@ export async function getReports(from?: string, to?: string): Promise<Report> {
   let cogs = 0;
   let salesCount = 0;
   for (const d of store.dispatches) {
+    if (!whIds.has(d.warehouseId)) continue;
     const day = dayOf(d.date, d.createdAt);
     if (!inRange(day)) continue;
     const p = product(d.ean);
@@ -1035,6 +1162,7 @@ export async function getReports(from?: string, to?: string): Promise<Report> {
   let spend = 0;
   let purchaseCount = 0;
   for (const rc of store.receipts) {
+    if (!whIds.has(rc.warehouseId)) continue;
     const day = dayOf(rc.date, rc.createdAt);
     if (!inRange(day)) continue;
     const lineSpend = rc.quantity * (rc.purchasePrice ?? 0);
@@ -1049,8 +1177,9 @@ export async function getReports(from?: string, to?: string): Promise<Report> {
 
   const profit = revenue - cogs;
 
-  // Low stock across all warehouses.
+  // Low stock across this channel's warehouses.
   const lowStock: LowStockRow[] = store.stock
+    .filter((s) => whIds.has(s.warehouseId))
     .map((s) => {
       const p = product(s.ean);
       const reorderLevel = p?.reorderLevel ?? 0;
@@ -1067,7 +1196,7 @@ export async function getReports(from?: string, to?: string): Promise<Report> {
     .filter((r) => r.quantity <= r.reorderLevel)
     .sort((a, b) => a.quantity - b.quantity);
 
-  const valuation = await getValuation();
+  const valuation = await getValuation(channel);
 
   return {
     from,
@@ -1140,12 +1269,15 @@ export async function createAdjustApproval(
   });
 }
 
-/** All approvals, newest first. */
-export async function listApprovals(): Promise<Approval[]> {
+/** All approvals for a channel (by their warehouse), newest first. */
+export async function listApprovals(
+  channel: Channel = "ecom"
+): Promise<Approval[]> {
   const store = await readStore();
-  return [...store.approvals].sort((a, b) =>
-    b.createdAt.localeCompare(a.createdAt)
-  );
+  const whIds = warehouseIdsForChannel(store, channel);
+  return store.approvals
+    .filter((a) => whIds.has(a.warehouseId))
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 /** Approve or reject a pending stock-in. Approving applies the receive.
@@ -1202,20 +1334,34 @@ function cleanPartyInput(input: PartyInput) {
   };
 }
 
-export async function listVendors(): Promise<Vendor[]> {
+export async function listVendors(channel: Channel = "ecom"): Promise<Vendor[]> {
   const store = await readStore();
-  return [...store.vendors].sort((a, b) => a.name.localeCompare(b.name));
+  return store.vendors
+    .filter((v) => v.channel === channel)
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export async function listCustomers(): Promise<Customer[]> {
+export async function listCustomers(
+  channel: Channel = "ecom"
+): Promise<Customer[]> {
   const store = await readStore();
-  return [...store.customers].sort((a, b) => a.name.localeCompare(b.name));
+  return store.customers
+    .filter((c) => c.channel === channel)
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function createPartyIn(list: Vendor[], input: PartyInput): PartyResult {
+function createPartyIn(
+  list: Vendor[],
+  input: PartyInput,
+  channel: Channel
+): PartyResult {
   const c = cleanPartyInput(input);
   if (!c.name) return { ok: false, error: "Name is required." };
-  if (list.some((p) => p.name.toLowerCase() === c.name!.toLowerCase())) {
+  if (
+    list.some(
+      (p) => p.channel === channel && p.name.toLowerCase() === c.name!.toLowerCase()
+    )
+  ) {
     return { ok: false, error: "A record with this name already exists." };
   }
   const party: Vendor = {
@@ -1225,6 +1371,7 @@ function createPartyIn(list: Vendor[], input: PartyInput): PartyResult {
     gstin: c.gstin,
     address: c.address,
     note: c.note,
+    channel,
     createdAt: new Date().toISOString(),
   };
   list.push(party);
@@ -1239,7 +1386,10 @@ function updatePartyIn(list: Vendor[], id: string, input: PartyInput): PartyResu
     if (!c.name) return { ok: false, error: "Name can't be empty." };
     if (
       list.some(
-        (p) => p.id !== id && p.name.toLowerCase() === c.name!.toLowerCase()
+        (p) =>
+          p.id !== id &&
+          p.channel === party.channel &&
+          p.name.toLowerCase() === c.name!.toLowerCase()
       )
     ) {
       return { ok: false, error: "A record with this name already exists." };
@@ -1253,14 +1403,20 @@ function updatePartyIn(list: Vendor[], id: string, input: PartyInput): PartyResu
   return { ok: true, party };
 }
 
-export async function createVendor(input: PartyInput): Promise<PartyResult> {
-  return mutate<PartyResult>((s) => [s, createPartyIn(s.vendors, input)]);
+export async function createVendor(
+  input: PartyInput,
+  channel: Channel = "ecom"
+): Promise<PartyResult> {
+  return mutate<PartyResult>((s) => [s, createPartyIn(s.vendors, input, channel)]);
 }
 export async function updateVendor(id: string, input: PartyInput): Promise<PartyResult> {
   return mutate<PartyResult>((s) => [s, updatePartyIn(s.vendors, id, input)]);
 }
-export async function createCustomer(input: PartyInput): Promise<PartyResult> {
-  return mutate<PartyResult>((s) => [s, createPartyIn(s.customers, input)]);
+export async function createCustomer(
+  input: PartyInput,
+  channel: Channel = "ecom"
+): Promise<PartyResult> {
+  return mutate<PartyResult>((s) => [s, createPartyIn(s.customers, input, channel)]);
 }
 export async function updateCustomer(id: string, input: PartyInput): Promise<PartyResult> {
   return mutate<PartyResult>((s) => [s, updatePartyIn(s.customers, id, input)]);
@@ -1295,7 +1451,7 @@ export async function getVendorDetail(id: string): Promise<VendorDetail | undefi
   const vendor = store.vendors.find((v) => v.id === id);
   if (!vendor) return undefined;
   const nameFor = (ean: string) =>
-    store.products.find((p) => p.ean === ean)?.name ?? "Unknown product";
+    findProduct(store, ean, vendor.channel)?.name ?? "Unknown product";
   const whName = (wid: string) =>
     store.warehouses.find((w) => w.id === wid)?.name ?? wid;
 
@@ -1330,7 +1486,7 @@ export async function getCustomerDetail(
   const store = await readStore();
   const customer = store.customers.find((c) => c.id === id);
   if (!customer) return undefined;
-  const productFor = (ean: string) => store.products.find((p) => p.ean === ean);
+  const productFor = (ean: string) => findProduct(store, ean, customer.channel);
   const whName = (wid: string) =>
     store.warehouses.find((w) => w.id === wid)?.name ?? wid;
 
@@ -1377,39 +1533,51 @@ function normalizeComponents(raw: unknown): ComboComponent[] {
 }
 
 /** True if a barcode collides with any product EAN/pack barcode, or another
- *  combo's barcode (ignoring the combo with id === selfId). */
-function barcodeInUse(store: Store, barcode: string, selfId: string | null): boolean {
+ *  combo's barcode, within the given channel (ignoring the combo id === selfId). */
+function barcodeInUse(
+  store: Store,
+  barcode: string,
+  selfId: string | null,
+  channel: Channel
+): boolean {
   if (
     store.products.some(
-      (p) => p.ean === barcode || p.barcodes.some((b) => b.ean === barcode)
+      (p) =>
+        p.channel === channel &&
+        (p.ean === barcode || p.barcodes.some((b) => b.ean === barcode))
     )
   ) {
     return true;
   }
-  return store.combos.some((c) => c.id !== selfId && c.barcode === barcode);
+  return store.combos.some(
+    (c) => c.channel === channel && c.id !== selfId && c.barcode === barcode
+  );
 }
 
-function cleanComboInput(store: Store, input: ComboInput) {
+function cleanComboInput(store: Store, input: ComboInput, channel: Channel) {
   const name = typeof input.name === "string" ? input.name.trim() : "";
   const barcode =
     typeof input.barcode === "string" ? input.barcode.trim() || undefined : undefined;
   const price =
     typeof input.price === "number" && input.price >= 0 ? input.price : undefined;
-  // Keep only components that point at a real product.
+  // Keep only components that point at a real product in this channel.
   const components = normalizeComponents(input.components).filter((c) =>
-    store.products.some((p) => p.ean === c.ean)
+    store.products.some((p) => p.channel === channel && p.ean === c.ean)
   );
   return { name, barcode, price, components };
 }
 
 type ComboResult = { ok: true; combo: Combo } | { ok: false; error: string };
 
-/** All combos, enriched with component product names. */
-export async function listCombos(): Promise<ComboView[]> {
+/** All combos in a channel, enriched with component product names. */
+export async function listCombos(
+  channel: Channel = "ecom"
+): Promise<ComboView[]> {
   const store = await readStore();
   const nameFor = (ean: string) =>
-    store.products.find((p) => p.ean === ean)?.name ?? "Unknown product";
-  return [...store.combos]
+    findProduct(store, ean, channel)?.name ?? "Unknown product";
+  return store.combos
+    .filter((c) => c.channel === channel)
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((c) => ({
       ...c,
@@ -1421,17 +1589,24 @@ export async function listCombos(): Promise<ComboView[]> {
     }));
 }
 
-export async function createCombo(input: ComboInput): Promise<ComboResult> {
+export async function createCombo(
+  input: ComboInput,
+  channel: Channel = "ecom"
+): Promise<ComboResult> {
   return mutate<ComboResult>((store) => {
-    const c = cleanComboInput(store, input);
+    const c = cleanComboInput(store, input, channel);
     if (!c.name) return [store, { ok: false, error: "Combo name is required." }];
     if (!c.components.length) {
       return [store, { ok: false, error: "Add at least one product to the combo." }];
     }
-    if (store.combos.some((x) => x.name.toLowerCase() === c.name.toLowerCase())) {
+    if (
+      store.combos.some(
+        (x) => x.channel === channel && x.name.toLowerCase() === c.name.toLowerCase()
+      )
+    ) {
       return [store, { ok: false, error: "A combo with this name already exists." }];
     }
-    if (c.barcode && barcodeInUse(store, c.barcode, null)) {
+    if (c.barcode && barcodeInUse(store, c.barcode, null, channel)) {
       return [
         store,
         { ok: false, error: "That barcode is already used by a product or combo." },
@@ -1439,6 +1614,7 @@ export async function createCombo(input: ComboInput): Promise<ComboResult> {
     }
     const combo: Combo = {
       id: randomUUID(),
+      channel,
       name: c.name,
       barcode: c.barcode,
       price: c.price,
@@ -1457,12 +1633,15 @@ export async function updateCombo(
   return mutate<ComboResult>((store) => {
     const combo = store.combos.find((c) => c.id === id);
     if (!combo) return [store, { ok: false, error: "Combo not found." }];
-    const c = cleanComboInput(store, input);
+    const c = cleanComboInput(store, input, combo.channel);
     if (input.name !== undefined) {
       if (!c.name) return [store, { ok: false, error: "Combo name can't be empty." }];
       if (
         store.combos.some(
-          (x) => x.id !== id && x.name.toLowerCase() === c.name.toLowerCase()
+          (x) =>
+            x.id !== id &&
+            x.channel === combo.channel &&
+            x.name.toLowerCase() === c.name.toLowerCase()
         )
       ) {
         return [store, { ok: false, error: "A combo with this name already exists." }];
@@ -1470,7 +1649,7 @@ export async function updateCombo(
       combo.name = c.name;
     }
     if (input.barcode !== undefined) {
-      if (c.barcode && barcodeInUse(store, c.barcode, id)) {
+      if (c.barcode && barcodeInUse(store, c.barcode, id, combo.channel)) {
         return [
           store,
           { ok: false, error: "That barcode is already used by a product or combo." },
@@ -1508,13 +1687,14 @@ export async function dispatchCombo(
     const warehouse = store.warehouses.find((w) => w.id === warehouseId);
     if (!warehouse) throw new Error("Warehouse not found.");
 
+    const channel = warehouse.channel;
     const combo = store.combos.find((c) => c.id === input.comboId);
     if (!combo) throw new Error("Combo not found.");
     if (!combo.components.length) throw new Error("This combo has no products.");
 
     const count = input.combos;
     const nameFor = (ean: string) =>
-      store.products.find((p) => p.ean === ean)?.name ?? ean;
+      findProduct(store, ean, channel)?.name ?? ean;
 
     // First pass: verify every component (all-or-nothing).
     for (const comp of combo.components) {
@@ -1548,7 +1728,11 @@ export async function dispatchCombo(
       });
     }
 
-    const customerId = upsertPartyByName(store.customers, input.customerName);
+    const customerId = upsertPartyByName(
+      store.customers,
+      input.customerName,
+      channel
+    );
 
     const record: ComboDispatch = {
       id: randomUUID(),
@@ -1619,11 +1803,13 @@ type POResult =
   | { ok: true; po: PurchaseOrder }
   | { ok: false; error: string };
 
-export async function listPurchaseOrders(): Promise<PurchaseOrder[]> {
+export async function listPurchaseOrders(
+  channel: Channel = "ecom"
+): Promise<PurchaseOrder[]> {
   const store = await readStore();
-  return [...store.purchaseOrders].sort((a, b) =>
-    b.createdAt.localeCompare(a.createdAt)
-  );
+  return store.purchaseOrders
+    .filter((p) => p.channel === channel)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export async function getPurchaseOrder(
@@ -1638,7 +1824,8 @@ export async function getPurchaseOrder(
 export async function createPurchaseOrder(
   input: PurchaseOrderInput,
   by: { id: string; name: string },
-  isAdmin: boolean
+  isAdmin: boolean,
+  channel: Channel = "ecom"
 ): Promise<POResult> {
   return mutate<POResult>((store) => {
     const vendorName =
@@ -1658,16 +1845,21 @@ export async function createPurchaseOrder(
       ];
     }
 
+    // Only allow a warehouse from this channel.
     const warehouseId =
-      input.warehouseId && store.warehouses.some((w) => w.id === input.warehouseId)
+      input.warehouseId &&
+      store.warehouses.some(
+        (w) => w.id === input.warehouseId && w.channel === channel
+      )
         ? input.warehouseId
         : undefined;
-    const vendorId = upsertPartyByName(store.vendors, vendorName);
+    const vendorId = upsertPartyByName(store.vendors, vendorName, channel);
     const grandTotal = round2(items.reduce((s, it) => s + it.totalAmount, 0));
     const now = new Date().toISOString();
 
     const po: PurchaseOrder = {
       id: randomUUID(),
+      channel,
       poNumber: nextPONumber(store),
       date,
       warehouseId,
@@ -1732,11 +1924,13 @@ function nextRONumber(store: Store): string {
 
 type ROResult = { ok: true; ro: ReleaseOrder } | { ok: false; error: string };
 
-export async function listReleaseOrders(): Promise<ReleaseOrder[]> {
+export async function listReleaseOrders(
+  channel: Channel = "ecom"
+): Promise<ReleaseOrder[]> {
   const store = await readStore();
-  return [...store.releaseOrders].sort((a, b) =>
-    b.createdAt.localeCompare(a.createdAt)
-  );
+  return store.releaseOrders
+    .filter((r) => r.channel === channel)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export async function getReleaseOrder(
@@ -1756,6 +1950,7 @@ export async function createReleaseOrder(
   return mutate<ROResult>((store) => {
     const warehouse = store.warehouses.find((w) => w.id === input.warehouseId);
     if (!warehouse) return [store, { ok: false, error: "Warehouse not found." }];
+    const channel = warehouse.channel;
     const date = typeof input.date === "string" ? input.date.trim() : "";
     if (!date) return [store, { ok: false, error: "Date is required." }];
     const rawLines = Array.isArray(input.lines) ? input.lines : [];
@@ -1766,9 +1961,7 @@ export async function createReleaseOrder(
     // Resolve each line to a product + piece count.
     const resolved = rawLines.map((ln) => {
       const scanned = String(ln.ean ?? "").trim();
-      const product =
-        store.products.find((p) => p.ean === scanned) ??
-        store.products.find((p) => p.barcodes.some((b) => b.ean === scanned));
+      const product = resolveProduct(store, scanned, channel);
       const quantity = Math.max(0, Math.floor(Number(ln.quantity) || 0));
       const landingRate = Math.max(0, Number(ln.landingRate) || 0);
       const gstRate = Math.max(0, Number(ln.gstRate) || 0);
@@ -1788,7 +1981,7 @@ export async function createReleaseOrder(
         store.stock.find((s) => s.warehouseId === input.warehouseId && s.ean === stockEan)
           ?.quantity ?? 0;
       if (total > have) {
-        const name = store.products.find((p) => p.ean === stockEan)?.name ?? stockEan;
+        const name = findProduct(store, stockEan, channel)?.name ?? stockEan;
         errors.push(`"${name}" — need ${total}, only ${have} in stock`);
       }
     }
@@ -1799,7 +1992,8 @@ export async function createReleaseOrder(
     // Deduct + log dispatches; build the RO line items.
     const customerId = upsertPartyByName(
       store.customers,
-      input.customerName || input.source
+      input.customerName || input.source,
+      channel
     );
     const now = new Date().toISOString();
     const roNumber = nextRONumber(store);
@@ -1851,6 +2045,7 @@ export async function createReleaseOrder(
     totalAmount = round2(totalAmount);
     const ro: ReleaseOrder = {
       id: randomUUID(),
+      channel,
       roNumber,
       date,
       source: input.source?.trim() || undefined,
