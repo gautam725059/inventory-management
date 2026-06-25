@@ -2,9 +2,15 @@
 
 import { useEffect, useState } from "react";
 import WarehouseCard from "@/components/WarehouseCard";
+import { useChannel } from "@/lib/useChannel";
 import type { WarehouseSummary, ProductCatalogEntry } from "@/lib/types";
 
+/** Brands shown on the B2B dashboard. A product belongs to a brand when its name
+ *  contains the brand word (case-insensitive). */
+const BRANDS = ["Philips", "Wipro", "Hindware", "Gorav", "Orient"];
+
 export default function Dashboard() {
+  const channel = useChannel();
   const [warehouses, setWarehouses] = useState<WarehouseSummary[]>([]);
   const [products, setProducts] = useState<ProductCatalogEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +39,18 @@ export default function Dashboard() {
   // Low / out of stock across the whole catalog (total stock at or below the
   // reorder level — includes products that are completely out of stock).
   const totalLow = products.filter((p) => p.lowStock).length;
+
+  // Per-brand product count + total pieces (matched by name).
+  const brandStats = BRANDS.map((brand) => {
+    const matched = products.filter((p) =>
+      p.name.toLowerCase().includes(brand.toLowerCase())
+    );
+    return {
+      brand,
+      productCount: matched.length,
+      quantity: matched.reduce((s, p) => s + p.totalQuantity, 0),
+    };
+  });
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-10">
@@ -97,6 +115,47 @@ export default function Dashboard() {
               <WarehouseCard key={w.id} warehouse={w} />
             ))}
           </div>
+
+          {channel === "b2b" && (
+            <section className="mt-10">
+              <h2 className="mb-4 text-lg font-bold tracking-tight text-slate-900">
+                Brands
+              </h2>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+                {brandStats.map((b) => (
+                  <div
+                    key={b.brand}
+                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-100 text-base">
+                        🏷️
+                      </span>
+                      <h3 className="font-semibold text-slate-900">{b.brand}</h3>
+                    </div>
+                    <div className="mt-3 flex items-end justify-between">
+                      <div>
+                        <div className="text-xl font-bold tabular-nums text-slate-900">
+                          {b.productCount}
+                        </div>
+                        <div className="text-xs uppercase tracking-wide text-slate-400">
+                          Products
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xl font-bold tabular-nums text-indigo-700">
+                          {b.quantity.toLocaleString()}
+                        </div>
+                        <div className="text-xs uppercase tracking-wide text-slate-400">
+                          Pieces
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </>
       )}
     </div>
