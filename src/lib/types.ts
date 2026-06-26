@@ -121,6 +121,8 @@ export interface Product {
    *  exist once per channel as separate records (separate e-com / B2B catalogs). */
   channel: Channel;
   name: string;
+  /** Optional brand (e.g. "Philips") — used to group products on the dashboard. */
+  brand?: string;
   comboSizes: number[];
   /** Extra barcodes — one EAN per pack size (pack of 10, pack of 5, single …).
    *  Scanning any of these in stock-out auto-fills the matching pack size. */
@@ -490,6 +492,7 @@ export interface WarehouseStockBit {
 export interface ProductCatalogEntry {
   ean: string;
   name: string;
+  brand?: string;
   comboSizes: number[];
   barcodes: PackBarcode[];
   reorderLevel: number;
@@ -653,6 +656,7 @@ export interface BulkDispatchResult {
 export interface ImportItem {
   ean: string; // master/primary EAN (or a generated key when none is given)
   name: string;
+  brand?: string; // optional brand to tag the product with
   barcodes: PackBarcode[];
   /** Pack sizes (>1) from pack rows that have no barcode of their own — e.g.
    *  "P10/P15/P20" become comboSizes [10,15,20] the product can be sold in. */

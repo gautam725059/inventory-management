@@ -21,11 +21,21 @@ J Hook\t8906212345670\t\t\t\t\t
 \t\tJ Hook P10\t8906212345671\tShanya Wall Hooks (Pack of 10)\t\t199
 \t\tJ Hook P15\t8906212345672\tShanya Wall Hooks (Pack of 15)\t\t279`;
 
+// B2B format: ASIN | pack size | 12NC. Grouped by 12NC into one product each.
+const SAMPLE_B2B = `B0H2W2Y61M\t1\t915006556101
+B0H2VXL2ZS\t2\t915006556101
+B0H2VV66ND\t4\t915006556101
+B0H2W5Q6CG\t10\t915006556101`;
+
+type Format = "standard" | "asin";
+
 export default function ImportPage() {
   const { me, loading } = useMe();
   const isAdmin = me?.role === "admin";
 
   const [text, setText] = useState("");
+  const [format, setFormat] = useState<Format>("standard");
+  const [brand, setBrand] = useState("");
   const [preview, setPreview] = useState<{ summary: Summary; products: PreviewProduct[] } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +49,7 @@ export default function ImportPage() {
       const res = await fetch("/api/admin/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, preview: previewMode }),
+        body: JSON.stringify({ text, preview: previewMode, format, brand: brand || undefined }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed.");
@@ -94,9 +104,44 @@ export default function ImportPage() {
         save as CSV first — broken EANs are skipped.
       </div>
 
+      <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Format</label>
+          <select
+            value={format}
+            onChange={(e) => {
+              setFormat(e.target.value as Format);
+              setPreview(null);
+            }}
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          >
+            <option value="standard">Standard (name · EAN · packs)</option>
+            <option value="asin">B2B (ASIN · size · 12NC)</option>
+          </select>
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">
+            Brand (optional) — tags every imported product
+          </label>
+          <input
+            value={brand}
+            onChange={(e) => setBrand(e.target.value)}
+            placeholder="e.g. Philips"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          />
+        </div>
+      </div>
+
       <div className="mb-2 flex items-center justify-between">
-        <label className="text-xs font-medium text-slate-600">Paste data (tab or comma separated)</label>
-        <button onClick={() => setText(SAMPLE)} className="text-xs font-medium text-brand-600 hover:underline">
+        <label className="text-xs font-medium text-slate-600">
+          {format === "asin"
+            ? "Paste 3 columns: ASIN · pack size · 12NC"
+            : "Paste data (tab or comma separated)"}
+        </label>
+        <button
+          onClick={() => setText(format === "asin" ? SAMPLE_B2B : SAMPLE)}
+          className="text-xs font-medium text-brand-600 hover:underline"
+        >
           Load sample
         </button>
       </div>

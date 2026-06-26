@@ -39,11 +39,20 @@ export default function Dashboard() {
   // Low / out of stock across the whole catalog (total stock at or below the
   // reorder level — includes products that are completely out of stock).
   const totalLow = products.filter((p) => p.lowStock).length;
+  // Total inventory value (this channel) = Σ stock × selling price.
+  const totalValue = products.reduce(
+    (s, p) => s + p.totalQuantity * (p.sellingPrice ?? 0),
+    0
+  );
 
-  // Per-brand product count + total pieces (matched by name).
+  // Per-brand product count + total pieces. Matches the product's `brand` field
+  // first, then falls back to the brand word appearing in its name.
   const brandStats = BRANDS.map((brand) => {
-    const matched = products.filter((p) =>
-      p.name.toLowerCase().includes(brand.toLowerCase())
+    const b = brand.toLowerCase();
+    const matched = products.filter(
+      (p) =>
+        (p.brand && p.brand.toLowerCase() === b) ||
+        p.name.toLowerCase().includes(b)
     );
     return {
       brand,
@@ -90,6 +99,10 @@ export default function Dashboard() {
                 <p className="mt-1 text-4xl font-bold tabular-nums">
                   {totalUnits.toLocaleString()}{" "}
                   <span className="text-xl font-medium text-brand-100">pieces</span>
+                </p>
+                <p className="mt-1 text-lg font-semibold tabular-nums text-brand-100">
+                  ₹{totalValue.toLocaleString("en-IN")}{" "}
+                  <span className="text-sm font-medium">inventory value</span>
                 </p>
               </div>
             </div>

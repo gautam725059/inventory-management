@@ -154,3 +154,83 @@ export function parseCatalogText(text: string): ParseOutput {
     summary: { masters, validPacks, skipped, errors: errors.slice(0, 50) },
   };
 }
+
+/** A plausible scannable code that may be alphanumeric (e.g. an Amazon ASIN
+ *  "B0H2W2Y61M"). 6–14 letters/digits. */
+function isValidCode(s: string): boolean {
+  return /^[A-Za-z0-9]{6,14}$/.test(s);
+}
+
+/**
+ * Parse the B2B catalog format: three columns per row —
+ *   0 ASIN (pack/listing code) | 1 Pack size | 2 12NC (master product code)
+ * Rows are grouped by 12NC into one master product each; every ASIN becomes a
+ * pack barcode of its size. All products get the given `brand`.
+ */
+export function parseAsinCatalog(text: string, brand?: string): ParseOutput {
+  const errors: string[] = [];
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.trimEnd())
+    .filter((l) => l.trim().length > 0);
+
+  const delim = lines.some((l) => l.includes("\t")) ? "\t" : ",";
+  const br = brand?.trim() || undefined;
+
+  const byEan = new Map<string, ImportItem>();
+  const items: ImportItem[] = [];
+  let validPacks = 0;
+  let skipped = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const cols = lines[i].split(delim).map((c) => c.trim());
+    // Skip a header row.
+    if (i === 0 && /asin/i.test(lines[i])) continue;
+
+    const asin = cols[0] ?? "";
+    const sizeRaw = cols[1] ?? "";
+    const twelve = (cols[2] ?? "").replace(/\s+/g, "");
+
+    if (!asin && !twelve) continue;
+    if (!twelve || !/^\d{6,14}$/.test(twelve)) {
+      errors.push(`Row ${i + 1}: missing / invalid 12NC — skipped.`);
+      skipped++;
+      continue;
+    }
+    const size = Math.floor(Number(sizeRaw) || 0);
+    if (!Number.isInteger(size) || size <= 0) {
+      errors.push(`Row ${i + 1}: bad pack size "${sizeRaw}" for ${twelve} — skipped.`);
+      skipped++;
+      continue;
+    }
+    if (!isValidCode(asin)) {
+      errors.push(`Row ${i + 1}: ASIN "${asin}" looks invalid — skipped.`);
+      skipped++;
+      continue;
+    }
+
+    let item = byEan.get(twelve);
+    if (!item) {
+      item = {
+        ean: twelve,
+        name: br ? `${br} ${twelve}` : `Product ${twelve}`,
+        brand: br,
+        barcodes: [],
+      };
+      byEan.set(twelve, item);
+      items.push(item);
+    }
+    if (item.barcodes.some((b) => b.ean === asin)) continue; // de-dupe ASIN
+    item.barcodes.push({
+      ean: asin,
+      size,
+      name: size === 1 ? twelve : `${twelve}_${size}`,
+    });
+    validPacks++;
+  }
+
+  return {
+    items,
+    summary: { masters: items.length, validPacks, skipped, errors: errors.slice(0, 50) },
+  };
+}

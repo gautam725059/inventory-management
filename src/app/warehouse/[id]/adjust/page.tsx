@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, use } from "react";
 import Link from "next/link";
 import { useMe } from "@/lib/useMe";
+import { useChannel, codeLabel, codeWord } from "@/lib/useChannel";
 import type { WarehouseDetail } from "@/lib/types";
 
 const inputClass =
@@ -25,6 +26,7 @@ export default function AdjustPage({
 }) {
   const { id } = use(params);
   const { me, loading: meLoading } = useMe();
+  const channel = useChannel();
   const allowed = !!me; // any logged-in user can submit
   const isAdmin = me?.role === "admin";
 
@@ -54,10 +56,16 @@ export default function AdjustPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, allowed]);
 
-  const selected = useMemo(
-    () => detail?.lines.find((l) => l.ean === ean),
-    [detail, ean]
-  );
+  // Resolve the typed code to a stock line — by primary EAN/12NC or any pack
+  // barcode (e.g. an ASIN).
+  const selected = useMemo(() => {
+    const e = ean.trim();
+    if (!e) return undefined;
+    return detail?.lines.find(
+      (l) => l.ean === e || (l.barcodes ?? []).some((b) => b.ean === e)
+    );
+  }, [detail, ean]);
+  const noMatch = ean.trim().length > 0 && !selected;
 
   const amt = Number(amount) || 0;
   const delta = direction === "remove" ? -amt : amt;
@@ -75,7 +83,7 @@ export default function AdjustPage({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ean,
+          ean: selected?.ean ?? ean.trim(),
           delta,
           reason,
           note: note || undefined,
@@ -165,22 +173,46 @@ export default function AdjustPage({
       ) : (
         <form onSubmit={handleSubmit} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label htmlFor="product" className={labelClass}>Product *</label>
-              <select
-                id="product"
+            <div>
+              <label htmlFor="ean" className={labelClass}>
+                {codeLabel(channel)} *
+              </label>
+              <input
+                id="ean"
                 className={inputClass}
                 value={ean}
                 onChange={(e) => setEan(e.target.value)}
+                placeholder={`Scan or type the ${codeWord(channel)}…`}
+                inputMode={channel === "b2b" ? "text" : "numeric"}
+                autoComplete="off"
+                // eslint-disable-next-line jsx-a11y/no-autofocus
+                autoFocus
                 required
-              >
-                <option value="">Select a product…</option>
-                {inStock.map((l) => (
-                  <option key={l.ean} value={l.ean}>
-                    {l.name} ({l.quantity} pcs)
-                  </option>
-                ))}
-              </select>
+              />
+              {noMatch && (
+                <p className="mt-1 text-xs font-medium text-red-600">
+                  No product with this code in this warehouse.
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="product-name" className={labelClass}>
+                Product name
+              </label>
+              <input
+                id="product-name"
+                className={`${inputClass} cursor-not-allowed bg-slate-50 text-slate-700`}
+                value={selected?.name ?? ""}
+                readOnly
+                tabIndex={-1}
+                placeholder="Auto-fills from the code"
+              />
+              {selected && (
+                <p className="mt-1 text-xs text-emerald-600">
+                  ✓ {selected.quantity} pcs in stock
+                </p>
+              )}
             </div>
 
             <div>

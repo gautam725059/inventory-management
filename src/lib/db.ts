@@ -150,6 +150,7 @@ function normalizeStore(parsed: Partial<Store>): Store {
       ? parsed.products.map((p) => ({
           ...p,
           channel: p.channel === "b2b" ? "b2b" : "ecom",
+          brand: typeof p.brand === "string" ? p.brand : undefined,
           comboSizes: Array.isArray(p.comboSizes) ? p.comboSizes : [],
           barcodes: normalizeBarcodes(p.barcodes),
           reorderLevel: typeof p.reorderLevel === "number" ? p.reorderLevel : 0,
@@ -553,6 +554,7 @@ export async function listCatalog(
       return {
         ean: p.ean,
         name: p.name,
+        brand: p.brand,
         comboSizes: p.comboSizes,
         barcodes: p.barcodes,
         reorderLevel: p.reorderLevel,
@@ -781,7 +783,8 @@ export async function dispatchStockBulk(
  *  Pack EANs that collide with another product's primary EAN are skipped. */
 export async function importCatalog(
   items: ImportItem[],
-  channel: Channel = "ecom"
+  channel: Channel = "ecom",
+  defaultBrand?: string
 ): Promise<ImportResult> {
   return mutate<ImportResult>((store) => {
     let productsCreated = 0;
@@ -791,6 +794,7 @@ export async function importCatalog(
     for (const item of items) {
       const ean = item.ean.trim();
       if (!ean) continue;
+      const brand = item.brand?.trim() || defaultBrand?.trim() || undefined;
 
       let product = findProduct(store, ean, channel);
       if (!product) {
@@ -798,6 +802,7 @@ export async function importCatalog(
           ean,
           channel,
           name: item.name.trim() || `Product ${ean}`,
+          brand,
           comboSizes: [],
           barcodes: [],
           reorderLevel: 0,
@@ -806,6 +811,7 @@ export async function importCatalog(
         productsCreated++;
       } else {
         if (item.name.trim()) product.name = item.name.trim();
+        if (brand) product.brand = brand;
         productsUpdated++;
       }
 

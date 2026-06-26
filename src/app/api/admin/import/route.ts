@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { importCatalog } from "@/lib/db";
 import { getCurrentUser, hasRole } from "@/lib/auth";
 import { currentChannel } from "@/lib/channel";
-import { parseCatalogText } from "@/lib/importParser";
+import { parseCatalogText, parseAsinCatalog } from "@/lib/importParser";
 
 /** Admin only. Body: { text: string, preview?: boolean }.
  *  preview → parse + return summary (no write). Otherwise import. */
@@ -23,8 +23,10 @@ export async function POST(request: Request) {
   if (!text.trim()) {
     return NextResponse.json({ error: "Paste some data first." }, { status: 400 });
   }
-
-  const parsed = parseCatalogText(text);
+  const brand = typeof b.brand === "string" ? b.brand.trim() : "";
+  // "asin" → B2B format (ASIN · size · 12NC); otherwise the standard sheet.
+  const parsed =
+    b.format === "asin" ? parseAsinCatalog(text, brand) : parseCatalogText(text);
 
   if (b.preview) {
     return NextResponse.json({
@@ -38,6 +40,10 @@ export async function POST(request: Request) {
     });
   }
 
-  const result = await importCatalog(parsed.items, await currentChannel());
+  const result = await importCatalog(
+    parsed.items,
+    await currentChannel(),
+    brand || undefined
+  );
   return NextResponse.json({ imported: true, summary: parsed.summary, result });
 }
