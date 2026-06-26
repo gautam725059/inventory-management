@@ -575,6 +575,26 @@ export interface Report {
   lowStock: LowStockRow[];
 }
 
+/** One purchase (stock-in) of a product, for the dashboard purchase lookup. */
+export interface PurchaseHistoryEntry {
+  date: string;
+  warehouseName: string;
+  quantity: number;
+  price?: number; // cost per piece, if recorded
+  amount?: number; // price * quantity
+  vendorName?: string;
+  bill?: string;
+}
+
+/** All purchases of one product (in a channel), newest first. */
+export interface ProductPurchaseHistory {
+  ean: string; // resolved primary code (EAN / 12NC)
+  name: string;
+  totalQuantity: number;
+  totalValue: number;
+  entries: PurchaseHistoryEntry[];
+}
+
 /** A unified stock movement for the history view. */
 export interface Movement {
   id: string;

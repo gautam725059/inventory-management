@@ -20,6 +20,7 @@ import type {
   ComboAvailability,
   Movement,
   ProductCatalogEntry,
+  ProductPurchaseHistory,
   ReceiveInput,
   DispatchInput,
   BulkDispatchInput,
@@ -567,6 +568,48 @@ export async function listCatalog(
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** Purchase (stock-in) history for one product in a channel, resolved from a
+ *  scanned code (primary EAN / 12NC, or any pack barcode / ASIN). Returns null
+ *  if the code matches no product in this channel. */
+export async function getProductPurchaseHistory(
+  code: string,
+  channel: Channel = "ecom"
+): Promise<ProductPurchaseHistory | null> {
+  const store = await readStore();
+  const scanned = code.trim();
+  if (!scanned) return null;
+  const product = resolveProduct(store, scanned, channel);
+  if (!product) return null;
+
+  const whIds = warehouseIdsForChannel(store, channel);
+  const whName = (id: string) =>
+    store.warehouses.find((w) => w.id === id)?.name ?? id;
+
+  const entries = store.receipts
+    .filter((r) => whIds.has(r.warehouseId) && r.ean === product.ean)
+    .map((r) => ({
+      date: r.date || r.createdAt.slice(0, 10),
+      warehouseName: whName(r.warehouseId),
+      quantity: r.quantity,
+      price: r.purchasePrice,
+      amount:
+        typeof r.purchasePrice === "number"
+          ? r.purchasePrice * r.quantity
+          : undefined,
+      vendorName: r.vendorName,
+      bill: r.bill,
+    }))
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  return {
+    ean: product.ean,
+    name: product.name,
+    totalQuantity: entries.reduce((s, e) => s + e.quantity, 0),
+    totalValue: entries.reduce((s, e) => s + (e.amount ?? 0), 0),
+    entries,
+  };
 }
 
 // ---- Writes -----------------------------------------------------------------

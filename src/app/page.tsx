@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import WarehouseCard from "@/components/WarehouseCard";
+import PurchaseSearch from "@/components/PurchaseSearch";
 import { useChannel } from "@/lib/useChannel";
 import type { WarehouseSummary, ProductCatalogEntry } from "@/lib/types";
 
@@ -122,6 +123,8 @@ export default function Dashboard() {
               ))}
             </div>
           </div>
+
+          <PurchaseSearch />
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {warehouses.map((w) => (
