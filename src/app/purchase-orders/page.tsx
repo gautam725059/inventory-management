@@ -13,6 +13,13 @@ const STATUS_BADGE: Record<PurchaseOrder["status"], string> = {
   pending: "bg-amber-100 text-amber-700",
   confirmed: "bg-emerald-100 text-emerald-700",
   rejected: "bg-red-100 text-red-700",
+  received: "bg-sky-100 text-sky-700",
+};
+const STATUS_LABEL: Record<PurchaseOrder["status"], string> = {
+  pending: "pending",
+  confirmed: "on the way",
+  rejected: "rejected",
+  received: "received",
 };
 
 export default function PurchaseOrdersPage() {
@@ -45,6 +52,36 @@ export default function PurchaseOrdersPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || "Failed.");
+      }
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed.");
+    }
+  }
+
+  async function stockIn(po: PurchaseOrder) {
+    setError(null);
+    if (!po.warehouseId) {
+      setError(
+        `${po.poNumber}: open the PO (View) to choose a warehouse before stocking in.`
+      );
+      return;
+    }
+    if (
+      !confirm(
+        `Stock in all ${po.items.length} item(s) of ${po.poNumber} into inventory?`
+      )
+    )
+      return;
+    try {
+      const res = await fetch(`/api/purchase-orders/${po.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "receive", warehouseId: po.warehouseId }),
       });
       if (!res.ok) {
         const d = await res.json().catch(() => ({}));
@@ -145,8 +182,14 @@ export default function PurchaseOrdersPage() {
                     {inr(po.grandTotal)}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_BADGE[po.status]}`}>
-                      {po.status}
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_BADGE[po.status]}`}>
+                      {po.status === "confirmed" && (
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        </span>
+                      )}
+                      {STATUS_LABEL[po.status]}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -172,6 +215,14 @@ export default function PurchaseOrdersPage() {
                             Reject
                           </button>
                         </>
+                      )}
+                      {isAdmin && po.status === "confirmed" && (
+                        <button
+                          onClick={() => stockIn(po)}
+                          className="rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-sky-700"
+                        >
+                          📥 Stock In
+                        </button>
                       )}
                       {isAdmin && (
                         <button

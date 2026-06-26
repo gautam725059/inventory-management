@@ -28,7 +28,6 @@ function inr(n: number): string {
 interface DraftLine {
   hsnCode: string;
   ean: string;
-  productCode: string;
   description: string;
   cartonSize: string;
   cartonQty: string;
@@ -39,7 +38,6 @@ interface DraftLine {
 const EMPTY_LINE: DraftLine = {
   hsnCode: "",
   ean: "",
-  productCode: "",
   description: "",
   cartonSize: "",
   cartonQty: "",
@@ -95,14 +93,12 @@ export default function NewPurchaseOrderPage() {
     setLines((ls) => ls.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
   }
 
-  /** When an EAN matches a catalog product, auto-fill the description. */
+  /** When an EAN matches a catalog product, auto-fill its description. */
   function onEanChange(i: number, ean: string) {
     const p = productByEan.get(ean.trim());
     setLines((ls) =>
       ls.map((l, idx) =>
-        idx === i
-          ? { ...l, ean, description: p && !l.description ? p.name : l.description }
-          : l
+        idx === i ? { ...l, ean, description: p ? p.name : l.description } : l
       )
     );
   }
@@ -141,7 +137,6 @@ export default function NewPurchaseOrderPage() {
           items: validLines.map((l) => ({
             hsnCode: l.hsnCode.trim() || undefined,
             ean: l.ean.trim(),
-            productCode: l.productCode.trim() || undefined,
             description: l.description.trim(),
             cartonSize: Number(l.cartonSize) || 0,
             cartonQty: Number(l.cartonQty) || 0,
@@ -250,10 +245,6 @@ export default function NewPurchaseOrderPage() {
                   <div>
                     <label className={labelClass}>HSN Code</label>
                     <input className={inputClass} value={l.hsnCode} onChange={(e) => setLine(i, { hsnCode: e.target.value })} placeholder="e.g. 96151900" />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Product Code</label>
-                    <input className={inputClass} value={l.productCode} onChange={(e) => setLine(i, { productCode: e.target.value })} placeholder="e.g. Butterfly Crown P1" />
                   </div>
                   <div>
                     <label className={labelClass}>Carton Size</label>

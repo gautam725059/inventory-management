@@ -337,13 +337,18 @@ export interface PurchaseOrder {
   invoiceNumber?: string;
   items: POLineItem[];
   grandTotal: number;
-  status: "pending" | "confirmed" | "rejected";
+  /** pending → awaiting admin approval. confirmed → approved, goods "on the way".
+   *  received → goods stocked into inventory. rejected → declined. */
+  status: "pending" | "confirmed" | "rejected" | "received";
   requestedBy?: string;
   requestedByName?: string;
   decidedBy?: string;
   decidedByName?: string;
   createdAt: string;
   decidedAt?: string;
+  /** Set when the PO's goods are received into inventory (status → received). */
+  receivedAt?: string;
+  receivedByName?: string;
 }
 
 /** A line item as submitted by the form (totals are derived server-side). */

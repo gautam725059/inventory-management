@@ -3,8 +3,11 @@ import {
   getPurchaseOrder,
   decidePurchaseOrder,
   deletePurchaseOrder,
+  updatePurchaseOrder,
+  receivePurchaseOrder,
 } from "@/lib/db";
 import { getCurrentUser, hasRole } from "@/lib/auth";
+import type { PurchaseOrderInput } from "@/lib/types";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -18,8 +21,8 @@ export async function GET(request: Request, { params }: Context) {
   return NextResponse.json(po);
 }
 
-/** Admin only: approve (→ confirmed) or reject a pending PO.
- *  Body: { action: "approve" | "reject" }. */
+/** Admin only: act on a PO. Body: { action: "approve" | "reject" | "receive",
+ *  warehouseId? }. "receive" stocks the goods into inventory. */
 export async function PATCH(request: Request, { params }: Context) {
   const me = await getCurrentUser(request);
   if (!hasRole(me, "admin")) {
@@ -33,10 +36,28 @@ export async function PATCH(request: Request, { params }: Context) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
-  const action = (body as Record<string, unknown>)?.action;
+  const b = body as Record<string, unknown>;
+  const action = b?.action;
+
+  if (action === "receive") {
+    const warehouseId =
+      typeof b.warehouseId === "string" && b.warehouseId.trim()
+        ? b.warehouseId.trim()
+        : undefined;
+    const result = await receivePurchaseOrder(
+      id,
+      { id: me!.id, name: me!.name },
+      warehouseId
+    );
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
+    return NextResponse.json(result.po);
+  }
+
   if (action !== "approve" && action !== "reject") {
     return NextResponse.json(
-      { error: "action must be 'approve' or 'reject'." },
+      { error: "action must be 'approve', 'reject' or 'receive'." },
       { status: 400 }
     );
   }
@@ -52,6 +73,36 @@ export async function PATCH(request: Request, { params }: Context) {
     );
   }
   return NextResponse.json(result);
+}
+
+/** Admin only: edit a PO's header / line items (qty, price, product). */
+export async function PUT(request: Request, { params }: Context) {
+  const me = await getCurrentUser(request);
+  if (!hasRole(me, "admin")) {
+    return NextResponse.json({ error: "Admin only." }, { status: 403 });
+  }
+  const { id } = await params;
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
+  }
+  const b = body as Partial<PurchaseOrderInput> & { warehouseId?: string | null };
+
+  const result = await updatePurchaseOrder(id, {
+    date: typeof b.date === "string" ? b.date : undefined,
+    vendorName: typeof b.vendorName === "string" ? b.vendorName : undefined,
+    invoiceNumber:
+      typeof b.invoiceNumber === "string" ? b.invoiceNumber : undefined,
+    warehouseId: b.warehouseId === undefined ? undefined : b.warehouseId,
+    items: Array.isArray(b.items) ? b.items : undefined,
+  });
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error }, { status: 400 });
+  }
+  return NextResponse.json(result.po);
 }
 
 /** Admin only: delete a purchase order. */

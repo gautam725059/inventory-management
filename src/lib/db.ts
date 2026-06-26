@@ -1911,6 +1911,120 @@ export async function deletePurchaseOrder(id: string): Promise<boolean> {
   });
 }
 
+/** Admin: edit a PO's header and/or line items (qty, price, product). Only
+ *  allowed while pending or confirmed (not once received/rejected). Recomputes
+ *  line totals and the grand total. */
+export async function updatePurchaseOrder(
+  id: string,
+  input: {
+    date?: string;
+    vendorName?: string;
+    invoiceNumber?: string;
+    warehouseId?: string | null;
+    items?: POLineInput[];
+  }
+): Promise<POResult> {
+  return mutate<POResult>((store) => {
+    const po = store.purchaseOrders.find((p) => p.id === id);
+    if (!po) return [store, { ok: false, error: "PO not found." }];
+    if (po.status === "received" || po.status === "rejected") {
+      return [store, { ok: false, error: `Can't edit a ${po.status} PO.` }];
+    }
+
+    if (input.items !== undefined) {
+      const items = (Array.isArray(input.items) ? input.items : [])
+        .map(computePOLine)
+        .filter((it) => it.ean && it.description && it.totalQty > 0);
+      if (items.length === 0) {
+        return [
+          store,
+          { ok: false, error: "Add at least one line with an EAN, description and quantity." },
+        ];
+      }
+      po.items = items;
+      po.grandTotal = round2(items.reduce((s, it) => s + it.totalAmount, 0));
+    }
+    if (typeof input.date === "string" && input.date.trim()) {
+      po.date = input.date.trim();
+    }
+    if (typeof input.vendorName === "string" && input.vendorName.trim()) {
+      po.vendorName = input.vendorName.trim();
+      po.vendorId = upsertPartyByName(store.vendors, po.vendorName, po.channel);
+    }
+    if (input.invoiceNumber !== undefined) {
+      po.invoiceNumber =
+        typeof input.invoiceNumber === "string"
+          ? input.invoiceNumber.trim() || undefined
+          : undefined;
+    }
+    if (input.warehouseId !== undefined) {
+      const wid = input.warehouseId || undefined;
+      // Only accept a warehouse from the PO's own channel.
+      if (
+        !wid ||
+        store.warehouses.some((w) => w.id === wid && w.channel === po.channel)
+      ) {
+        po.warehouseId = wid;
+      }
+    }
+    return [store, { ok: true, po }];
+  });
+}
+
+/** Admin: receive a confirmed PO's goods into a warehouse (stock-in). Each line
+ *  is received into the PO's channel — creating the product if needed and
+ *  recording the rate as the cost price — and the PO moves to "received". */
+export async function receivePurchaseOrder(
+  id: string,
+  by: { id: string; name: string },
+  warehouseIdOverride?: string
+): Promise<POResult> {
+  const store0 = await readStore();
+  const po0 = store0.purchaseOrders.find((p) => p.id === id);
+  if (!po0) return { ok: false, error: "PO not found." };
+  if (po0.status !== "confirmed") {
+    return { ok: false, error: "Only a confirmed PO can be stocked in." };
+  }
+  const warehouseId = warehouseIdOverride || po0.warehouseId;
+  if (!warehouseId) {
+    return { ok: false, error: "Choose a warehouse to receive the goods into." };
+  }
+  const wh = store0.warehouses.find((w) => w.id === warehouseId);
+  if (!wh) return { ok: false, error: "Warehouse not found." };
+  if (wh.channel !== po0.channel) {
+    return { ok: false, error: "Warehouse must be in the PO's channel." };
+  }
+
+  const bill = po0.invoiceNumber || po0.poNumber;
+  const date = new Date().toISOString().slice(0, 10);
+  // Receive each line (each its own mutation). receiveStock creates the product
+  // in the warehouse's channel if missing and records the cost price.
+  for (const it of po0.items) {
+    await receiveStock(warehouseId, {
+      ean: it.ean,
+      quantity: it.totalQty,
+      name: it.description,
+      bill,
+      vendorName: po0.vendorName,
+      date,
+      purchasePrice: it.rate,
+    });
+  }
+
+  return mutate<POResult>((store) => {
+    const po = store.purchaseOrders.find((p) => p.id === id);
+    if (!po) return [store, { ok: false, error: "PO not found." }];
+    if (po.status !== "confirmed") {
+      return [store, { ok: false, error: "PO already processed." }];
+    }
+    po.status = "received";
+    po.warehouseId = warehouseId;
+    po.receivedAt = new Date().toISOString();
+    po.receivedByName = by.name;
+    return [store, { ok: true, po }];
+  });
+}
+
 // ---- Release orders (incoming orders → stock-out) ---------------------------
 
 function nextRONumber(store: Store): string {
