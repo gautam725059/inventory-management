@@ -1,4 +1,4 @@
-import { MongoClient, type Db, type Collection } from "mongodb";
+import { MongoClient, GridFSBucket, ObjectId, type Db, type Collection } from "mongodb";
 import type { Store } from "./types";
 
 /** The single store document: the whole Store nested under `data`. */
@@ -74,4 +74,56 @@ export async function mongoWriteStore(store: Store): Promise<void> {
     { data: store },
     { upsert: true }
   );
+}
+
+// ---- Image storage (GridFS) -------------------------------------------------
+// Product images are stored in MongoDB (GridFS bucket "images") so they persist
+// on serverless hosts (Vercel) where the local filesystem is read-only. Each
+// product's imageUrl points at /api/images/<id>.
+
+async function imageBucket(): Promise<GridFSBucket> {
+  const db = await getDb();
+  return new GridFSBucket(db, { bucketName: "images" });
+}
+
+/** Store an image and return its GridFS id (as a string). */
+export async function mongoPutImage(
+  buffer: Buffer,
+  contentType: string,
+  filename: string
+): Promise<string> {
+  const bucket = await imageBucket();
+  return new Promise<string>((resolve, reject) => {
+    const stream = bucket.openUploadStream(filename, {
+      metadata: { contentType },
+    });
+    stream.on("error", reject);
+    stream.on("finish", () => resolve(String(stream.id)));
+    stream.end(buffer);
+  });
+}
+
+/** Read an image by id, or null if not found / bad id. */
+export async function mongoGetImage(
+  id: string
+): Promise<{ buffer: Buffer; contentType: string } | null> {
+  let oid: ObjectId;
+  try {
+    oid = new ObjectId(id);
+  } catch {
+    return null;
+  }
+  const bucket = await imageBucket();
+  const files = await bucket.find({ _id: oid }).toArray();
+  if (files.length === 0) return null;
+  const contentType =
+    (files[0].metadata?.contentType as string | undefined) || "image/jpeg";
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    bucket
+      .openDownloadStream(oid)
+      .on("data", (c: Buffer) => chunks.push(c))
+      .on("error", reject)
+      .on("end", () => resolve({ buffer: Buffer.concat(chunks), contentType }));
+  });
 }
