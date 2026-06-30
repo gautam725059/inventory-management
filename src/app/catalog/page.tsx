@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import ImageEditor from "@/components/ImageEditor";
+import ImageViewer from "@/components/ImageViewer";
 import BarcodeEditor from "@/components/BarcodeEditor";
 import { useMe } from "@/lib/useMe";
 import { useChannel, codeWord } from "@/lib/useChannel";
@@ -18,6 +19,7 @@ export default function CatalogPage() {
   const [query, setQuery] = useState("");
   const [brandFilter, setBrandFilter] = useState("");
   const [editingEan, setEditingEan] = useState<string | null>(null);
+  const [viewingEan, setViewingEan] = useState<string | null>(null);
   const [barcodesEan, setBarcodesEan] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
@@ -41,7 +43,15 @@ export default function CatalogPage() {
   }, [load]);
 
   const editing = products.find((p) => p.ean === editingEan) ?? null;
+  const viewing = products.find((p) => p.ean === viewingEan) ?? null;
   const editingBarcodes = products.find((p) => p.ean === barcodesEan) ?? null;
+
+  /** Click an image cell: open the big preview if there's an image, else (admin)
+   *  jump straight to the editor to add one. */
+  function openImage(p: ProductCatalogEntry) {
+    if (p.imageUrl) setViewingEan(p.ean);
+    else if (isAdmin) setEditingEan(p.ean);
+  }
 
   const warehouseNames = products[0]?.byWarehouse.map((b) => b.warehouseName) ?? [];
 
@@ -267,44 +277,36 @@ export default function CatalogPage() {
                     </td>
                   )}
                   <td className="px-4 py-3">
-                    {isAdmin ? (
-                      <button
-                        onClick={() => setEditingEan(p.ean)}
-                        title="Add or change image"
-                        className="group relative block h-12 w-12 overflow-hidden rounded-lg border border-slate-200 bg-slate-50"
-                      >
-                        {p.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={p.imageUrl}
-                            alt={p.name}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <span className="flex h-full w-full items-center justify-center text-lg text-slate-300">
-                            📷
-                          </span>
-                        )}
-                        <span className="absolute inset-0 hidden items-center justify-center bg-slate-900/50 text-xs font-medium text-white group-hover:flex">
-                          Edit
+                    <button
+                      onClick={() => openImage(p)}
+                      disabled={!p.imageUrl && !isAdmin}
+                      title={
+                        p.imageUrl
+                          ? "View image"
+                          : isAdmin
+                            ? "Add image"
+                            : "No image"
+                      }
+                      className="group relative block h-12 w-12 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 disabled:cursor-default"
+                    >
+                      {p.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={p.imageUrl}
+                          alt={p.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <span className="flex h-full w-full items-center justify-center text-lg text-slate-300">
+                          📷
                         </span>
-                      </button>
-                    ) : (
-                      <div className="block h-12 w-12 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
-                        {p.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={p.imageUrl}
-                            alt={p.name}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <span className="flex h-full w-full items-center justify-center text-lg text-slate-300">
-                            📷
-                          </span>
-                        )}
-                      </div>
-                    )}
+                      )}
+                      {(p.imageUrl || isAdmin) && (
+                        <span className="absolute inset-0 hidden items-center justify-center bg-slate-900/50 text-[10px] font-medium text-white group-hover:flex">
+                          {p.imageUrl ? "View" : "Add"}
+                        </span>
+                      )}
+                    </button>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -366,6 +368,21 @@ export default function CatalogPage() {
           Showing <strong className="text-slate-900">{filtered.length}</strong> of{" "}
           {products.length} products.
         </p>
+      )}
+
+      {viewing && viewing.imageUrl && (
+        <ImageViewer
+          ean={viewing.ean}
+          name={viewing.name}
+          imageUrl={viewing.imageUrl}
+          isAdmin={isAdmin}
+          onClose={() => setViewingEan(null)}
+          onEdit={() => {
+            setEditingEan(viewing.ean);
+            setViewingEan(null);
+          }}
+          onDeleted={load}
+        />
       )}
 
       {editing && (

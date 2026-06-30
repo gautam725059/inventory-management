@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 import { updateProduct } from "@/lib/db";
+import { currentChannel } from "@/lib/channel";
 
 export const runtime = "nodejs";
 
@@ -55,7 +56,7 @@ export async function POST(request: Request, { params }: Context) {
   await fs.writeFile(path.join(UPLOAD_DIR, filename), buffer);
 
   const imageUrl = `/uploads/${filename}`;
-  const ok = await updateProduct(ean, { imageUrl });
+  const ok = await updateProduct(ean, { imageUrl }, await currentChannel());
   if (!ok) {
     return NextResponse.json({ error: "Product not found." }, { status: 404 });
   }
