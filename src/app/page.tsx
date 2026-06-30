@@ -42,7 +42,7 @@ export default function Dashboard() {
   const totalLow = products.filter((p) => p.lowStock).length;
   // Total inventory value (this channel) = Σ stock × selling price.
   const totalValue = products.reduce(
-    (s, p) => s + p.totalQuantity * (p.sellingPrice ?? 0),
+    (s, p) => s + p.totalQuantity * (p.sellingPrice ?? p.purchasePrice ?? 0),
     0
   );
 
@@ -59,6 +59,10 @@ export default function Dashboard() {
       brand,
       productCount: matched.length,
       quantity: matched.reduce((s, p) => s + p.totalQuantity, 0),
+      value: matched.reduce(
+        (s, p) => s + p.totalQuantity * (p.sellingPrice ?? p.purchasePrice ?? 0),
+        0
+      ),
     };
   });
 
@@ -166,6 +170,14 @@ export default function Dashboard() {
                           Pieces
                         </div>
                       </div>
+                    </div>
+                    <div className="mt-3 flex items-baseline justify-between border-t border-slate-100 pt-2">
+                      <span className="text-xs uppercase tracking-wide text-slate-400">
+                        Value
+                      </span>
+                      <span className="text-base font-bold tabular-nums text-slate-900">
+                        ₹{b.value.toLocaleString("en-IN")}
+                      </span>
                     </div>
                   </div>
                 ))}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useChannel, codeLabel, codeWord } from "@/lib/useChannel";
+import { useChannel, codeLabel, codeWord, isValidCode } from "@/lib/useChannel";
 import type { Vendor, ProductCatalogEntry } from "@/lib/types";
 
 function today(): string {
@@ -56,7 +56,12 @@ export default function AddProductForm({ warehouseId, onAdded, onError }: Props)
       .catch(() => setProducts([]));
   }, []);
 
-  const eanValid = /^\d{6,14}$/.test(form.ean.trim());
+  const eanValid = isValidCode(form.ean, channel);
+  // Message shown when the code is invalid for the active channel.
+  const codeHint =
+    channel === "b2b"
+      ? `Enter a valid ${codeWord(channel)}.`
+      : `${codeWord(channel)} must be 6–14 digits.`;
   // Warn (but don't block) if the EAN already belongs to a product.
   const existing = useMemo(
     () => products.find((p) => p.ean === form.ean.trim()),
@@ -81,7 +86,7 @@ export default function AddProductForm({ warehouseId, onAdded, onError }: Props)
     e.preventDefault();
     onError("");
     if (!eanValid) {
-      onError(`${codeWord(channel)} must be 6–14 digits.`);
+      onError(codeHint);
       return;
     }
     if (!form.name.trim()) {
@@ -177,15 +182,13 @@ export default function AddProductForm({ warehouseId, onAdded, onError }: Props)
             value={form.ean}
             onChange={(e) => setForm({ ...form, ean: e.target.value })}
             placeholder={`Scan or type a new ${codeWord(channel)}`}
-            inputMode="numeric"
+            inputMode={channel === "b2b" ? "text" : "numeric"}
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
             required
           />
           {form.ean.trim() && !eanValid && (
-            <p className="mt-1 text-xs text-red-600">
-              {codeWord(channel)} must be 6–14 digits.
-            </p>
+            <p className="mt-1 text-xs text-red-600">{codeHint}</p>
           )}
           {existing && (
             <p className="mt-1 text-xs text-amber-600">

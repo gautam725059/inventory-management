@@ -16,6 +16,7 @@ export default function CatalogPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [brandFilter, setBrandFilter] = useState("");
   const [editingEan, setEditingEan] = useState<string | null>(null);
   const [barcodesEan, setBarcodesEan] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -44,6 +45,15 @@ export default function CatalogPage() {
 
   const warehouseNames = products[0]?.byWarehouse.map((b) => b.warehouseName) ?? [];
 
+  // Distinct brands present in this channel's catalog (for the brand dropdown).
+  const brands = useMemo(
+    () =>
+      [...new Set(products.map((p) => p.brand).filter(Boolean) as string[])].sort(
+        (a, b) => a.localeCompare(b)
+      ),
+    [products]
+  );
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list = q
@@ -51,13 +61,16 @@ export default function CatalogPage() {
           (p) => p.name.toLowerCase().includes(q) || p.ean.includes(q)
         )
       : products;
+    if (brandFilter) {
+      list = list.filter((p) => p.brand === brandFilter);
+    }
     if (sortTotal === "asc") {
       list = [...list].sort((a, b) => a.totalQuantity - b.totalQuantity);
     } else if (sortTotal === "desc") {
       list = [...list].sort((a, b) => b.totalQuantity - a.totalQuantity);
     }
     return list;
-  }, [products, query, sortTotal]);
+  }, [products, query, brandFilter, sortTotal]);
 
   function cycleSortTotal() {
     setSortTotal((s) => (s === "none" ? "desc" : s === "desc" ? "asc" : "none"));
@@ -143,12 +156,28 @@ export default function CatalogPage() {
         </div>
       )}
 
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder={`Search by product name or ${codeWord(channel)}…`}
-        className="mb-5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-      />
+      <div className="mb-5 flex flex-col gap-2 sm:flex-row">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={`Search by product name or ${codeWord(channel)}…`}
+          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+        />
+        {brands.length > 0 && (
+          <select
+            value={brandFilter}
+            onChange={(e) => setBrandFilter(e.target.value)}
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 sm:w-56"
+          >
+            <option value="">All brands ({products.length})</option>
+            {brands.map((b) => (
+              <option key={b} value={b}>
+                {b} ({products.filter((p) => p.brand === b).length})
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
 
       {isAdmin && selected.size > 0 && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">

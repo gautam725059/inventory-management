@@ -163,9 +163,9 @@ function isValidCode(s: string): boolean {
 
 /**
  * Parse the B2B catalog format: three columns per row —
- *   0 ASIN (pack/listing code) | 1 Pack size | 2 12NC (master product code)
- * Rows are grouped by 12NC into one master product each; every ASIN becomes a
- * pack barcode of its size. All products get the given `brand`.
+ *   0 ASIN (pack/listing code) | 1 Pack size | 2 product code (12NC or SKU)
+ * Rows are grouped by the code into one master product each; every ASIN becomes
+ * a pack barcode of its size. All products get the given `brand`.
  */
 export function parseAsinCatalog(text: string, brand?: string): ParseOutput {
   const errors: string[] = [];
@@ -192,8 +192,10 @@ export function parseAsinCatalog(text: string, brand?: string): ParseOutput {
     const twelve = (cols[2] ?? "").replace(/\s+/g, "");
 
     if (!asin && !twelve) continue;
-    if (!twelve || !/^\d{6,14}$/.test(twelve)) {
-      errors.push(`Row ${i + 1}: missing / invalid 12NC — skipped.`);
+    // Master product code: numeric 12NC (Philips) OR alphanumeric SKU (Wipro,
+    // e.g. "CL0004", "NW-AV12WTPNDD") — 3–24 chars, letters/digits/hyphen.
+    if (!twelve || !/^[A-Za-z0-9][A-Za-z0-9-]{2,23}$/.test(twelve)) {
+      errors.push(`Row ${i + 1}: missing / invalid product code — skipped.`);
       skipped++;
       continue;
     }

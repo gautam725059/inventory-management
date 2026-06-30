@@ -13,9 +13,11 @@ function parseBody(body: unknown): { ok: true; value: ReceiveInput } | { ok: fal
   const b = body as Record<string, unknown>;
 
   const ean = typeof b.ean === "string" ? b.ean.trim() : "";
-  if (!ean) return { ok: false, error: "EAN is required." };
-  if (!/^\d{6,14}$/.test(ean)) {
-    return { ok: false, error: "EAN must be 6–14 digits." };
+  if (!ean) return { ok: false, error: "Product code is required." };
+  // Accept a numeric EAN (e-com) or an alphanumeric SKU / 12NC (B2B). The code
+  // is resolved within the warehouse's own channel downstream.
+  if (!/^[A-Za-z0-9][A-Za-z0-9-]{2,23}$/.test(ean)) {
+    return { ok: false, error: "Invalid product code." };
   }
 
   const quantity = Number(b.quantity);

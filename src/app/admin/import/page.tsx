@@ -116,7 +116,7 @@ export default function ImportPage() {
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
           >
             <option value="standard">Standard (name · EAN · packs)</option>
-            <option value="asin">B2B (ASIN · size · 12NC)</option>
+            <option value="asin">B2B (ASIN · size · SKU/12NC)</option>
           </select>
         </div>
         <div>
@@ -135,7 +135,7 @@ export default function ImportPage() {
       <div className="mb-2 flex items-center justify-between">
         <label className="text-xs font-medium text-slate-600">
           {format === "asin"
-            ? "Paste 3 columns: ASIN · pack size · 12NC"
+            ? "Paste 3 columns: ASIN · pack size · SKU/12NC"
             : "Paste data (tab or comma separated)"}
         </label>
         <button

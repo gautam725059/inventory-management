@@ -143,7 +143,7 @@ export default function ReceiveForm({ warehouseId, onReceived, onError }: Props)
             value={form.ean}
             onChange={(e) => setForm({ ...form, ean: e.target.value })}
             placeholder={`Scan or type the ${codeWord(channel)}…`}
-            inputMode="numeric"
+            inputMode={channel === "b2b" ? "text" : "numeric"}
             autoComplete="off"
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
