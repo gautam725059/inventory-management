@@ -45,6 +45,15 @@ export default function Dashboard() {
     (s, p) => s + p.totalQuantity * (p.sellingPrice ?? p.purchasePrice ?? 0),
     0
   );
+  // Inventory value per warehouse = Σ (qty in that warehouse × price).
+  const valueByWarehouse: Record<string, number> = {};
+  for (const p of products) {
+    const price = p.sellingPrice ?? p.purchasePrice ?? 0;
+    for (const b of p.byWarehouse) {
+      valueByWarehouse[b.warehouseId] =
+        (valueByWarehouse[b.warehouseId] ?? 0) + b.quantity * price;
+    }
+  }
 
   // Per-brand product count + total pieces. Matches the product's `brand` field
   // first, then falls back to the brand word appearing in its name.
@@ -132,7 +141,11 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {warehouses.map((w) => (
-              <WarehouseCard key={w.id} warehouse={w} />
+              <WarehouseCard
+                key={w.id}
+                warehouse={w}
+                value={valueByWarehouse[w.id] ?? 0}
+              />
             ))}
           </div>
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import ImageEditor from "@/components/ImageEditor";
 import ImageViewer from "@/components/ImageViewer";
 import BarcodeEditor from "@/components/BarcodeEditor";
+import NameEditor from "@/components/NameEditor";
 import { useMe } from "@/lib/useMe";
 import { useChannel, codeWord } from "@/lib/useChannel";
 import type { ProductCatalogEntry } from "@/lib/types";
@@ -21,6 +22,7 @@ export default function CatalogPage() {
   const [editingEan, setEditingEan] = useState<string | null>(null);
   const [viewingEan, setViewingEan] = useState<string | null>(null);
   const [barcodesEan, setBarcodesEan] = useState<string | null>(null);
+  const [nameEan, setNameEan] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
   // Default: highest total quantity first.
@@ -45,6 +47,7 @@ export default function CatalogPage() {
   const editing = products.find((p) => p.ean === editingEan) ?? null;
   const viewing = products.find((p) => p.ean === viewingEan) ?? null;
   const editingBarcodes = products.find((p) => p.ean === barcodesEan) ?? null;
+  const editingName = products.find((p) => p.ean === nameEan) ?? null;
 
   /** Click an image cell: open the big preview if there's an image, else (admin)
    *  jump straight to the editor to add one. */
@@ -311,6 +314,15 @@ export default function CatalogPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-slate-900">{p.name}</span>
+                      {isAdmin && (
+                        <button
+                          onClick={() => setNameEan(p.ean)}
+                          title="Edit name / description"
+                          className="text-slate-400 transition hover:text-brand-600"
+                        >
+                          ✏
+                        </button>
+                      )}
                       {p.lowStock && (
                         <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
                           Low
@@ -382,6 +394,15 @@ export default function CatalogPage() {
             setViewingEan(null);
           }}
           onDeleted={load}
+        />
+      )}
+
+      {editingName && (
+        <NameEditor
+          ean={editingName.ean}
+          name={editingName.name}
+          onClose={() => setNameEan(null)}
+          onSaved={load}
         />
       )}
 

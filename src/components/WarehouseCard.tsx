@@ -2,7 +2,14 @@ import Link from "next/link";
 import type { WarehouseSummary } from "@/lib/types";
 
 /** Clickable dashboard card summarizing one warehouse. */
-export default function WarehouseCard({ warehouse }: { warehouse: WarehouseSummary }) {
+export default function WarehouseCard({
+  warehouse,
+  value,
+}: {
+  warehouse: WarehouseSummary;
+  /** Inventory value (₹) of this warehouse's stock. */
+  value?: number;
+}) {
   return (
     <Link
       href={`/warehouse/${warehouse.id}`}
@@ -44,6 +51,17 @@ export default function WarehouseCard({ warehouse }: { warehouse: WarehouseSumma
           </div>
         </div>
       </div>
+
+      {value !== undefined && (
+        <div className="flex items-baseline justify-between rounded-xl bg-slate-50 px-3 py-2">
+          <span className="text-xs uppercase tracking-wide text-slate-400">
+            Inventory Value
+          </span>
+          <span className="text-base font-bold tabular-nums text-slate-900">
+            ₹{value.toLocaleString("en-IN")}
+          </span>
+        </div>
+      )}
 
       <span className="inline-flex items-center gap-1 text-sm font-semibold text-brand-600">
         Open warehouse
