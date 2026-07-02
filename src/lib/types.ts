@@ -550,6 +550,19 @@ export interface LowStockRow {
   reorderLevel: number;
 }
 
+/** One slow-moving / stuck product for the stock-aging alert: in stock but not
+ *  dispatched for `idleDays` days (or never sold since it was received). */
+export interface StockAgingRow {
+  ean: string;
+  name: string;
+  quantity: number; // total in stock (this channel)
+  lastOutDate?: string; // last stock-out date, if ever
+  neverSold: boolean;
+  idleDays: number; // days since last movement / since received
+  value: number; // quantity × (selling ?? purchase price)
+  warehouses: string[]; // warehouses holding it
+}
+
 /** Business report over an optional date range. Revenue/COGS use the product's
  *  current selling/purchase prices; purchase spend uses each receipt's recorded
  *  cost. */
@@ -648,6 +661,28 @@ export interface DispatchInput {
   invoiceNo: string; // invoice number
   referenceNo?: string; // optional reference number (PO/order/ref)
   customerName?: string; // who the goods were sold to (optional)
+}
+
+/** One line of a bulk (multi-product) stock-in. */
+export interface BulkReceiveLine {
+  ean: string; // primary code / pack barcode (resolved to the product)
+  quantity: number;
+  purchasePrice?: number; // cost per piece for this line
+  name?: string; // name for a NEW product (when the code isn't in the catalog)
+}
+
+/** Body accepted by the bulk "receive goods" endpoint. Bill / vendor / date are
+ *  shared across all lines. */
+export interface BulkReceiveInput {
+  bill: string;
+  vendorName: string;
+  date: string;
+  lines: BulkReceiveLine[];
+}
+
+export interface BulkReceiveResult {
+  received: number; // number of lines received
+  totalPieces: number;
 }
 
 /** One line of a bulk (multi-product) stock-out. */

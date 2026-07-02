@@ -23,6 +23,8 @@ import type {
   ProductPurchaseHistory,
   ReceiveInput,
   DispatchInput,
+  BulkReceiveInput,
+  BulkReceiveResult,
   BulkDispatchInput,
   BulkDispatchResult,
   ProductUpdateInput,
@@ -42,6 +44,7 @@ import type {
   ReportProductRow,
   ReportMonthly,
   LowStockRow,
+  StockAgingRow,
   ImportItem,
   ImportResult,
   Combo,
@@ -687,6 +690,91 @@ export async function receiveStock(
   });
 }
 
+/** Receive several products into a warehouse in one go (bulk stock-in). Shares
+ *  bill / vendor / date across all lines. All-or-nothing on validation: every
+ *  line's code must already resolve to a product in this channel (add brand-new
+ *  products via Add Product), and quantities must be positive. */
+export async function receiveStockBulk(
+  warehouseId: string,
+  input: BulkReceiveInput
+): Promise<BulkReceiveResult> {
+  return mutate((store) => {
+    const warehouse = store.warehouses.find((w) => w.id === warehouseId);
+    if (!warehouse) throw new Error("Warehouse not found.");
+    const channel = warehouse.channel;
+    if (!input.lines.length) throw new Error("Add at least one line to receive.");
+
+    const resolved = input.lines.map((ln) => ({
+      scanned: ln.ean.trim(),
+      product: resolveProduct(store, ln.ean.trim(), channel),
+      name: ln.name?.trim(),
+      quantity: Math.floor(Number(ln.quantity) || 0),
+      purchasePrice:
+        typeof ln.purchasePrice === "number" ? ln.purchasePrice : undefined,
+    }));
+
+    const errors: string[] = [];
+    for (const r of resolved) {
+      if (!r.scanned) errors.push("A line is missing its code");
+      else if (!r.product && !r.name) {
+        errors.push(`"${r.scanned}" is new — enter a name to create it`);
+      }
+      if (r.quantity <= 0) {
+        errors.push(`"${r.product?.name ?? r.scanned}" — quantity must be greater than 0`);
+      }
+    }
+    if (errors.length) throw new Error(errors.join("; ") + ".");
+
+    const vendorId = upsertPartyByName(store.vendors, input.vendorName, channel);
+    const now = new Date().toISOString();
+    let totalPieces = 0;
+
+    for (const r of resolved) {
+      // Existing product, or create a new one from the entered name.
+      let product = r.product;
+      if (!product) {
+        product = {
+          ean: r.scanned,
+          channel,
+          name: r.name || `Product ${r.scanned}`,
+          comboSizes: [],
+          barcodes: [],
+          reorderLevel: 0,
+        };
+        store.products.push(product);
+      }
+      const stockEan = product.ean;
+      if (typeof r.purchasePrice === "number") {
+        product.purchasePrice = r.purchasePrice;
+      }
+      let row = store.stock.find(
+        (s) => s.warehouseId === warehouseId && s.ean === stockEan
+      );
+      if (!row) {
+        row = { warehouseId, ean: stockEan, quantity: 0 };
+        store.stock.push(row);
+      }
+      row.quantity += r.quantity;
+      totalPieces += r.quantity;
+
+      store.receipts.push({
+        id: randomUUID(),
+        warehouseId,
+        ean: stockEan,
+        quantity: r.quantity,
+        bill: input.bill,
+        vendorName: input.vendorName?.trim() || undefined,
+        vendorId,
+        date: input.date,
+        purchasePrice: r.purchasePrice,
+        createdAt: now,
+      });
+    }
+
+    return [store, { received: resolved.length, totalPieces }];
+  });
+}
+
 /** Dispatch goods out of a warehouse as packs (stock-out). The scanned `ean`
  *  may be the product's primary EAN or any of its pack barcodes; it is resolved
  *  to the product, then `unitSize * packs` pieces are removed from that
@@ -1268,6 +1356,84 @@ export async function getReports(
     monthly: [...months.values()].sort((a, b) => a.month.localeCompare(b.month)),
     lowStock,
   };
+}
+
+// ---- Stock aging (slow-moving / stuck stock) --------------------------------
+
+/** Products still in stock that haven't moved out for `days`+ days (or were
+ *  never sold since received) — likely damaged, dead, or stuck stock. Uses
+ *  existing receipts/dispatches only; nothing needs to be recorded manually. */
+export async function getStockAging(
+  channel: Channel = "ecom",
+  days = 30
+): Promise<StockAgingRow[]> {
+  const store = await readStore();
+  const whIds = warehouseIdsForChannel(store, channel);
+  const whName = (wid: string) =>
+    store.warehouses.find((w) => w.id === wid)?.name ?? wid;
+  const dayOf = (date: string | undefined, createdAt: string) =>
+    date || createdAt.slice(0, 10);
+  const todayMs = Date.now();
+
+  // In-stock quantity + holding warehouses, per product (this channel).
+  const stockByEan = new Map<string, { qty: number; whs: Set<string> }>();
+  for (const s of store.stock) {
+    if (!whIds.has(s.warehouseId) || s.quantity <= 0) continue;
+    const e = stockByEan.get(s.ean) ?? { qty: 0, whs: new Set<string>() };
+    e.qty += s.quantity;
+    e.whs.add(whName(s.warehouseId));
+    stockByEan.set(s.ean, e);
+  }
+
+  // Last stock-out date per product (plain dispatches + combo components).
+  const lastOut = new Map<string, string>();
+  const noteOut = (ean: string, day: string) => {
+    const cur = lastOut.get(ean);
+    if (!cur || day > cur) lastOut.set(ean, day);
+  };
+  for (const d of store.dispatches) {
+    if (whIds.has(d.warehouseId)) noteOut(d.ean, dayOf(d.date, d.createdAt));
+  }
+  for (const c of store.comboDispatches) {
+    if (!whIds.has(c.warehouseId)) continue;
+    const day = dayOf(c.date, c.createdAt);
+    for (const comp of c.components) noteOut(comp.ean, day);
+  }
+
+  // Earliest receipt date per product (fallback age when never sold).
+  const firstIn = new Map<string, string>();
+  for (const r of store.receipts) {
+    if (!whIds.has(r.warehouseId)) continue;
+    const day = dayOf(r.date, r.createdAt);
+    const cur = firstIn.get(r.ean);
+    if (!cur || day < cur) firstIn.set(r.ean, day);
+  }
+
+  const rows: StockAgingRow[] = [];
+  for (const [ean, info] of stockByEan) {
+    const out = lastOut.get(ean);
+    const baseDay = out ?? firstIn.get(ean);
+    if (!baseDay) continue; // no dates to judge age
+    const idleDays = Math.max(
+      0,
+      Math.floor((todayMs - new Date(baseDay).getTime()) / 86_400_000)
+    );
+    if (idleDays < days) continue;
+    const product = findProduct(store, ean, channel);
+    const price = product?.sellingPrice ?? product?.purchasePrice ?? 0;
+    rows.push({
+      ean,
+      name: product?.name ?? "Unknown product",
+      quantity: info.qty,
+      lastOutDate: out,
+      neverSold: !out,
+      idleDays,
+      value: info.qty * price,
+      warehouses: [...info.whs].sort(),
+    });
+  }
+  rows.sort((a, b) => b.idleDays - a.idleDays);
+  return rows;
 }
 
 // ---- Admin: approvals (stock-in & stock adjustments) ------------------------

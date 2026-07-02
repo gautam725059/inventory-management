@@ -17,6 +17,17 @@ function inr(n: number): string {
 function round2(n: number): number {
   return Math.round((n + Number.EPSILON) * 100) / 100;
 }
+/** Whole days between two ISO timestamps (>=0), or null if either is missing. */
+function daysBetween(fromISO?: string, toISO?: string): number | null {
+  if (!fromISO || !toISO) return null;
+  const ms = new Date(toISO).getTime() - new Date(fromISO).getTime();
+  if (!Number.isFinite(ms)) return null;
+  return Math.max(0, Math.round(ms / 86_400_000));
+}
+/** "same day" / "3 days" phrasing. */
+function daysLabel(n: number): string {
+  return n === 0 ? "same day" : `${n} day${n === 1 ? "" : "s"}`;
+}
 
 const STATUS_BADGE: Record<PurchaseOrder["status"], string> = {
   pending: "bg-amber-100 text-amber-700",
@@ -284,6 +295,13 @@ export default function PurchaseOrderDetailPage({
   const td = "border border-slate-300 px-2 py-1.5";
   const warehouseName = (wid?: string) =>
     warehouses.find((w) => w.id === wid)?.name;
+  // Time from admin approval to goods received.
+  const receiveDays = daysBetween(po.decidedAt, po.receivedAt);
+  // For a confirmed (on-the-way) PO: days elapsed since approval.
+  const waitingDays =
+    po.status === "confirmed"
+      ? daysBetween(po.decidedAt, new Date().toISOString())
+      : null;
   const draftGrand = round2(dLines.reduce((s, l) => s + calc(l).totalAmount, 0));
   const canEdit = po.status === "pending" || po.status === "confirmed";
 
@@ -355,6 +373,11 @@ export default function PurchaseOrderDetailPage({
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
             </span>
             🚚 Products coming — on the way
+            {waitingDays !== null && (
+              <span className="font-medium text-emerald-700">
+                · {daysLabel(waitingDays)} since approval
+              </span>
+            )}
           </div>
           {isAdmin && (
             <div className="flex flex-wrap items-center gap-2">
@@ -393,7 +416,11 @@ export default function PurchaseOrderDetailPage({
           ✓ Stocked into{" "}
           <strong>{warehouseName(po.warehouseId) ?? "inventory"}</strong>
           {po.receivedAt ? ` on ${po.receivedAt.slice(0, 10)}` : ""}
-          {po.receivedByName ? ` by ${po.receivedByName}` : ""}.
+          {po.receivedByName ? ` by ${po.receivedByName}` : ""}
+          {receiveDays !== null && (
+            <> — received in <strong>{daysLabel(receiveDays)}</strong> after approval</>
+          )}
+          .
         </div>
       )}
 

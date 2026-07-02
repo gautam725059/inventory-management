@@ -2,7 +2,6 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import StockOutForm from "@/components/StockOutForm";
 import ComboOutForm from "@/components/ComboOutForm";
 import BulkStockOutForm from "@/components/BulkStockOutForm";
 import StockCard from "@/components/StockCard";
@@ -19,7 +18,7 @@ export default function StockOutPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [mode, setMode] = useState<"product" | "bulk" | "combo">("product");
+  const [mode, setMode] = useState<"product" | "combo">("product");
 
   async function load() {
     try {
@@ -76,17 +75,7 @@ export default function StockOutPage({
               : "text-slate-600 hover:bg-slate-50"
           }`}
         >
-          📤 Product
-        </button>
-        <button
-          onClick={() => setMode("bulk")}
-          className={`rounded-md px-4 py-1.5 text-sm font-semibold transition ${
-            mode === "bulk"
-              ? "bg-brand-600 text-white shadow-sm"
-              : "text-slate-600 hover:bg-slate-50"
-          }`}
-        >
-          📋 Bulk
+          📤 Products
         </button>
         <button
           onClick={() => setMode("combo")}
@@ -103,24 +92,11 @@ export default function StockOutPage({
       {loading ? (
         <div className="py-16 text-center text-sm text-slate-400">Loading…</div>
       ) : mode === "product" ? (
-        <StockOutForm
-          warehouseId={id}
-          lines={detail?.lines ?? []}
-          onDispatched={async () => {
-            setSuccess("Stock dispatched.");
-            await load();
-          }}
-          onError={(message) => {
-            setError(message || null);
-            if (message) setSuccess(null);
-          }}
-        />
-      ) : mode === "bulk" ? (
         <BulkStockOutForm
           warehouseId={id}
           lines={detail?.lines ?? []}
           onDispatched={async () => {
-            setSuccess("Bulk stock dispatched.");
+            setSuccess("Stock dispatched.");
             await load();
           }}
           onError={(message) => {

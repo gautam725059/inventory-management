@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import ReceiveForm from "@/components/ReceiveForm";
+import BulkReceiveForm from "@/components/BulkReceiveForm";
 import StockCard from "@/components/StockCard";
 import type { WarehouseDetail } from "@/lib/types";
 
@@ -46,10 +46,11 @@ export default function StockInPage({
 
       <header className="mt-3 mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Stock In — bulk
+          Stock In
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          Receive products into {detail?.name ?? "this warehouse"} by EAN.
+          Receive one or many products into {detail?.name ?? "this warehouse"} —
+          new products are created right here.
         </p>
       </header>
 
@@ -64,17 +65,11 @@ export default function StockInPage({
         </div>
       )}
 
-      <ReceiveForm
+      <BulkReceiveForm
         warehouseId={id}
-        onReceived={async ({ pending }) => {
-          if (pending) {
-            setSuccess(
-              "Stock-in submitted for admin approval. Stock will update once an admin approves it."
-            );
-          } else {
-            setSuccess("Stock received and added to the warehouse.");
-            await load();
-          }
+        onReceived={async () => {
+          setSuccess("Stock received and added to the warehouse.");
+          await load();
         }}
         onError={(message) => {
           setError(message || null);

@@ -8,6 +8,12 @@ import type { PurchaseOrder } from "@/lib/types";
 function inr(n: number): string {
   return "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
 }
+function daysBetween(fromISO?: string, toISO?: string): number | null {
+  if (!fromISO || !toISO) return null;
+  const ms = new Date(toISO).getTime() - new Date(fromISO).getTime();
+  if (!Number.isFinite(ms)) return null;
+  return Math.max(0, Math.round(ms / 86_400_000));
+}
 
 const STATUS_BADGE: Record<PurchaseOrder["status"], string> = {
   pending: "bg-amber-100 text-amber-700",
@@ -191,6 +197,24 @@ export default function PurchaseOrdersPage() {
                       )}
                       {STATUS_LABEL[po.status]}
                     </span>
+                    {po.status === "received" &&
+                      (() => {
+                        const d = daysBetween(po.decidedAt, po.receivedAt);
+                        return d !== null ? (
+                          <div className="mt-0.5 text-xs text-slate-400">
+                            in {d}d
+                          </div>
+                        ) : null;
+                      })()}
+                    {po.status === "confirmed" &&
+                      (() => {
+                        const d = daysBetween(po.decidedAt, new Date().toISOString());
+                        return d !== null ? (
+                          <div className="mt-0.5 text-xs text-slate-400">
+                            {d}d waiting
+                          </div>
+                        ) : null;
+                      })()}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">

@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import WarehouseCard from "@/components/WarehouseCard";
 import PurchaseSearch from "@/components/PurchaseSearch";
 import { useChannel } from "@/lib/useChannel";
+import { useMe } from "@/lib/useMe";
 import type { WarehouseSummary, ProductCatalogEntry } from "@/lib/types";
 
 /** Brands shown on the B2B dashboard. A product belongs to a brand when its name
@@ -12,8 +14,11 @@ const BRANDS = ["Philips", "Wipro", "Hindware", "Gorav", "Orient"];
 
 export default function Dashboard() {
   const channel = useChannel();
+  const { me } = useMe();
+  const isAdmin = me?.role === "admin";
   const [warehouses, setWarehouses] = useState<WarehouseSummary[]>([]);
   const [products, setProducts] = useState<ProductCatalogEntry[]>([]);
+  const [agingCount, setAgingCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,6 +32,11 @@ export default function Dashboard() {
         if (!whRes.ok) throw new Error("Failed to load warehouses.");
         setWarehouses(await whRes.json());
         if (prRes.ok) setProducts(await prRes.json());
+        // Stock-aging alert count (30+ days) — best-effort.
+        fetch("/api/reports/aging?days=30")
+          .then((r) => (r.ok ? r.json() : { rows: [] }))
+          .then((d) => setAgingCount(Array.isArray(d.rows) ? d.rows.length : 0))
+          .catch(() => {});
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong.");
       } finally {
@@ -91,6 +101,19 @@ export default function Dashboard() {
         <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
+      )}
+
+      {isAdmin && agingCount > 0 && (
+        <Link
+          href="/aging"
+          className="mb-6 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 transition hover:bg-amber-100"
+        >
+          <span className="font-semibold">
+            🕒 {agingCount} product{agingCount === 1 ? "" : "s"} in stock 30+ days
+            — check &amp; clear (damaged / dead stock)
+          </span>
+          <span className="font-medium underline">View →</span>
+        </Link>
       )}
 
       {loading ? (
