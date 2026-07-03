@@ -569,8 +569,21 @@ function UsersSection({
     name: "",
     role: "staff" as Role,
     password: "",
+    warehouseId: "",
   });
+  const [warehouses, setWarehouses] = useState<{ id: string; name: string }[]>([]);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/warehouses?channel=ecom")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((d: { id: string; name: string }[]) =>
+        setWarehouses(
+          Array.isArray(d) ? d.map((w) => ({ id: w.id, name: w.name })) : []
+        )
+      )
+      .catch(() => {});
+  }, []);
 
   async function createUser(e: React.FormEvent) {
     e.preventDefault();
@@ -586,7 +599,7 @@ function UsersSection({
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Failed to create user.");
       }
-      setForm({ username: "", name: "", role: "staff", password: "" });
+      setForm({ username: "", name: "", role: "staff", password: "", warehouseId: "" });
       await onChanged();
     } catch (err) {
       onError(err instanceof Error ? err.message : "Failed to create user.");
@@ -628,7 +641,7 @@ function UsersSection({
 
       <form
         onSubmit={createUser}
-        className="mb-4 grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-5"
+        className="mb-4 grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-6"
       >
         <input
           className={inputClass}
@@ -651,6 +664,24 @@ function UsersSection({
           {ROLES.map((r) => (
             <option key={r} value={r}>
               {r}
+            </option>
+          ))}
+        </select>
+        <select
+          className={inputClass}
+          value={form.role === "admin" ? "" : form.warehouseId}
+          onChange={(e) => setForm({ ...form, warehouseId: e.target.value })}
+          disabled={form.role === "admin"}
+          title={
+            form.role === "admin"
+              ? "Admins can access all warehouses"
+              : "Limit this staff to one warehouse (blank = all)"
+          }
+        >
+          <option value="">All warehouses</option>
+          {warehouses.map((w) => (
+            <option key={w.id} value={w.id}>
+              {w.name}
             </option>
           ))}
         </select>
@@ -677,6 +708,7 @@ function UsersSection({
             <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
               <th className="px-4 py-3 font-medium">User</th>
               <th className="px-4 py-3 font-medium">Role</th>
+              <th className="px-4 py-3 font-medium">Warehouse</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 text-right font-medium">Actions</th>
             </tr>
@@ -705,6 +737,24 @@ function UsersSection({
                       </option>
                     ))}
                   </select>
+                </td>
+                <td className="px-4 py-3">
+                  {u.role === "admin" ? (
+                    <span className="text-xs text-slate-400">All</span>
+                  ) : (
+                    <select
+                      value={u.warehouseId ?? ""}
+                      onChange={(e) => patchUser(u.id, { warehouseId: e.target.value })}
+                      className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                    >
+                      <option value="">All</option>
+                      {warehouses.map((w) => (
+                        <option key={w.id} value={w.id}>
+                          {w.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   <span

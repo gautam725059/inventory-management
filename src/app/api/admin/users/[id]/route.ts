@@ -22,7 +22,13 @@ export async function PATCH(request: Request, { params }: Context) {
   }
   const b = body as Record<string, unknown>;
 
-  const patch: { name?: string; role?: Role; active?: boolean; password?: string } = {};
+  const patch: {
+    name?: string;
+    role?: Role;
+    active?: boolean;
+    password?: string;
+    warehouseId?: string | null;
+  } = {};
   if (b.name !== undefined) {
     if (typeof b.name !== "string" || !b.name.trim()) {
       return NextResponse.json({ error: "Name must not be empty." }, { status: 400 });
@@ -49,6 +55,9 @@ export async function PATCH(request: Request, { params }: Context) {
       );
     }
     patch.password = b.password;
+  }
+  if (b.warehouseId !== undefined) {
+    patch.warehouseId = typeof b.warehouseId === "string" ? b.warehouseId : null;
   }
 
   const result = await updateUser(id, patch);

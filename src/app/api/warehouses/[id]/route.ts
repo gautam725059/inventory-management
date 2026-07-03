@@ -1,11 +1,19 @@
 import { NextResponse } from "next/server";
 import { getWarehouseDetail } from "@/lib/db";
+import { getCurrentUser, canAccessWarehouse } from "@/lib/auth";
 import { toCsv, csvResponse } from "@/lib/csv";
 
 type Context = { params: Promise<{ id: string }> };
 
 export async function GET(request: Request, { params }: Context) {
   const { id } = await params;
+  const me = await getCurrentUser(request);
+  if (!canAccessWarehouse(me, id)) {
+    return NextResponse.json(
+      { error: "You don't have access to this warehouse." },
+      { status: 403 }
+    );
+  }
   const detail = await getWarehouseDetail(id);
   if (!detail) {
     return NextResponse.json({ error: "Warehouse not found." }, { status: 404 });

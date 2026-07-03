@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { receiveStock } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, canAccessWarehouse } from "@/lib/auth";
 import type { ReceiveInput } from "@/lib/types";
 
 type Context = { params: Promise<{ id: string }> };
@@ -70,6 +70,18 @@ function parseBody(body: unknown): { ok: true; value: ReceiveInput } | { ok: fal
 export async function POST(request: Request, { params }: Context) {
   const { id } = await params;
 
+  // Any logged-in user can receive stock directly (no approval needed).
+  const me = await getCurrentUser(request);
+  if (!me) {
+    return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+  }
+  if (!canAccessWarehouse(me, id)) {
+    return NextResponse.json(
+      { error: "You don't have access to this warehouse." },
+      { status: 403 }
+    );
+  }
+
   let body: unknown;
   try {
     body = await request.json();
@@ -80,12 +92,6 @@ export async function POST(request: Request, { params }: Context) {
   const result = parseBody(body);
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 });
-  }
-
-  // Any logged-in user can receive stock directly (no approval needed).
-  const me = await getCurrentUser(request);
-  if (!me) {
-    return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   }
 
   try {

@@ -42,6 +42,25 @@ export function hasRole(user: User | null, ...roles: Role[]): boolean {
   return !!user && roles.includes(user.role);
 }
 
+/** The location key of a warehouse id, ignoring channel: wh-delhi-b2b → wh-delhi.
+ *  Lets one staff assignment cover both channels of the same physical location. */
+export function warehouseBase(id: string): string {
+  return id.replace(/-b2b$/, "");
+}
+
+/** Whether a user may see / act on a warehouse. Admins → every warehouse; a
+ *  staff with an assigned warehouse → only that one (matched by location across
+ *  channels); an unassigned staff → all warehouses (no limit). */
+export function canAccessWarehouse(
+  user: User | null,
+  warehouseId: string
+): boolean {
+  if (!user) return false;
+  if (user.role === "admin") return true;
+  if (!user.warehouseId) return true; // not restricted
+  return warehouseBase(warehouseId) === warehouseBase(user.warehouseId);
+}
+
 /** Cookie attributes for the session cookie. */
 export function sessionCookieOptions(maxAgeSeconds: number) {
   return {

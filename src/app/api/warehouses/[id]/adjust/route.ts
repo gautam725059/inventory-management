@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { adjustStock, createAdjustApproval } from "@/lib/db";
-import { getCurrentUser, hasRole } from "@/lib/auth";
+import { getCurrentUser, hasRole, canAccessWarehouse } from "@/lib/auth";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -12,6 +12,12 @@ export async function POST(request: Request, { params }: Context) {
     return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   }
   const { id } = await params;
+  if (!canAccessWarehouse(me, id)) {
+    return NextResponse.json(
+      { error: "You don't have access to this warehouse." },
+      { status: 403 }
+    );
+  }
 
   let body: unknown;
   try {

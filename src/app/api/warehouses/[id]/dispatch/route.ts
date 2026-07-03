@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { dispatchStock } from "@/lib/db";
+import { getCurrentUser, canAccessWarehouse } from "@/lib/auth";
 import type { DispatchInput } from "@/lib/types";
 
 type Context = { params: Promise<{ id: string }> };
@@ -45,6 +46,13 @@ function parseBody(
 
 export async function POST(request: Request, { params }: Context) {
   const { id } = await params;
+  const me = await getCurrentUser(request);
+  if (!canAccessWarehouse(me, id)) {
+    return NextResponse.json(
+      { error: "You don't have access to this warehouse." },
+      { status: 403 }
+    );
+  }
 
   let body: unknown;
   try {

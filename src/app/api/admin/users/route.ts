@@ -32,6 +32,8 @@ export async function POST(request: Request) {
   const name = typeof b.name === "string" ? b.name.trim() : "";
   const role = b.role as Role;
   const password = typeof b.password === "string" ? b.password : "";
+  const warehouseId =
+    typeof b.warehouseId === "string" ? b.warehouseId.trim() : undefined;
 
   if (!/^[a-zA-Z0-9._-]{3,}$/.test(username)) {
     return NextResponse.json(
@@ -49,7 +51,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = await createUser({ username, name, role, password });
+  const result = await createUser({ username, name, role, password, warehouseId });
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 409 });
   }

@@ -2413,6 +2413,7 @@ function toPublicUser(u: User): PublicUser {
     name: u.name,
     role: u.role,
     active: u.active,
+    warehouseId: u.warehouseId,
     createdAt: u.createdAt,
   };
 }
@@ -2466,12 +2467,18 @@ export async function createUser(input: {
   name: string;
   role: Role;
   password: string;
+  warehouseId?: string;
 }): Promise<UserResult> {
   return mutate<UserResult>((store) => {
     const username = input.username.trim();
     if (store.users.some((u) => u.username.toLowerCase() === username.toLowerCase())) {
       return [store, { ok: false, error: "Username already exists." } as const];
     }
+    // Staff can be tied to a warehouse; admins always see all.
+    const warehouseId =
+      input.role === "staff" && input.warehouseId?.trim()
+        ? input.warehouseId.trim()
+        : undefined;
     const user: User = {
       id: randomUUID(),
       username,
@@ -2479,6 +2486,7 @@ export async function createUser(input: {
       role: input.role,
       passwordHash: hashPassword(input.password),
       active: true,
+      warehouseId,
       createdAt: new Date().toISOString(),
     };
     store.users.push(user);
@@ -2488,7 +2496,13 @@ export async function createUser(input: {
 
 export async function updateUser(
   id: string,
-  patch: { name?: string; role?: Role; active?: boolean; password?: string }
+  patch: {
+    name?: string;
+    role?: Role;
+    active?: boolean;
+    password?: string;
+    warehouseId?: string | null;
+  }
 ): Promise<UserResult> {
   return mutate<UserResult>((store) => {
     const user = store.users.find((u) => u.id === id);
@@ -2506,6 +2520,11 @@ export async function updateUser(
     if (patch.role) user.role = patch.role;
     if (typeof patch.active === "boolean") user.active = patch.active;
     if (patch.password) user.passwordHash = hashPassword(patch.password);
+    if (patch.warehouseId !== undefined) {
+      user.warehouseId = patch.warehouseId?.trim() || undefined;
+    }
+    // Admins are never warehouse-limited.
+    if (user.role === "admin") user.warehouseId = undefined;
     return [store, { ok: true, user: toPublicUser(user) } as const];
   });
 }

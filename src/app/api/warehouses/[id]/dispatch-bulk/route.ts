@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { dispatchStockBulk } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, canAccessWarehouse } from "@/lib/auth";
 import type { BulkDispatchInput, BulkDispatchLine } from "@/lib/types";
 
 const MAX_LINES = 10;
@@ -57,6 +57,12 @@ export async function POST(request: Request, { params }: Context) {
   if (!me) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
 
   const { id } = await params;
+  if (!canAccessWarehouse(me, id)) {
+    return NextResponse.json(
+      { error: "You don't have access to this warehouse." },
+      { status: 403 }
+    );
+  }
   let body: unknown;
   try {
     body = await request.json();

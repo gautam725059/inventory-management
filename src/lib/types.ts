@@ -17,6 +17,10 @@ export interface User {
   role: Role;
   passwordHash: string; // scrypt hash "salt:hash"
   active: boolean; // disabled users can't log in
+  /** For staff: the warehouse (location) they're limited to. Matched across
+   *  channels by location, so a "Haryana" staff gets Haryana in both e-com and
+   *  B2B. Empty/undefined (and admins) = all warehouses. */
+  warehouseId?: string;
   createdAt: string;
 }
 
@@ -35,6 +39,7 @@ export interface PublicUser {
   name: string;
   role: Role;
   active: boolean;
+  warehouseId?: string; // staff: the warehouse they're limited to
   createdAt: string;
 }
 
