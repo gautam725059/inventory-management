@@ -73,6 +73,46 @@ export default function PurchaseSearch() {
   const grandQty = found.reduce((s, r) => s + (r.data?.totalQuantity ?? 0), 0);
   const grandValue = found.reduce((s, r) => s + (r.data?.totalValue ?? 0), 0);
 
+  // CSV: one row per found product —
+  // Brand | SKU | <warehouse names…> | Rate | Qty  (Qty = total current stock).
+  function csvCell(v: string | number | undefined): string {
+    const s = v == null ? "" : String(v);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  }
+
+  function downloadCsv() {
+    const rows = found.map((r) => r.data!);
+    if (rows.length === 0) return;
+    // All products in a channel share the same warehouse set, in order.
+    const warehouses = rows[0].stockByWarehouse.map((w) => w.warehouseName);
+    const header = ["Brand", label, ...warehouses, "Rate", "Qty"];
+    const lines = [header.map(csvCell).join(",")];
+    for (const d of rows) {
+      const whQtys = d.stockByWarehouse.map((w) => w.quantity);
+      lines.push(
+        [
+          d.brand ?? "",
+          d.ean,
+          ...whQtys,
+          d.latestRate ?? "",
+          d.currentStockTotal,
+        ]
+          .map(csvCell)
+          .join(",")
+      );
+    }
+    const blob = new Blob(["﻿" + lines.join("\r\n")], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const stamp = new Date().toISOString().slice(0, 10);
+    a.download = `${channel}-stock-${stamp}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -138,10 +178,19 @@ export default function PurchaseSearch() {
               <span className="font-semibold text-brand-800">
                 {found.length} product{found.length === 1 ? "" : "s"} found
               </span>
-              <span className="tabular-nums text-brand-800">
-                Total: <strong>{grandQty.toLocaleString()}</strong> pcs
-                {grandValue > 0 && <> · {inr(grandValue)}</>}
-              </span>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="tabular-nums text-brand-800">
+                  Total: <strong>{grandQty.toLocaleString()}</strong> pcs
+                  {grandValue > 0 && <> · {inr(grandValue)}</>}
+                </span>
+                <button
+                  type="button"
+                  onClick={downloadCsv}
+                  className="rounded-lg border border-brand-300 bg-white px-3 py-1.5 text-xs font-semibold text-brand-700 shadow-sm transition hover:bg-brand-100"
+                >
+                  ⬇ Download CSV
+                </button>
+              </div>
             </div>
           )}
 

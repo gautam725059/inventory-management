@@ -430,9 +430,16 @@ export interface ReleaseOrder {
   totalAmount: number;
   cartDiscount: number;
   netAmount: number;
+  // Approval lifecycle: staff ROs start "pending" (no stock deducted) until an
+  // admin approves them ("dispatched") or rejects them ("rejected"). Admin ROs
+  // are created "dispatched" directly.
+  status: "pending" | "dispatched" | "rejected";
   createdBy?: string;
   createdByName?: string;
   createdAt: string;
+  decidedBy?: string;
+  decidedByName?: string;
+  decidedAt?: string;
 }
 
 /** A release-order line as submitted by the form (totals derived server-side). */
@@ -604,13 +611,25 @@ export interface PurchaseHistoryEntry {
   bill?: string;
 }
 
+/** Current stock of a product in one warehouse (for the export row). */
+export interface WarehouseStockCell {
+  warehouseId: string;
+  warehouseName: string;
+  quantity: number;
+}
+
 /** All purchases of one product (in a channel), newest first. */
 export interface ProductPurchaseHistory {
   ean: string; // resolved primary code (EAN / 12NC)
   name: string;
+  brand?: string;
   totalQuantity: number;
   totalValue: number;
   entries: PurchaseHistoryEntry[];
+  // Current stock in each warehouse of the channel, in warehouse order.
+  stockByWarehouse: WarehouseStockCell[];
+  currentStockTotal: number;
+  latestRate?: number; // most recent recorded purchase price per piece
 }
 
 /** A unified stock movement for the history view. */

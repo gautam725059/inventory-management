@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { listReleaseOrders, createReleaseOrder } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, hasRole } from "@/lib/auth";
 import { currentChannel } from "@/lib/channel";
 import type { ReleaseOrderInput, ROLineInput } from "@/lib/types";
 
@@ -13,7 +13,8 @@ export async function GET(request: Request) {
   return NextResponse.json(await listReleaseOrders(await currentChannel()));
 }
 
-/** Any logged-in user (incl. staff): create an RO → dispatches stock. */
+/** Any logged-in user (incl. staff): create an RO. Admins dispatch stock now;
+ *  staff ROs are queued as "pending" until an admin approves them. */
 export async function POST(request: Request) {
   const me = await getCurrentUser(request);
   if (!me) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
@@ -57,7 +58,11 @@ export async function POST(request: Request) {
     })),
   };
 
-  const result = await createReleaseOrder(input, { id: me.id, name: me.name });
+  const result = await createReleaseOrder(
+    input,
+    { id: me.id, name: me.name },
+    hasRole(me, "admin")
+  );
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }

@@ -44,6 +44,21 @@ export default function ReleaseOrderDetailPage({
     if (res.ok) router.push("/release-orders");
   }
 
+  async function decide(action: "approve" | "reject") {
+    if (!ro) return;
+    if (action === "approve" && !confirm(`Approve ${ro.roNumber}? This dispatches the stock.`)) return;
+    if (action === "reject" && !confirm(`Reject ${ro.roNumber}?`)) return;
+    setError(null);
+    const res = await fetch(`/api/release-orders/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action }),
+    });
+    const d = await res.json().catch(() => ({}));
+    if (res.ok) setRo(d);
+    else setError(d.error || "Failed.");
+  }
+
   if (loading) return <div className="py-20 text-center text-sm text-slate-400">Loading…</div>;
   if (!ro) {
     return (
@@ -57,6 +72,13 @@ export default function ReleaseOrderDetailPage({
   const th = "border border-slate-300 px-2 py-1.5 text-left font-semibold";
   const td = "border border-slate-300 px-2 py-1.5";
 
+  const badge =
+    ro.status === "pending"
+      ? { text: "PENDING", cls: "bg-amber-100 text-amber-700" }
+      : ro.status === "rejected"
+        ? { text: "REJECTED", cls: "bg-red-100 text-red-700" }
+        : { text: "DISPATCHED", cls: "bg-emerald-100 text-emerald-700" };
+
   return (
     <div className="mx-auto max-w-6xl px-5 py-10">
       <style>{`@media print { aside, header.sticky, .no-print { display: none !important; } .md\\:pl-64 { padding-left: 0 !important; } }`}</style>
@@ -65,11 +87,23 @@ export default function ReleaseOrderDetailPage({
         <Link href="/release-orders" className="text-sm font-medium text-brand-600 hover:underline">← Release Orders</Link>
         <div className="flex gap-2">
           <button onClick={() => window.print()} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50">🖨 Print / PDF</button>
+          {isAdmin && ro.status === "pending" && (
+            <>
+              <button onClick={() => decide("approve")} className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100">Approve</button>
+              <button onClick={() => decide("reject")} className="rounded-lg border border-amber-300 px-3 py-2 text-sm font-medium text-amber-700 transition hover:bg-amber-50">Reject</button>
+            </>
+          )}
           {isAdmin && (
             <button onClick={remove} className="rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50">Delete</button>
           )}
         </div>
       </div>
+
+      {error && (
+        <div className="no-print mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
@@ -77,7 +111,7 @@ export default function ReleaseOrderDetailPage({
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">Release Order</h1>
             <p className="mt-0.5 font-mono text-lg text-slate-700">{ro.roNumber}</p>
           </div>
-          <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700">DISPATCHED</span>
+          <span className={`rounded-full px-3 py-1 text-sm font-semibold ${badge.cls}`}>{badge.text}</span>
         </div>
 
         <div className="mb-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">

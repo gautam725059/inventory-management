@@ -213,6 +213,11 @@ function normalizeStore(parsed: Partial<Store>): Store {
       ? parsed.releaseOrders.map((r) => ({
           ...r,
           channel: r.channel === "b2b" ? "b2b" : "ecom",
+          // Older ROs predate the approval flow — they were dispatched on create.
+          status:
+            r.status === "pending" || r.status === "rejected"
+              ? r.status
+              : "dispatched",
         }))
       : [],
   };
@@ -606,12 +611,31 @@ export async function getProductPurchaseHistory(
     }))
     .sort((a, b) => b.date.localeCompare(a.date));
 
+  // Current stock in each warehouse of the channel, kept in warehouse order.
+  const stockByWarehouse = store.warehouses
+    .filter((w) => w.channel === channel)
+    .map((w) => ({
+      warehouseId: w.id,
+      warehouseName: w.name,
+      quantity:
+        store.stock.find((s) => s.warehouseId === w.id && s.ean === product.ean)
+          ?.quantity ?? 0,
+    }));
+  const currentStockTotal = stockByWarehouse.reduce((s, c) => s + c.quantity, 0);
+
+  // Latest recorded purchase rate (entries are already newest-first).
+  const latestRate = entries.find((e) => typeof e.price === "number")?.price;
+
   return {
     ean: product.ean,
     name: product.name,
+    brand: product.brand,
     totalQuantity: entries.reduce((s, e) => s + e.quantity, 0),
     totalValue: entries.reduce((s, e) => s + (e.amount ?? 0), 0),
     entries,
+    stockByWarehouse,
+    currentStockTotal,
+    latestRate,
   };
 }
 
@@ -2274,7 +2298,8 @@ export async function getReleaseOrder(
  *  that doesn't resolve / isn't stocked / is short. */
 export async function createReleaseOrder(
   input: ReleaseOrderInput,
-  by?: { id: string; name: string }
+  by?: { id: string; name: string },
+  isAdmin = false
 ): Promise<ROResult> {
   return mutate<ROResult>((store) => {
     const warehouse = store.warehouses.find((w) => w.id === input.warehouseId);
@@ -2297,7 +2322,9 @@ export async function createReleaseOrder(
       return { ln, scanned, product, stockEan: product?.ean ?? scanned, quantity, landingRate, gstRate };
     });
 
-    // Validate: every EAN resolves, quantity > 0, and combined stock is enough.
+    // Validate: every EAN resolves and quantity > 0 (always). Stock-sufficiency
+    // is only enforced when the RO dispatches now (admin) — a staff RO waits in
+    // "pending" and is re-checked at approval time.
     const need = new Map<string, number>();
     const errors: string[] = [];
     for (const r of resolved) {
@@ -2305,20 +2332,22 @@ export async function createReleaseOrder(
       if (r.quantity <= 0) errors.push(`EAN ${r.scanned}: quantity must be > 0`);
       need.set(r.stockEan, (need.get(r.stockEan) ?? 0) + r.quantity);
     }
-    for (const [stockEan, total] of need) {
-      const have =
-        store.stock.find((s) => s.warehouseId === input.warehouseId && s.ean === stockEan)
-          ?.quantity ?? 0;
-      if (total > have) {
-        const name = findProduct(store, stockEan, channel)?.name ?? stockEan;
-        errors.push(`"${name}" — need ${total}, only ${have} in stock`);
+    if (isAdmin) {
+      for (const [stockEan, total] of need) {
+        const have =
+          store.stock.find((s) => s.warehouseId === input.warehouseId && s.ean === stockEan)
+            ?.quantity ?? 0;
+        if (total > have) {
+          const name = findProduct(store, stockEan, channel)?.name ?? stockEan;
+          errors.push(`"${name}" — need ${total}, only ${have} in stock`);
+        }
       }
     }
     if (errors.length) {
       return [store, { ok: false, error: errors.join("; ") + "." }];
     }
 
-    // Deduct + log dispatches; build the RO line items.
+    // Build the RO line items + totals (no stock touched yet).
     const customerId = upsertPartyByName(
       store.customers,
       input.customerName || input.source,
@@ -2331,11 +2360,6 @@ export async function createReleaseOrder(
     let totalAmount = 0;
 
     for (const r of resolved) {
-      const row = store.stock.find(
-        (s) => s.warehouseId === input.warehouseId && s.ean === r.stockEan
-      )!;
-      row.quantity -= r.quantity;
-
       const taxAmount = round2((r.landingRate * r.gstRate) / (100 + r.gstRate));
       const lineTotal = round2(r.landingRate * r.quantity);
       totalQuantity += r.quantity;
@@ -2353,21 +2377,32 @@ export async function createReleaseOrder(
         mrp: typeof r.ln.mrp === "number" ? r.ln.mrp : undefined,
         totalAmount: lineTotal,
       });
+    }
 
-      store.dispatches.push({
-        id: randomUUID(),
-        warehouseId: input.warehouseId,
-        ean: r.stockEan,
-        unitSize: 1,
-        packs: r.quantity,
-        quantity: r.quantity,
-        date,
-        invoiceNo: roNumber,
-        referenceNo: input.source || undefined,
-        customerName: input.customerName?.trim() || input.source || undefined,
-        customerId,
-        createdAt: now,
-      });
+    // Admin dispatches immediately: deduct stock + log dispatches. Staff ROs
+    // stay pending and deduct nothing until an admin approves.
+    if (isAdmin) {
+      for (const r of resolved) {
+        const row = store.stock.find(
+          (s) => s.warehouseId === input.warehouseId && s.ean === r.stockEan
+        )!;
+        row.quantity -= r.quantity;
+
+        store.dispatches.push({
+          id: randomUUID(),
+          warehouseId: input.warehouseId,
+          ean: r.stockEan,
+          unitSize: 1,
+          packs: r.quantity,
+          quantity: r.quantity,
+          date,
+          invoiceNo: roNumber,
+          referenceNo: input.source || undefined,
+          customerName: input.customerName?.trim() || input.source || undefined,
+          customerId,
+          createdAt: now,
+        });
+      }
     }
 
     const cartDiscount = Math.max(0, Number(input.cartDiscount) || 0);
@@ -2385,11 +2420,92 @@ export async function createReleaseOrder(
       totalAmount,
       cartDiscount,
       netAmount: round2(totalAmount - cartDiscount),
+      status: isAdmin ? "dispatched" : "pending",
       createdBy: by?.id,
       createdByName: by?.name,
       createdAt: now,
+      decidedBy: isAdmin ? by?.id : undefined,
+      decidedByName: isAdmin ? by?.name : undefined,
+      decidedAt: isAdmin ? now : undefined,
     };
     store.releaseOrders.push(ro);
+    return [store, { ok: true, ro }];
+  });
+}
+
+/** Admin decision on a pending release order. "approve" re-validates stock,
+ *  deducts it, and logs dispatches (marking the RO "dispatched"); "reject"
+ *  simply marks it "rejected" with no stock change. */
+export async function decideReleaseOrder(
+  id: string,
+  action: "approve" | "reject",
+  by: { id: string; name: string }
+): Promise<ROResult> {
+  return mutate<ROResult>((store) => {
+    const ro = store.releaseOrders.find((r) => r.id === id);
+    if (!ro) return [store, { ok: false, error: "Release order not found." }];
+    if (ro.status !== "pending") {
+      return [store, { ok: false, error: "This release order is already decided." }];
+    }
+    const now = new Date().toISOString();
+
+    if (action === "reject") {
+      ro.status = "rejected";
+      ro.decidedBy = by.id;
+      ro.decidedByName = by.name;
+      ro.decidedAt = now;
+      return [store, { ok: true, ro }];
+    }
+
+    // approve: re-validate combined stock, then deduct + log dispatches.
+    const need = new Map<string, number>();
+    for (const it of ro.items) {
+      need.set(it.ean, (need.get(it.ean) ?? 0) + it.quantity);
+    }
+    const errors: string[] = [];
+    for (const [stockEan, total] of need) {
+      const have =
+        store.stock.find((s) => s.warehouseId === ro.warehouseId && s.ean === stockEan)
+          ?.quantity ?? 0;
+      if (total > have) {
+        const name = findProduct(store, stockEan, ro.channel)?.name ?? stockEan;
+        errors.push(`"${name}" — need ${total}, only ${have} in stock`);
+      }
+    }
+    if (errors.length) {
+      return [store, { ok: false, error: errors.join("; ") + "." }];
+    }
+
+    const customerId = upsertPartyByName(
+      store.customers,
+      ro.customerName || ro.source,
+      ro.channel
+    );
+    for (const it of ro.items) {
+      const row = store.stock.find(
+        (s) => s.warehouseId === ro.warehouseId && s.ean === it.ean
+      )!;
+      row.quantity -= it.quantity;
+      store.dispatches.push({
+        id: randomUUID(),
+        warehouseId: ro.warehouseId,
+        ean: it.ean,
+        unitSize: 1,
+        packs: it.quantity,
+        quantity: it.quantity,
+        date: ro.date,
+        invoiceNo: ro.roNumber,
+        referenceNo: ro.source || undefined,
+        customerName: ro.customerName || ro.source || undefined,
+        customerId,
+        createdAt: now,
+      });
+    }
+
+    ro.status = "dispatched";
+    ro.decidedBy = by.id;
+    ro.decidedByName = by.name;
+    ro.decidedAt = now;
     return [store, { ok: true, ro }];
   });
 }

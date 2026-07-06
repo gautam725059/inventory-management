@@ -133,8 +133,22 @@ export default function BarcodeEditor({
         )}
 
         <div className="mt-4 space-y-3">
-          {rows.map((r, i) => (
+          {rows.map((r, i) => {
+            const sz = Number(r.size);
+            const label =
+              r.size.trim() && Number.isFinite(sz) && sz > 0
+                ? sz === 1
+                  ? "Single"
+                  : `Pack of ${sz}`
+                : "New pack";
+            return (
             <div key={i} className="rounded-lg border border-slate-200 p-2.5">
+              <div className="mb-2 flex items-baseline gap-2 text-xs">
+                <span className="font-semibold text-slate-700">{label}</span>
+                {r.ean.trim() && (
+                  <span className="font-mono text-slate-400">{r.ean.trim()}</span>
+                )}
+              </div>
               <div className="flex items-center gap-2">
                 <input
                   className={`${inputClass} flex-1`}
@@ -184,7 +198,8 @@ export default function BarcodeEditor({
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <button

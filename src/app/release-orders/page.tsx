@@ -9,6 +9,21 @@ function inr(n: number): string {
   return "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
 }
 
+const STATUS_BADGE: Record<ReleaseOrder["status"], { label: string; cls: string }> = {
+  pending: { label: "Pending", cls: "bg-amber-50 text-amber-700 border-amber-200" },
+  dispatched: { label: "Dispatched", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  rejected: { label: "Rejected", cls: "bg-red-50 text-red-700 border-red-200" },
+};
+
+function StatusBadge({ status }: { status: ReleaseOrder["status"] }) {
+  const b = STATUS_BADGE[status] ?? STATUS_BADGE.dispatched;
+  return (
+    <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${b.cls}`}>
+      {b.label}
+    </span>
+  );
+}
+
 export default function ReleaseOrdersPage() {
   const { me } = useMe();
   const isAdmin = me?.role === "admin";
@@ -46,6 +61,26 @@ export default function ReleaseOrdersPage() {
     }
   }
 
+  async function decide(ro: ReleaseOrder, action: "approve" | "reject") {
+    if (action === "approve" && !confirm(`Approve ${ro.roNumber}? This dispatches the stock.`)) return;
+    if (action === "reject" && !confirm(`Reject ${ro.roNumber}?`)) return;
+    setError(null);
+    try {
+      const res = await fetch(`/api/release-orders/${ro.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || "Failed.");
+      }
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed.");
+    }
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-5 py-10">
       <Link href="/" className="text-sm font-medium text-brand-600 hover:underline">
@@ -56,8 +91,9 @@ export default function ReleaseOrdersPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Release Orders</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Incoming platform orders (Blinkit etc.). Creating an RO matches EANs
-            and dispatches the stock.
+            Incoming platform orders (Blinkit etc.). Admin ROs dispatch stock
+            right away; staff ROs stay <strong>pending</strong> until an admin
+            approves them.
           </p>
         </div>
         <Link
@@ -88,6 +124,7 @@ export default function ReleaseOrdersPage() {
                 <th className="px-4 py-3 font-medium">RO No.</th>
                 <th className="px-4 py-3 font-medium">Date</th>
                 <th className="px-4 py-3 font-medium">Source</th>
+                <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 text-right font-medium">Items</th>
                 <th className="px-4 py-3 text-right font-medium">Qty</th>
                 <th className="px-4 py-3 text-right font-medium">Net Amount</th>
@@ -104,6 +141,7 @@ export default function ReleaseOrdersPage() {
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-slate-500">{ro.date}</td>
                   <td className="px-4 py-3 text-slate-700">{ro.source || "—"}</td>
+                  <td className="px-4 py-3"><StatusBadge status={ro.status} /></td>
                   <td className="px-4 py-3 text-right tabular-nums text-slate-600">{ro.items.length}</td>
                   <td className="px-4 py-3 text-right tabular-nums text-slate-600">
                     {ro.totalQuantity.toLocaleString("en-IN")}
@@ -112,7 +150,23 @@ export default function ReleaseOrdersPage() {
                     {inr(ro.netAmount)}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex flex-wrap justify-end gap-2">
+                      {isAdmin && ro.status === "pending" && (
+                        <>
+                          <button
+                            onClick={() => decide(ro, "approve")}
+                            className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => decide(ro, "reject")}
+                            className="rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-50"
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
                       <Link
                         href={`/release-orders/${ro.id}`}
                         className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"

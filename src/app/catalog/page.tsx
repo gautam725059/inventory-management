@@ -338,6 +338,25 @@ export default function CatalogPage() {
                         </span>
                       )}
                     </div>
+                    {p.barcodes.length > 0 && (
+                      <ul className="mt-1 space-y-0.5">
+                        {[...p.barcodes]
+                          .sort((a, b) => a.size - b.size)
+                          .map((b) => (
+                            <li key={b.ean} className="flex flex-wrap gap-1.5 text-xs">
+                              <span className="min-w-[64px] font-medium text-slate-600">
+                                {b.size === 1 ? "Single" : `Pack of ${b.size}`}
+                              </span>
+                              {b.name && (
+                                <span className="text-slate-500">{b.name}</span>
+                              )}
+                              <span className="font-mono text-slate-400">
+                                {b.ean}
+                              </span>
+                            </li>
+                          ))}
+                      </ul>
+                    )}
                     {isAdmin && (
                       <button
                         onClick={() => setBarcodesEan(p.ean)}

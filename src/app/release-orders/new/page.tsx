@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useMe } from "@/lib/useMe";
 import type { WarehouseSummary, ProductCatalogEntry } from "@/lib/types";
 
 const inputClass =
@@ -102,6 +103,8 @@ function buildLinesFromRows(
 
 export default function NewReleaseOrderPage() {
   const router = useRouter();
+  const { me } = useMe();
+  const isAdmin = me?.role === "admin";
   const [warehouses, setWarehouses] = useState<WarehouseSummary[]>([]);
   const [products, setProducts] = useState<ProductCatalogEntry[]>([]);
 
@@ -287,6 +290,14 @@ export default function NewReleaseOrderPage() {
         </p>
       </header>
 
+      {!isAdmin && (
+        <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Note: staff release orders need <strong>admin approval</strong>. Stock
+          is dispatched only after an admin approves — nothing is deducted right
+          now.
+        </div>
+      )}
+
       {error && (
         <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
       )}
@@ -444,7 +455,13 @@ export default function NewReleaseOrderPage() {
               disabled={saving || !canConfirm}
               className="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {saving ? "Dispatching…" : "Confirm & Stock Out"}
+              {saving
+                ? isAdmin
+                  ? "Dispatching…"
+                  : "Submitting…"
+                : isAdmin
+                  ? "Confirm & Stock Out"
+                  : "Submit for approval"}
             </button>
           </div>
         </div>

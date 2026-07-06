@@ -14,15 +14,15 @@ export function useChannel(): Channel {
   return channel;
 }
 
-/** The product-code field label for a channel. B2B identifies products by their
- *  SKU (Wipro) / 12NC (Philips); e-commerce uses the EAN barcode. */
-export function codeLabel(channel: Channel): string {
+/** The product-code field label. E-commerce products are keyed by their EAN
+ *  barcode; B2B products are keyed by their SKU (Wipro SKU / Philips 12NC). */
+export function codeLabel(channel?: Channel): string {
   return channel === "b2b" ? "SKU" : "EAN / Barcode";
 }
 
-/** The short product-code word for inline copy ("…matches this EAN/SKU"). Used
- *  for the PRIMARY product code (stock-in, add product, catalog). */
-export function codeWord(channel: Channel): string {
+/** The short product-code word for inline copy ("…matches this EAN"). Used for
+ *  the PRIMARY product code (stock-in, add product, catalog). */
+export function codeWord(channel?: Channel): string {
   return channel === "b2b" ? "SKU" : "EAN";
 }
 
