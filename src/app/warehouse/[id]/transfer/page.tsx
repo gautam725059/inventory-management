@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, use } from "react";
 import Link from "next/link";
 import { useMe, canApprove } from "@/lib/useMe";
+import { useChannel, codeLabel, codeWord } from "@/lib/useChannel";
 import type { WarehouseDetail, WarehouseSummary } from "@/lib/types";
 
 const inputClass =
@@ -16,6 +17,7 @@ export default function TransferPage({
 }) {
   const { id } = use(params);
   const { me, loading: meLoading } = useMe();
+  const channel = useChannel();
   const allowed = canApprove(me);
 
   const [detail, setDetail] = useState<WarehouseDetail | null>(null);
@@ -48,10 +50,16 @@ export default function TransferPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, allowed]);
 
-  const selected = useMemo(
-    () => detail?.lines.find((l) => l.ean === ean),
-    [detail, ean]
-  );
+  // Resolve the typed/scanned code to an in-stock line — by primary EAN/12NC or
+  // any pack barcode (e.g. an ASIN). Name then auto-fills from the match.
+  const selected = useMemo(() => {
+    const e = ean.trim();
+    if (!e) return undefined;
+    return detail?.lines.find(
+      (l) => l.quantity > 0 && (l.ean === e || (l.barcodes ?? []).some((b) => b.ean === e))
+    );
+  }, [detail, ean]);
+  const noMatch = ean.trim().length > 0 && !selected;
   const destinations = warehouses.filter((w) => w.id !== id);
 
   const qty = Number(quantity) || 0;
@@ -71,7 +79,7 @@ export default function TransferPage({
         body: JSON.stringify({
           fromWarehouseId: id,
           toWarehouseId,
-          ean,
+          ean: selected?.ean ?? ean.trim(),
           quantity: qty,
           note: note || undefined,
         }),
@@ -147,22 +155,54 @@ export default function TransferPage({
       ) : (
         <form onSubmit={handleSubmit} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label htmlFor="product" className={labelClass}>Product *</label>
-              <select
-                id="product"
+            <div>
+              <label htmlFor="ean" className={labelClass}>
+                {codeLabel(channel)} *
+              </label>
+              <input
+                id="ean"
                 className={inputClass}
                 value={ean}
                 onChange={(e) => setEan(e.target.value)}
+                placeholder={`Scan or type the ${codeWord(channel)}…`}
+                inputMode={channel === "b2b" ? "text" : "numeric"}
+                list="transfer-eans"
+                autoComplete="off"
+                // eslint-disable-next-line jsx-a11y/no-autofocus
+                autoFocus
                 required
-              >
-                <option value="">Select a product…</option>
+              />
+              <datalist id="transfer-eans">
                 {inStock.map((l) => (
                   <option key={l.ean} value={l.ean}>
                     {l.name} ({l.quantity} pcs)
                   </option>
                 ))}
-              </select>
+              </datalist>
+              {noMatch && (
+                <p className="mt-1 text-xs font-medium text-red-600">
+                  No stock with this {codeWord(channel)} in this warehouse.
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="product-name" className={labelClass}>
+                Product name
+              </label>
+              <input
+                id="product-name"
+                className={`${inputClass} cursor-not-allowed bg-slate-50 text-slate-700`}
+                value={selected?.name ?? ""}
+                readOnly
+                tabIndex={-1}
+                placeholder="Auto-fills from the code"
+              />
+              {selected && (
+                <p className="mt-1 text-xs text-emerald-600">
+                  ✓ {selected.quantity} pcs in stock
+                </p>
+              )}
             </div>
 
             <div>
