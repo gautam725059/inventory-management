@@ -162,6 +162,8 @@ export interface Receipt {
   vendorId?: string; // linked vendor master record
   date?: string; // received date (YYYY-MM-DD) entered by the user
   purchasePrice?: number; // cost price per piece for this batch
+  byId?: string; // who performed the stock-in
+  byName?: string;
   createdAt: string;
 }
 
@@ -230,6 +232,8 @@ export interface Dispatch {
   referenceNo?: string; // optional reference number (PO/order/ref)
   customerName?: string; // who the goods were sold to
   customerId?: string; // linked customer master record
+  byId?: string; // who performed the stock-out
+  byName?: string;
   createdAt: string;
 }
 
@@ -298,6 +302,8 @@ export interface ComboDispatch {
   referenceNo?: string;
   customerName?: string;
   customerId?: string;
+  byId?: string; // who dispatched the combo
+  byName?: string;
   createdAt: string;
 }
 
@@ -651,7 +657,7 @@ export interface Movement {
   note?: string; // adjust / transfer
   counterparty?: string; // transfer only: the other warehouse's name
   comboItems?: string; // combo-out only: "J Hook ×5, Frame Hook ×5"
-  byName?: string; // who performed it (adjust / transfer)
+  byName?: string; // who performed it
   createdAt: string;
 }
 

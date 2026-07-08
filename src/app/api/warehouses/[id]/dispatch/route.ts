@@ -47,6 +47,9 @@ function parseBody(
 export async function POST(request: Request, { params }: Context) {
   const { id } = await params;
   const me = await getCurrentUser(request);
+  if (!me) {
+    return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+  }
   if (!canAccessWarehouse(me, id)) {
     return NextResponse.json(
       { error: "You don't have access to this warehouse." },
@@ -67,7 +70,7 @@ export async function POST(request: Request, { params }: Context) {
   }
 
   try {
-    const line = await dispatchStock(id, result.value);
+    const line = await dispatchStock(id, result.value, { id: me.id, name: me.name });
     return NextResponse.json(line, { status: 200 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to dispatch goods.";

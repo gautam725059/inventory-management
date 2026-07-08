@@ -59,7 +59,7 @@ export async function POST(request: Request, { params }: Context) {
   // Admins apply directly; staff queue for approval.
   if (hasRole(me, "admin")) {
     try {
-      const line = await receiveStock(id, input);
+      const line = await receiveStock(id, input, { id: me.id, name: me.name });
       return NextResponse.json({ applied: true, line }, { status: 201 });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to add product.";

@@ -9,3 +9,6 @@ out/
 
 # Local inventory data (uncomment to keep data out of git)
 # data/items.json
+
+# Full production store dumps (users, passwordHashes, session tokens) — never commit.
+import-backup-*.json

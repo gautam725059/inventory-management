@@ -462,6 +462,7 @@ export async function getWarehouseMovements(
       date: r.date,
       bill: r.bill,
       vendorName: r.vendorName,
+      byName: r.byName,
       createdAt: r.createdAt,
     }));
 
@@ -479,6 +480,7 @@ export async function getWarehouseMovements(
       invoiceNo: d.invoiceNo,
       referenceNo: d.referenceNo,
       customerName: d.customerName,
+      byName: d.byName,
       createdAt: d.createdAt,
     }));
 
@@ -534,6 +536,7 @@ export async function getWarehouseMovements(
       comboItems: c.components
         .map((k) => `${k.name} ×${k.pieces}`)
         .join(", "),
+      byName: c.byName,
       createdAt: c.createdAt,
     }));
 
@@ -646,7 +649,8 @@ export async function getProductPurchaseHistory(
  *  product. Creates the product only if the EAN matches nothing. */
 export async function receiveStock(
   warehouseId: string,
-  input: ReceiveInput
+  input: ReceiveInput,
+  by?: { id: string; name: string }
 ): Promise<WarehouseStockLine> {
   return mutate((store) => {
     const warehouse = store.warehouses.find((w) => w.id === warehouseId);
@@ -707,6 +711,8 @@ export async function receiveStock(
       vendorId,
       date: input.date,
       purchasePrice: input.purchasePrice,
+      byId: by?.id,
+      byName: by?.name,
       createdAt: new Date().toISOString(),
     });
 
@@ -720,7 +726,8 @@ export async function receiveStock(
  *  products via Add Product), and quantities must be positive. */
 export async function receiveStockBulk(
   warehouseId: string,
-  input: BulkReceiveInput
+  input: BulkReceiveInput,
+  by?: { id: string; name: string }
 ): Promise<BulkReceiveResult> {
   return mutate((store) => {
     const warehouse = store.warehouses.find((w) => w.id === warehouseId);
@@ -791,6 +798,8 @@ export async function receiveStockBulk(
         vendorId,
         date: input.date,
         purchasePrice: r.purchasePrice,
+        byId: by?.id,
+        byName: by?.name,
         createdAt: now,
       });
     }
@@ -805,7 +814,8 @@ export async function receiveStockBulk(
  *  product's stock. Throws if stock is insufficient. */
 export async function dispatchStock(
   warehouseId: string,
-  input: DispatchInput
+  input: DispatchInput,
+  by?: { id: string; name: string }
 ): Promise<WarehouseStockLine> {
   return mutate((store) => {
     const warehouse = store.warehouses.find((w) => w.id === warehouseId);
@@ -849,6 +859,8 @@ export async function dispatchStock(
       referenceNo: input.referenceNo,
       customerName: input.customerName?.trim() || undefined,
       customerId,
+      byId: by?.id,
+      byName: by?.name,
       createdAt: new Date().toISOString(),
     });
 
@@ -862,7 +874,8 @@ export async function dispatchStock(
  *  validated against the combined quantity. */
 export async function dispatchStockBulk(
   warehouseId: string,
-  input: BulkDispatchInput
+  input: BulkDispatchInput,
+  by?: { id: string; name: string }
 ): Promise<BulkDispatchResult> {
   return mutate((store) => {
     const warehouse = store.warehouses.find((w) => w.id === warehouseId);
@@ -926,6 +939,8 @@ export async function dispatchStockBulk(
         referenceNo: input.referenceNo,
         customerName: input.customerName?.trim() || undefined,
         customerId,
+        byId: by?.id,
+        byName: by?.name,
         createdAt: now,
       });
     }
@@ -1542,7 +1557,7 @@ export async function decideApproval(
       const ap = approval.adjustPayload;
       await adjustStock(approval.warehouseId, ap.ean, ap.delta, ap.reason, ap.note, by);
     } else if (approval.payload) {
-      await receiveStock(approval.warehouseId, approval.payload);
+      await receiveStock(approval.warehouseId, approval.payload, by);
     }
   }
 
@@ -1920,7 +1935,8 @@ export async function deleteCombo(id: string): Promise<boolean> {
  *  if any component is short (nothing is deducted). */
 export async function dispatchCombo(
   warehouseId: string,
-  input: ComboDispatchInput
+  input: ComboDispatchInput,
+  by?: { id: string; name: string }
 ): Promise<ComboDispatch> {
   return mutate((store) => {
     const warehouse = store.warehouses.find((w) => w.id === warehouseId);
@@ -1989,6 +2005,8 @@ export async function dispatchCombo(
       referenceNo: input.referenceNo,
       customerName: input.customerName?.trim() || undefined,
       customerId,
+      byId: by?.id,
+      byName: by?.name,
       createdAt: new Date().toISOString(),
     };
     store.comboDispatches.push(record);
@@ -2247,7 +2265,7 @@ export async function receivePurchaseOrder(
       vendorName: po0.vendorName,
       date,
       purchasePrice: it.rate,
-    });
+    }, by);
   }
 
   return mutate<POResult>((store) => {
@@ -2400,6 +2418,8 @@ export async function createReleaseOrder(
           referenceNo: input.source || undefined,
           customerName: input.customerName?.trim() || input.source || undefined,
           customerId,
+          byId: by?.id,
+          byName: by?.name,
           createdAt: now,
         });
       }
@@ -2498,6 +2518,10 @@ export async function decideReleaseOrder(
         referenceNo: ro.source || undefined,
         customerName: ro.customerName || ro.source || undefined,
         customerId,
+        // Credit the staff member who raised the RO; the approving admin is
+        // recorded separately on the RO as decidedBy/decidedByName.
+        byId: ro.createdBy,
+        byName: ro.createdByName,
         createdAt: now,
       });
     }

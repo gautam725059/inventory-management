@@ -553,6 +553,89 @@ function PriceRow({
 
 const ROLES: Role[] = ["admin", "staff"];
 
+/** Eye / eye-off glyph for the reveal toggle. */
+function EyeIcon({ hidden }: { hidden: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+    >
+      {hidden ? (
+        <>
+          <path d="M3 3l18 18" />
+          <path d="M10.6 10.6a2 2 0 002.8 2.8" />
+          <path d="M9.4 5.2A9.5 9.5 0 0112 5c5 0 9 4.5 9 7a11 11 0 01-2.4 3.3M6.2 6.7A11.4 11.4 0 003 12c0 2.5 4 7 9 7a9.6 9.6 0 003.3-.6" />
+        </>
+      ) : (
+        <>
+          <path d="M3 12s3.6-7 9-7 9 7 9 7-3.6 7-9 7-9-7-9-7z" />
+          <circle cx="12" cy="12" r="2.6" />
+        </>
+      )}
+    </svg>
+  );
+}
+
+/** A password input with a show/hide toggle, so the admin can read what they type.
+ *  Stored passwords are scrypt hashes and can never be read back — this only
+ *  reveals the value currently being entered. */
+function PasswordField({
+  value,
+  onChange,
+  placeholder,
+  className,
+  required,
+  autoFocus,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  className: string;
+  required?: boolean;
+  autoFocus?: boolean;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <input
+        className={`${className} pr-10`}
+        type={show ? "text" : "password"}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required={required}
+        autoComplete="new-password"
+        // eslint-disable-next-line jsx-a11y/no-autofocus
+        autoFocus={autoFocus}
+      />
+      <button
+        type="button"
+        onClick={() => setShow((s) => !s)}
+        aria-label={show ? "Hide password" : "Show password"}
+        aria-pressed={show}
+        title={show ? "Hide password" : "Show password"}
+        className="absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-r-lg text-slate-400 outline-none transition hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-brand-100"
+      >
+        <EyeIcon hidden={show} />
+      </button>
+    </div>
+  );
+}
+
+/** Random password from an unambiguous alphabet (no l/I/1, O/0). */
+function generatePassword(len = 12): string {
+  const alphabet = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = new Uint32Array(len);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (n) => alphabet[n % alphabet.length]).join("");
+}
+
 function UsersSection({
   users,
   onChanged,
@@ -573,6 +656,13 @@ function UsersSection({
   });
   const [warehouses, setWarehouses] = useState<{ id: string; name: string }[]>([]);
   const [busy, setBusy] = useState(false);
+
+  // Reset-password dialog state.
+  const [resetFor, setResetFor] = useState<PublicUser | null>(null);
+  const [resetPw, setResetPw] = useState("");
+  const [resetErr, setResetErr] = useState("");
+  const [resetBusy, setResetBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetch("/api/warehouses?channel=ecom")
@@ -626,11 +716,66 @@ function UsersSection({
     }
   }
 
-  async function resetPassword(id: string, username: string) {
-    const pw = window.prompt(`New password for ${username}:`);
-    if (pw && pw.length >= 4) await patchUser(id, { password: pw });
-    else if (pw !== null) onError("Password must be at least 4 characters.");
+  function openReset(u: PublicUser) {
+    setResetFor(u);
+    setResetPw("");
+    setResetErr("");
+    setCopied(false);
   }
+
+  function closeReset() {
+    setResetFor(null);
+    setResetPw("");
+    setResetErr("");
+    setCopied(false);
+  }
+
+  async function copyResetPw() {
+    try {
+      await navigator.clipboard.writeText(resetPw);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setResetErr("Could not copy. Select the password and copy it manually.");
+    }
+  }
+
+  async function saveReset() {
+    if (!resetFor) return;
+    if (resetPw.length < 4) {
+      setResetErr("Password must be at least 4 characters.");
+      return;
+    }
+    setResetBusy(true);
+    setResetErr("");
+    try {
+      const res = await fetch(`/api/admin/users/${resetFor.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: resetPw }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to reset password.");
+      }
+      closeReset();
+      await onChanged();
+    } catch (err) {
+      setResetErr(err instanceof Error ? err.message : "Failed to reset password.");
+    } finally {
+      setResetBusy(false);
+    }
+  }
+
+  // Close the dialog on Escape.
+  useEffect(() => {
+    if (!resetFor) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeReset();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [resetFor]);
 
   const inputClass =
     "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100";
@@ -685,12 +830,11 @@ function UsersSection({
             </option>
           ))}
         </select>
-        <input
+        <PasswordField
           className={inputClass}
-          type="password"
           placeholder="Password"
           value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
+          onChange={(v) => setForm({ ...form, password: v })}
           required
         />
         <button
@@ -770,7 +914,7 @@ function UsersSection({
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
                     <button
-                      onClick={() => resetPassword(u.id, u.username)}
+                      onClick={() => openReset(u)}
                       className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
                     >
                       Reset password
@@ -792,6 +936,85 @@ function UsersSection({
           </tbody>
         </table>
       </div>
+
+      {resetFor && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4"
+          onClick={closeReset}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reset-pw-title"
+            className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 id="reset-pw-title" className="text-sm font-semibold text-slate-900">
+              Reset password
+            </h3>
+            <p className="mt-1 text-xs leading-relaxed text-slate-500">
+              Set a new password for{" "}
+              <span className="font-medium text-slate-700">@{resetFor.username}</span>. It is
+              stored as a one-way hash, so this is the only time you can read it — copy it
+              before you close.
+            </p>
+
+            <div className="mt-4">
+              <PasswordField
+                className={inputClass}
+                placeholder="New password"
+                value={resetPw}
+                onChange={(v) => {
+                  setResetPw(v);
+                  setResetErr("");
+                }}
+                autoFocus
+              />
+            </div>
+
+            {resetErr && <p className="mt-1.5 text-xs font-medium text-red-600">{resetErr}</p>}
+
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setResetPw(generatePassword());
+                  setResetErr("");
+                }}
+                className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+              >
+                Generate
+              </button>
+              <button
+                type="button"
+                onClick={copyResetPw}
+                disabled={!resetPw}
+                className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {copied ? "Copied" : "Copy"}
+              </button>
+            </div>
+
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeReset}
+                className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={saveReset}
+                disabled={resetBusy || resetPw.length < 4}
+                className="rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {resetBusy ? "Saving…" : "Save password"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

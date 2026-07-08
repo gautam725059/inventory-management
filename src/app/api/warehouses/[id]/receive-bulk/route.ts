@@ -56,7 +56,11 @@ export async function POST(request: Request, { params }: Context) {
   }));
 
   try {
-    const result = await receiveStockBulk(id, { bill, vendorName, date, lines });
+    const result = await receiveStockBulk(
+      id,
+      { bill, vendorName, date, lines },
+      { id: me.id, name: me.name }
+    );
     return NextResponse.json(result, { status: 201 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to receive goods.";

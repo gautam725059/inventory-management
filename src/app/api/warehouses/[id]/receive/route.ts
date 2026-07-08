@@ -95,7 +95,7 @@ export async function POST(request: Request, { params }: Context) {
   }
 
   try {
-    const line = await receiveStock(id, result.value);
+    const line = await receiveStock(id, result.value, { id: me.id, name: me.name });
     return NextResponse.json(line, { status: 201 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to receive goods.";

@@ -76,7 +76,7 @@ export async function POST(request: Request, { params }: Context) {
   }
 
   try {
-    const result = await dispatchStockBulk(id, parsed.value);
+    const result = await dispatchStockBulk(id, parsed.value, { id: me.id, name: me.name });
     return NextResponse.json(result, { status: 200 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to dispatch.";

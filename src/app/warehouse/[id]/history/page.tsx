@@ -244,6 +244,7 @@ export default function HistoryPage({
                 <th className="px-4 py-3 font-medium">Type</th>
                 <th className="px-4 py-3 font-medium">Product</th>
                 <th className="px-4 py-3 font-medium">Detail</th>
+                <th className="px-4 py-3 font-medium">By</th>
                 <th className="px-4 py-3 text-right font-medium">Pieces</th>
               </tr>
             </thead>
@@ -309,10 +310,7 @@ export default function HistoryPage({
                     ) : m.type === "adjust" ? (
                       <>
                         <div>{m.reason}</div>
-                        <div className="text-xs text-slate-400">
-                          {m.note && <>{m.note} · </>}
-                          {m.byName ? `by ${m.byName}` : ""}
-                        </div>
+                        {m.note && <div className="text-xs text-slate-400">{m.note}</div>}
                       </>
                     ) : m.type === "combo-out" ? (
                       <>
@@ -336,11 +334,20 @@ export default function HistoryPage({
                           {m.type === "transfer-out" ? "To " : "From "}
                           {m.counterparty}
                         </div>
-                        <div className="text-xs text-slate-400">
-                          {m.note && <>{m.note} · </>}
-                          {m.byName ? `by ${m.byName}` : ""}
-                        </div>
+                        {m.note && <div className="text-xs text-slate-400">{m.note}</div>}
                       </>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {m.byName ? (
+                      <span className="text-slate-700">{m.byName}</span>
+                    ) : (
+                      <span
+                        className="text-xs text-slate-400"
+                        title="Recorded before user tracking was added"
+                      >
+                        —
+                      </span>
                     )}
                   </td>
                   <td

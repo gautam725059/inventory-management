@@ -63,7 +63,7 @@ export async function POST(request: Request, { params }: Context) {
   }
 
   try {
-    const record = await dispatchCombo(id, result.value);
+    const record = await dispatchCombo(id, result.value, { id: me.id, name: me.name });
     return NextResponse.json(record, { status: 200 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to dispatch combo.";
