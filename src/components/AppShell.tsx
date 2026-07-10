@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMe, logout } from "@/lib/useMe";
 import ChannelSwitcher from "@/components/ChannelSwitcher";
+import GuideFab from "@/components/GuideFab";
 import type { PublicUser } from "@/lib/types";
 
 interface NavItem {
@@ -134,6 +135,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
         <main className="animate-fade-in-up">{children}</main>
       </div>
+
+      {/* Floating guide — visible to admin and staff on every page */}
+      <GuideFab />
     </div>
   );
 }
