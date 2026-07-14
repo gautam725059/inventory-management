@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { channelLabel } from "@/lib/useChannel";
 import type { Channel } from "@/lib/types";
 
 const COOKIE = "channel";
@@ -12,7 +13,7 @@ function readChannel(): Channel {
   return m?.[1] === "b2b" ? "b2b" : "ecom";
 }
 
-/** Switches the whole app between the E-commerce and B2B channels. The choice is
+/** Switches the whole app between the Shanya (e-com) and B2B channels. The choice is
  *  stored in a cookie that every API route reads, so all data (catalog, vendors,
  *  customers, orders, reports …) is scoped to the active channel. Switching does
  *  a full reload to the dashboard so every page re-fetches in the new channel. */
@@ -28,8 +29,8 @@ export default function ChannelSwitcher() {
   }
 
   const options: { value: Channel; label: string; icon: string }[] = [
-    { value: "ecom", label: "E-commerce", icon: "🛒" },
-    { value: "b2b", label: "B2B", icon: "🏢" },
+    { value: "ecom", label: channelLabel("ecom"), icon: "🛒" },
+    { value: "b2b", label: channelLabel("b2b"), icon: "🏢" },
   ];
 
   return (

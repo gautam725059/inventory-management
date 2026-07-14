@@ -14,7 +14,14 @@ export function useChannel(): Channel {
   return channel;
 }
 
-/** The product-code field label. E-commerce products are keyed by their EAN
+/** Display name for a channel. The stored value stays "ecom" / "b2b" everywhere
+ *  (DB, cookie, API) — this is only what the user sees, so renaming a channel is
+ *  a one-line change here. */
+export function channelLabel(channel?: Channel): string {
+  return channel === "b2b" ? "B2B" : "Shanya";
+}
+
+/** The product-code field label. Shanya (e-com) products are keyed by their EAN
  *  barcode; B2B products are keyed by their SKU (Wipro SKU / Philips 12NC). */
 export function codeLabel(channel?: Channel): string {
   return channel === "b2b" ? "SKU" : "EAN / Barcode";

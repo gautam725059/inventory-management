@@ -40,7 +40,7 @@ export const GUIDES: Guide[] = [
     steps: [
       "Dashboard (🏠) pe apna warehouse kholo.",
       "\"Stock In\" (📥) card pe click karo.",
-      "Product ka code — E-commerce me EAN/barcode, B2B me SKU — scan ya type karo. Purana product ho to naam apne-aap aa jayega.",
+      "Product ka code — Shanya me EAN/barcode, B2B me SKU — scan ya type karo. Purana product ho to naam apne-aap aa jayega.",
       "Naya product hai to naam khud likho (naya product yahin ban jayega).",
       "Quantity (kitne piece), Vendor, Bill number aur Date bharo. Purchase price optional hai.",
       "Ek se zyada product? Neeche nayi line add karke sab ek saath daalo.",
@@ -64,7 +64,7 @@ export const GUIDES: Guide[] = [
     steps: [
       "Dashboard pe apna warehouse kholo → \"Stock Out\" (📤).",
       "Upar \"Product\" tab chuna rehne do (bundle bhejna ho to \"🎁 Combo\").",
-      "Code scan karo — E-commerce me EAN barcode, B2B me ASIN.",
+      "Code scan karo — Shanya me EAN barcode, B2B me ASIN.",
       "Pack size aur kitne pack (packs) daalo — total piece apne-aap ban jaate hain.",
       "Date, Invoice number, aur Customer bharo (reference optional).",
       "Ek se zyada product ho to nayi line add karo — sab ek hi invoice pe.",
@@ -142,7 +142,7 @@ export const GUIDES: Guide[] = [
       "Quantity daalo — jitna stock hai usse zyada nahi.",
       "\"Transfer stock\" dabao. Dono warehouse ki History me log hoga.",
     ],
-    note: "Transfer sirf admin kar sakta hai. Dono warehouse ek hi channel ke hone chahiye (E-commerce ↔ E-commerce, B2B ↔ B2B).",
+    note: "Transfer sirf admin kar sakta hai. Dono warehouse ek hi channel ke hone chahiye (Shanya ↔ Shanya, B2B ↔ B2B).",
     links: [{ label: "Dashboard kholo", href: "/" }],
     related: ["stock-in", "stock-out", "history"],
   },
@@ -191,20 +191,20 @@ export const GUIDES: Guide[] = [
   },
   {
     id: "channel",
-    title: "Channel switch — E-commerce / B2B",
+    title: "Channel switch — Shanya / B2B",
     category: "Setup",
     icon: "🔀",
     keywords: [
-      "channel", "b2b", "ecommerce", "e-commerce", "ecom", "switch", "badalna",
+      "channel", "b2b", "shanya", "ecommerce", "e-commerce", "ecom", "switch", "badalna",
       "amazon", "wipro", "philips", "sku dikhega", "ean dikhega", "channel change",
     ],
-    intro: "App do channel me kaam karta hai — E-commerce aur B2B. Poora data (products, warehouse, order) channel ke hisaab se alag dikhta hai:",
+    intro: "App do channel me kaam karta hai — Shanya aur B2B. Poora data (products, warehouse, order) channel ke hisaab se alag dikhta hai:",
     steps: [
       "Left sidebar me sabse upar Channel switcher hai.",
-      "\"🛒 E-commerce\" ya \"🏢 B2B\" pe click karo.",
+      "\"🛒 Shanya\" ya \"🏢 B2B\" pe click karo.",
       "Poori app us channel pe switch ho jayegi.",
     ],
-    note: "E-commerce me product ka primary code \"EAN\" kehlata hai aur stock-out par \"EAN\" scan hota hai. B2B me primary code \"SKU\" (Wipro SKU / Philips 12NC) hai aur stock-out par \"ASIN\" scan hota hai.",
+    note: "Shanya me product ka primary code \"EAN\" kehlata hai aur stock-out par \"EAN\" scan hota hai. B2B me primary code \"SKU\" (Wipro SKU / Philips 12NC) hai aur stock-out par \"ASIN\" scan hota hai.",
     related: ["stock-in", "stock-out"],
   },
   {

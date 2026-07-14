@@ -93,7 +93,7 @@ export default function Dashboard() {
         </h1>
         <p className="mt-1 text-sm text-slate-500">
           Select a warehouse to receive stock and manage combos. Use the channel
-          switch in the sidebar to move between E-commerce and B2B.
+          switch in the sidebar to move between Shanya and B2B.
         </p>
       </header>
 
