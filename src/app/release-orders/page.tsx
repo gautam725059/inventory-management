@@ -11,9 +11,26 @@ function inr(n: number): string {
 
 const STATUS_BADGE: Record<ReleaseOrder["status"], { label: string; cls: string }> = {
   pending: { label: "Pending", cls: "bg-amber-50 text-amber-700 border-amber-200" },
+  approved: { label: "In fulfillment", cls: "bg-indigo-50 text-indigo-700 border-indigo-200" },
   dispatched: { label: "Dispatched", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   rejected: { label: "Rejected", cls: "bg-red-50 text-red-700 border-red-200" },
 };
+
+/** For an approved RO, summarise how its lines are progressing. */
+function roProgress(ro: ReleaseOrder): string | null {
+  if (ro.status !== "approved") return null;
+  const c = { packed: 0, dispatched: 0, delivered: 0 };
+  for (const it of ro.items) {
+    if (it.fulfillment === "packed") c.packed++;
+    else if (it.fulfillment === "dispatched") c.dispatched++;
+    else if (it.fulfillment === "delivered") c.delivered++;
+  }
+  const parts: string[] = [];
+  if (c.packed) parts.push(`📦 ${c.packed}`);
+  if (c.dispatched) parts.push(`🚚 ${c.dispatched}`);
+  if (c.delivered) parts.push(`✅ ${c.delivered}`);
+  return parts.join("  ");
+}
 
 function StatusBadge({ status }: { status: ReleaseOrder["status"] }) {
   const b = STATUS_BADGE[status] ?? STATUS_BADGE.dispatched;
@@ -62,7 +79,7 @@ export default function ReleaseOrdersPage() {
   }
 
   async function decide(ro: ReleaseOrder, action: "approve" | "reject") {
-    if (action === "approve" && !confirm(`Approve ${ro.roNumber}? This dispatches the stock.`)) return;
+    if (action === "approve" && !confirm(`Approve ${ro.roNumber}? Stock will be reserved (packed).`)) return;
     if (action === "reject" && !confirm(`Reject ${ro.roNumber}?`)) return;
     setError(null);
     try {
@@ -91,9 +108,10 @@ export default function ReleaseOrdersPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Release Orders</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Incoming platform orders (Blinkit etc.). Admin ROs dispatch stock
-            right away; staff ROs stay <strong>pending</strong> until an admin
-            approves them.
+            Incoming platform orders (Blinkit etc.). Approving an RO reserves the
+            stock as <strong>packed</strong>; the warehouse team then moves each
+            item <strong>Packed → Dispatched → Delivered</strong>. Staff ROs stay
+            pending until an admin approves.
           </p>
         </div>
         <Link
@@ -141,7 +159,12 @@ export default function ReleaseOrdersPage() {
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-slate-500">{ro.date}</td>
                   <td className="px-4 py-3 text-slate-700">{ro.source || "—"}</td>
-                  <td className="px-4 py-3"><StatusBadge status={ro.status} /></td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={ro.status} />
+                    {roProgress(ro) && (
+                      <div className="mt-1 whitespace-nowrap text-xs text-slate-500">{roProgress(ro)}</div>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-right tabular-nums text-slate-600">{ro.items.length}</td>
                   <td className="px-4 py-3 text-right tabular-nums text-slate-600">
                     {ro.totalQuantity.toLocaleString("en-IN")}

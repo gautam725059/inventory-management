@@ -60,6 +60,7 @@ import type {
   PurchaseOrderInput,
   ReleaseOrder,
   ROLineItem,
+  ROFulfillment,
   ReleaseOrderInput,
 } from "./types";
 
@@ -213,9 +214,14 @@ function normalizeStore(parsed: Partial<Store>): Store {
       ? parsed.releaseOrders.map((r) => ({
           ...r,
           channel: r.channel === "b2b" ? "b2b" : "ecom",
-          // Older ROs predate the approval flow — they were dispatched on create.
+          // Older ROs predate the packed pipeline — they were dispatched on
+          // create. New statuses (pending/approved/rejected) pass through; any
+          // legacy/unknown value collapses to "dispatched". Legacy lines have no
+          // `fulfillment`, so they never count as reserved — no backfill needed.
           status:
-            r.status === "pending" || r.status === "rejected"
+            r.status === "pending" ||
+            r.status === "approved" ||
+            r.status === "rejected"
               ? r.status
               : "dispatched",
         }))
@@ -314,7 +320,8 @@ function computeCombos(
 function buildLine(
   product: Product | undefined,
   ean: string,
-  quantity: number
+  quantity: number,
+  packed = 0
 ): WarehouseStockLine {
   const comboSizes = product?.comboSizes ?? [];
   const reorderLevel = product?.reorderLevel ?? 0;
@@ -322,6 +329,8 @@ function buildLine(
     ean,
     name: product?.name ?? "Unknown product",
     quantity,
+    packed,
+    available: Math.max(0, quantity - packed),
     comboSizes,
     combos: computeCombos(quantity, comboSizes),
     barcodes: product?.barcodes ?? [],
@@ -329,6 +338,22 @@ function buildLine(
     lowStock: quantity <= reorderLevel,
     imageUrl: product?.imageUrl,
   };
+}
+
+/** Pieces reserved by "packed" RO lines (approved but not yet dispatched) per
+ *  product in a warehouse. This is the amount set aside — physical stock minus
+ *  this is what's actually free to sell / reserve again. */
+function reservedByEan(store: Store, warehouseId: string): Map<string, number> {
+  const m = new Map<string, number>();
+  for (const ro of store.releaseOrders) {
+    if (ro.warehouseId !== warehouseId || ro.status === "rejected") continue;
+    for (const it of ro.items) {
+      if (it.fulfillment === "packed") {
+        m.set(it.ean, (m.get(it.ean) ?? 0) + it.quantity);
+      }
+    }
+  }
+  return m;
 }
 
 /** Find a party by case-insensitive name within a channel, creating it if new.
@@ -426,10 +451,16 @@ export async function getWarehouseDetail(
   const warehouse = store.warehouses.find((w) => w.id === id);
   if (!warehouse) return undefined;
 
+  const reserved = reservedByEan(store, id);
   const lines: WarehouseStockLine[] = store.stock
     .filter((s) => s.warehouseId === id)
     .map((s) =>
-      buildLine(findProduct(store, s.ean, warehouse.channel), s.ean, s.quantity)
+      buildLine(
+        findProduct(store, s.ean, warehouse.channel),
+        s.ean,
+        s.quantity,
+        reserved.get(s.ean) ?? 0
+      )
     )
     .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -2340,9 +2371,10 @@ export async function createReleaseOrder(
       return { ln, scanned, product, stockEan: product?.ean ?? scanned, quantity, landingRate, gstRate };
     });
 
-    // Validate: every EAN resolves and quantity > 0 (always). Stock-sufficiency
-    // is only enforced when the RO dispatches now (admin) — a staff RO waits in
-    // "pending" and is re-checked at approval time.
+    // Validate: every EAN resolves and quantity > 0 (always). Availability is
+    // only enforced when the RO reserves now (admin) — a staff RO waits in
+    // "pending" and is re-checked at approval time. "Available" = physical stock
+    // minus what's already reserved by other packed ROs.
     const need = new Map<string, number>();
     const errors: string[] = [];
     for (const r of resolved) {
@@ -2351,13 +2383,15 @@ export async function createReleaseOrder(
       need.set(r.stockEan, (need.get(r.stockEan) ?? 0) + r.quantity);
     }
     if (isAdmin) {
+      const reserved = reservedByEan(store, input.warehouseId);
       for (const [stockEan, total] of need) {
-        const have =
+        const physical =
           store.stock.find((s) => s.warehouseId === input.warehouseId && s.ean === stockEan)
             ?.quantity ?? 0;
-        if (total > have) {
+        const available = physical - (reserved.get(stockEan) ?? 0);
+        if (total > available) {
           const name = findProduct(store, stockEan, channel)?.name ?? stockEan;
-          errors.push(`"${name}" — need ${total}, only ${have} in stock`);
+          errors.push(`"${name}" — need ${total}, only ${available} available`);
         }
       }
     }
@@ -2394,36 +2428,17 @@ export async function createReleaseOrder(
         quantity: r.quantity,
         mrp: typeof r.ln.mrp === "number" ? r.ln.mrp : undefined,
         totalAmount: lineTotal,
+        // Admin RO enters the pipeline reserved ("packed"); staff RO waits for
+        // approval before any line is reserved.
+        fulfillment: isAdmin ? "packed" : undefined,
       });
     }
 
-    // Admin dispatches immediately: deduct stock + log dispatches. Staff ROs
-    // stay pending and deduct nothing until an admin approves.
-    if (isAdmin) {
-      for (const r of resolved) {
-        const row = store.stock.find(
-          (s) => s.warehouseId === input.warehouseId && s.ean === r.stockEan
-        )!;
-        row.quantity -= r.quantity;
-
-        store.dispatches.push({
-          id: randomUUID(),
-          warehouseId: input.warehouseId,
-          ean: r.stockEan,
-          unitSize: 1,
-          packs: r.quantity,
-          quantity: r.quantity,
-          date,
-          invoiceNo: roNumber,
-          referenceNo: input.source || undefined,
-          customerName: input.customerName?.trim() || input.source || undefined,
-          customerId,
-          byId: by?.id,
-          byName: by?.name,
-          createdAt: now,
-        });
-      }
-    }
+    // NOTE: no stock is deducted here anymore. An admin RO reserves each line as
+    // "packed"; physical stock leaves only when a line is marked "dispatched"
+    // (see updateROLineStatus). `customerId` is upserted above for the party
+    // list; the dispatch is logged later, at dispatch time.
+    void customerId;
 
     const cartDiscount = Math.max(0, Number(input.cartDiscount) || 0);
     totalAmount = round2(totalAmount);
@@ -2440,7 +2455,7 @@ export async function createReleaseOrder(
       totalAmount,
       cartDiscount,
       netAmount: round2(totalAmount - cartDiscount),
-      status: isAdmin ? "dispatched" : "pending",
+      status: isAdmin ? "approved" : "pending",
       createdBy: by?.id,
       createdByName: by?.name,
       createdAt: now,
@@ -2477,59 +2492,111 @@ export async function decideReleaseOrder(
       return [store, { ok: true, ro }];
     }
 
-    // approve: re-validate combined stock, then deduct + log dispatches.
+    // approve: re-check availability (physical − already reserved), then RESERVE
+    // each line as "packed". No stock is deducted here — it leaves per-line when
+    // the warehouse team marks a line "dispatched".
+    const reserved = reservedByEan(store, ro.warehouseId);
     const need = new Map<string, number>();
     for (const it of ro.items) {
       need.set(it.ean, (need.get(it.ean) ?? 0) + it.quantity);
     }
     const errors: string[] = [];
     for (const [stockEan, total] of need) {
-      const have =
+      const physical =
         store.stock.find((s) => s.warehouseId === ro.warehouseId && s.ean === stockEan)
           ?.quantity ?? 0;
-      if (total > have) {
+      const available = physical - (reserved.get(stockEan) ?? 0);
+      if (total > available) {
         const name = findProduct(store, stockEan, ro.channel)?.name ?? stockEan;
-        errors.push(`"${name}" — need ${total}, only ${have} in stock`);
+        errors.push(`"${name}" — need ${total}, only ${available} available`);
       }
     }
     if (errors.length) {
       return [store, { ok: false, error: errors.join("; ") + "." }];
     }
 
-    const customerId = upsertPartyByName(
-      store.customers,
-      ro.customerName || ro.source,
-      ro.channel
-    );
+    // Reserve the party now so it appears in the customer list; the dispatch is
+    // logged later, when each line is dispatched.
+    upsertPartyByName(store.customers, ro.customerName || ro.source, ro.channel);
     for (const it of ro.items) {
+      it.fulfillment = "packed";
+    }
+
+    ro.status = "approved";
+    ro.decidedBy = by.id;
+    ro.decidedByName = by.name;
+    ro.decidedAt = now;
+    return [store, { ok: true, ro }];
+  });
+}
+
+/** Advance one RO line through the fulfillment pipeline (warehouse team).
+ *  packed → dispatched deducts physical stock and logs a dispatch;
+ *  dispatched → delivered only stamps the time. Forward-only. */
+export async function updateROLineStatus(
+  roId: string,
+  itemIndex: number,
+  to: ROFulfillment,
+  by: { id: string; name: string }
+): Promise<ROResult> {
+  return mutate<ROResult>((store) => {
+    const ro = store.releaseOrders.find((r) => r.id === roId);
+    if (!ro) return [store, { ok: false, error: "Release order not found." }];
+    if (ro.status !== "approved") {
+      return [store, { ok: false, error: "Only an approved RO's lines can be updated." }];
+    }
+    const line = ro.items[itemIndex];
+    if (!line) return [store, { ok: false, error: "RO line not found." }];
+
+    const from = line.fulfillment ?? "packed";
+    const forward =
+      (from === "packed" && to === "dispatched") ||
+      (from === "dispatched" && to === "delivered");
+    if (!forward) {
+      return [store, { ok: false, error: `Can't move a ${from} line to ${to}.` }];
+    }
+    const now = new Date().toISOString();
+
+    if (to === "dispatched") {
+      // Stock physically leaves now.
       const row = store.stock.find(
-        (s) => s.warehouseId === ro.warehouseId && s.ean === it.ean
-      )!;
-      row.quantity -= it.quantity;
+        (s) => s.warehouseId === ro.warehouseId && s.ean === line.ean
+      );
+      const have = row?.quantity ?? 0;
+      if (have < line.quantity) {
+        const name = findProduct(store, line.ean, ro.channel)?.name ?? line.ean;
+        return [store, { ok: false, error: `"${name}" — only ${have} in stock, need ${line.quantity}.` }];
+      }
+      row!.quantity -= line.quantity;
+
+      const customerId = upsertPartyByName(
+        store.customers,
+        ro.customerName || ro.source,
+        ro.channel
+      );
       store.dispatches.push({
         id: randomUUID(),
         warehouseId: ro.warehouseId,
-        ean: it.ean,
+        ean: line.ean,
         unitSize: 1,
-        packs: it.quantity,
-        quantity: it.quantity,
+        packs: line.quantity,
+        quantity: line.quantity,
         date: ro.date,
         invoiceNo: ro.roNumber,
         referenceNo: ro.source || undefined,
         customerName: ro.customerName || ro.source || undefined,
         customerId,
-        // Credit the staff member who raised the RO; the approving admin is
-        // recorded separately on the RO as decidedBy/decidedByName.
-        byId: ro.createdBy,
-        byName: ro.createdByName,
+        byId: by.id, // credit whoever dispatched it
+        byName: by.name,
         createdAt: now,
       });
+      line.fulfillment = "dispatched";
+      line.dispatchedAt = now;
+    } else {
+      line.fulfillment = "delivered";
+      line.deliveredAt = now;
     }
 
-    ro.status = "dispatched";
-    ro.decidedBy = by.id;
-    ro.decidedByName = by.name;
-    ro.decidedAt = now;
     return [store, { ok: true, ro }];
   });
 }

@@ -4,11 +4,21 @@ import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMe } from "@/lib/useMe";
-import type { ReleaseOrder } from "@/lib/types";
+import type { ReleaseOrder, ROFulfillment } from "@/lib/types";
 
 function inr(n: number): string {
   return "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
 }
+
+/** Per-line pipeline display + the next action. */
+const FULFILL: Record<
+  ROFulfillment,
+  { label: string; cls: string; next: ROFulfillment | null; nextLabel: string }
+> = {
+  packed: { label: "📦 Packed", cls: "bg-amber-100 text-amber-700", next: "dispatched", nextLabel: "🚚 Dispatch" },
+  dispatched: { label: "🚚 Dispatched", cls: "bg-blue-100 text-blue-700", next: "delivered", nextLabel: "✅ Deliver" },
+  delivered: { label: "✅ Delivered", cls: "bg-emerald-100 text-emerald-700", next: null, nextLabel: "" },
+};
 
 export default function ReleaseOrderDetailPage({
   params,
@@ -23,6 +33,7 @@ export default function ReleaseOrderDetailPage({
   const [ro, setRo] = useState<ReleaseOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [busyLine, setBusyLine] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -46,7 +57,7 @@ export default function ReleaseOrderDetailPage({
 
   async function decide(action: "approve" | "reject") {
     if (!ro) return;
-    if (action === "approve" && !confirm(`Approve ${ro.roNumber}? This dispatches the stock.`)) return;
+    if (action === "approve" && !confirm(`Approve ${ro.roNumber}? Stock will be reserved (packed).`)) return;
     if (action === "reject" && !confirm(`Reject ${ro.roNumber}?`)) return;
     setError(null);
     const res = await fetch(`/api/release-orders/${id}`, {
@@ -57,6 +68,25 @@ export default function ReleaseOrderDetailPage({
     const d = await res.json().catch(() => ({}));
     if (res.ok) setRo(d);
     else setError(d.error || "Failed.");
+  }
+
+  /** Move one line forward: packed → dispatched (deducts stock) → delivered. */
+  async function advanceLine(index: number, to: ROFulfillment) {
+    if (to === "dispatched" && !confirm("Dispatch this item? Stock will be removed from the warehouse.")) return;
+    setError(null);
+    setBusyLine(index);
+    try {
+      const res = await fetch(`/api/release-orders/${id}/line`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ itemIndex: index, to }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (res.ok) setRo(d);
+      else setError(d.error || "Failed.");
+    } finally {
+      setBusyLine(null);
+    }
   }
 
   if (loading) return <div className="py-20 text-center text-sm text-slate-400">Loading…</div>;
@@ -72,12 +102,31 @@ export default function ReleaseOrderDetailPage({
   const th = "border border-slate-300 px-2 py-1.5 text-left font-semibold";
   const td = "border border-slate-300 px-2 py-1.5";
 
+  // Per-line pipeline progress (only meaningful once approved).
+  const counts = ro.items.reduce(
+    (a, it) => {
+      const f = it.fulfillment;
+      if (f === "packed") a.packed++;
+      else if (f === "dispatched") a.dispatched++;
+      else if (f === "delivered") a.delivered++;
+      return a;
+    },
+    { packed: 0, dispatched: 0, delivered: 0 }
+  );
+  const inPipeline = ro.status === "approved";
+
   const badge =
     ro.status === "pending"
       ? { text: "PENDING", cls: "bg-amber-100 text-amber-700" }
       : ro.status === "rejected"
         ? { text: "REJECTED", cls: "bg-red-100 text-red-700" }
-        : { text: "DISPATCHED", cls: "bg-emerald-100 text-emerald-700" };
+        : ro.status === "approved"
+          ? counts.delivered === ro.items.length
+            ? { text: "DELIVERED", cls: "bg-emerald-100 text-emerald-700" }
+            : counts.packed === 0
+              ? { text: "DISPATCHED", cls: "bg-blue-100 text-blue-700" }
+              : { text: "IN PROGRESS", cls: "bg-indigo-100 text-indigo-700" }
+          : { text: "DISPATCHED", cls: "bg-emerald-100 text-emerald-700" };
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-10">
@@ -121,6 +170,16 @@ export default function ReleaseOrderDetailPage({
           <div><div className="text-xs uppercase tracking-wide text-slate-400">By</div><div className="font-medium text-slate-900">{ro.createdByName || "—"}</div></div>
         </div>
 
+        {inPipeline && (
+          <div className="no-print mb-5 flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+            <span className="font-medium text-slate-600">Fulfillment:</span>
+            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">📦 {counts.packed} packed</span>
+            <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">🚚 {counts.dispatched} dispatched</span>
+            <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">✅ {counts.delivered} delivered</span>
+            <span className="ml-auto text-xs text-slate-400">Move each item forward in the table below.</span>
+          </div>
+        )}
+
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-xs">
             <thead>
@@ -136,6 +195,7 @@ export default function ReleaseOrderDetailPage({
                 <th className={`${th} text-right`}>Quantity</th>
                 <th className={`${th} text-right`}>MRP</th>
                 <th className={`${th} text-right`}>Total Amount</th>
+                {inPipeline && <th className={`${th} no-print`}>Status</th>}
               </tr>
             </thead>
             <tbody>
@@ -152,6 +212,28 @@ export default function ReleaseOrderDetailPage({
                   <td className={`${td} text-right tabular-nums`}>{it.quantity}</td>
                   <td className={`${td} text-right tabular-nums`}>{it.mrp ?? "—"}</td>
                   <td className={`${td} text-right font-semibold tabular-nums`}>{it.totalAmount.toLocaleString("en-IN")}</td>
+                  {inPipeline && (
+                    <td className={`${td} no-print`}>
+                      {(() => {
+                        const f = it.fulfillment ?? "packed";
+                        const info = FULFILL[f];
+                        return (
+                          <div className="flex items-center gap-2 whitespace-nowrap">
+                            <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${info.cls}`}>{info.label}</span>
+                            {info.next && (
+                              <button
+                                onClick={() => advanceLine(i, info.next!)}
+                                disabled={busyLine === i}
+                                className="rounded-md border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                              >
+                                {busyLine === i ? "…" : info.nextLabel}
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -161,6 +243,7 @@ export default function ReleaseOrderDetailPage({
                 <td className={`${td} text-right tabular-nums`}>{ro.totalQuantity.toLocaleString("en-IN")}</td>
                 <td className={td}></td>
                 <td className={`${td} text-right tabular-nums`}>{inr(ro.totalAmount)}</td>
+                {inPipeline && <td className={`${td} no-print`}></td>}
               </tr>
             </tfoot>
           </table>

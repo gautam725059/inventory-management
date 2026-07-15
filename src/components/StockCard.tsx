@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useChannel, codeWord } from "@/lib/useChannel";
 import type { WarehouseStockLine } from "@/lib/types";
 
 const inputClass =
@@ -23,6 +24,7 @@ export default function StockCard({
   onChanged,
   onError,
 }: Props) {
+  const channel = useChannel();
   const editable = Boolean(warehouseId && onChanged);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(line.name);
@@ -124,7 +126,7 @@ export default function StockCard({
               )}
             </div>
             <div className="mt-0.5 text-xs text-slate-400">
-              EAN {line.ean}
+              {codeWord(channel)} {line.ean}
               {line.reorderLevel > 0 && (
                 <span className="ml-2 text-slate-400">
                   · reorder at {line.reorderLevel}
@@ -133,15 +135,27 @@ export default function StockCard({
             </div>
           </div>
         </div>
-        <span
-          className={`whitespace-nowrap rounded-full border px-3 py-1 text-sm font-bold tabular-nums ${
-            line.lowStock
-              ? "border-amber-200 bg-amber-50 text-amber-700"
-              : "border-slate-200 bg-slate-50 text-slate-700"
-          }`}
-        >
-          {line.quantity.toLocaleString()} pcs
-        </span>
+        <div className="flex flex-col items-end gap-1">
+          <span
+            className={`whitespace-nowrap rounded-full border px-3 py-1 text-sm font-bold tabular-nums ${
+              line.lowStock
+                ? "border-amber-200 bg-amber-50 text-amber-700"
+                : "border-slate-200 bg-slate-50 text-slate-700"
+            }`}
+          >
+            {line.packed > 0
+              ? `${line.available.toLocaleString()} available`
+              : `${line.quantity.toLocaleString()} pcs`}
+          </span>
+          {line.packed > 0 && (
+            <span
+              className="whitespace-nowrap rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700"
+              title={`${line.packed} reserved for release orders (packed, not yet dispatched). Total on-hand: ${line.quantity}.`}
+            >
+              📦 {line.packed.toLocaleString()} packed
+            </span>
+          )}
+        </div>
       </div>
 
       {line.combos.length === 0 ? (

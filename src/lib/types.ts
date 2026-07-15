@@ -406,6 +406,13 @@ export interface Store {
 
 // ---- Release Orders (incoming platform orders → stock-out) ------------------
 
+/** Fulfillment stage of one RO line, moved forward by the warehouse team:
+ *  packed = items packed & reserved (stock set aside, not yet deducted);
+ *  dispatched = physically left the warehouse (stock now deducted + logged);
+ *  delivered = reached the feeder / customer. Undefined = not yet in the
+ *  pipeline (RO still pending approval). */
+export type ROFulfillment = "packed" | "dispatched" | "delivered";
+
 /** One line on a release order (e.g. a Blinkit order). Tax/total are computed
  *  on save; the landing rate is treated as tax-inclusive. */
 export interface ROLineItem {
@@ -419,6 +426,9 @@ export interface ROLineItem {
   quantity: number;
   mrp?: number;
   totalAmount: number; // landingRate * quantity
+  fulfillment?: ROFulfillment; // per-line pipeline stage (set once approved)
+  dispatchedAt?: string; // when this line was marked dispatched
+  deliveredAt?: string; // when this line was marked delivered
 }
 
 /** A release order fulfilled by stock-out. Saving an RO deducts each line's
@@ -436,10 +446,12 @@ export interface ReleaseOrder {
   totalAmount: number;
   cartDiscount: number;
   netAmount: number;
-  // Approval lifecycle: staff ROs start "pending" (no stock deducted) until an
-  // admin approves them ("dispatched") or rejects them ("rejected"). Admin ROs
-  // are created "dispatched" directly.
-  status: "pending" | "dispatched" | "rejected";
+  // Lifecycle: staff ROs start "pending" (nothing reserved) until an admin
+  // approves them. Approving (and an admin-created RO) moves the RO to
+  // "approved" and reserves each line as "packed" — stock is set aside but not
+  // deducted; it leaves per-line at "dispatched". "rejected" reserves nothing.
+  // ("dispatched" is a legacy value from before the packed pipeline.)
+  status: "pending" | "approved" | "dispatched" | "rejected";
   createdBy?: string;
   createdByName?: string;
   createdAt: string;
@@ -483,7 +495,9 @@ export interface ComboAvailability {
 export interface WarehouseStockLine {
   ean: string;
   name: string;
-  quantity: number;
+  quantity: number; // physical on-hand (reserved stock is still counted here)
+  packed: number; // reserved by "packed" RO lines, not yet dispatched
+  available: number; // quantity − packed (free to sell / reserve)
   comboSizes: number[];
   combos: ComboAvailability[];
   barcodes: PackBarcode[]; // pack barcodes for scanning in stock-out
