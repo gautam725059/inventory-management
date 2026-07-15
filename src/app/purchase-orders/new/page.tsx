@@ -246,14 +246,7 @@ export default function NewPurchaseOrderPage() {
                     <label className={labelClass}>HSN Code</label>
                     <input className={inputClass} value={l.hsnCode} onChange={(e) => setLine(i, { hsnCode: e.target.value })} placeholder="e.g. 96151900" />
                   </div>
-                  <div>
-                    <label className={labelClass}>Carton Size</label>
-                    <input type="number" min={0} className={inputClass} value={l.cartonSize} onChange={(e) => setLine(i, { cartonSize: e.target.value })} placeholder="240" />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Carton Qty</label>
-                    <input type="number" min={0} className={inputClass} value={l.cartonQty} onChange={(e) => setLine(i, { cartonQty: e.target.value })} placeholder="3" />
-                  </div>
+  
                   <div>
                     <label className={labelClass}>Total Qty</label>
                     <input className={`${inputClass} bg-slate-50`} value={c.totalQty.toLocaleString("en-IN")} readOnly tabIndex={-1} />
