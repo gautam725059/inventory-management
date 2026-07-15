@@ -2055,7 +2055,11 @@ function round2(n: number): number {
 function computePOLine(input: POLineInput): POLineItem {
   const cartonSize = Math.max(0, Math.floor(Number(input.cartonSize) || 0));
   const cartonQty = Math.max(0, Math.floor(Number(input.cartonQty) || 0));
-  const totalQty = cartonSize * cartonQty;
+  // Prefer an explicit total quantity; fall back to the legacy carton breakdown.
+  const totalQty =
+    input.totalQty != null && Number(input.totalQty) > 0
+      ? Math.max(0, Math.floor(Number(input.totalQty)))
+      : cartonSize * cartonQty;
   const rate = Math.max(0, Number(input.rate) || 0);
   const taxRate = Math.max(0, Number(input.taxRate) || 0);
   const taxAmount = round2((rate * taxRate) / 100);

@@ -370,8 +370,11 @@ export interface POLineInput {
   ean: string;
   productCode?: string;
   description: string;
-  cartonSize: number;
-  cartonQty: number;
+  /** Total pieces ordered. Preferred. */
+  totalQty?: number;
+  /** Legacy carton breakdown — totalQty falls back to cartonSize × cartonQty. */
+  cartonSize?: number;
+  cartonQty?: number;
   rate: number;
   taxRate: number;
 }

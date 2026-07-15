@@ -47,8 +47,7 @@ interface DraftLine {
   ean: string;
   productCode: string;
   description: string;
-  cartonSize: string;
-  cartonQty: string;
+  totalQty: string;
   rate: string;
   taxRate: string;
 }
@@ -59,17 +58,14 @@ function toDraft(po: PurchaseOrder): DraftLine[] {
     ean: it.ean,
     productCode: it.productCode ?? "",
     description: it.description,
-    cartonSize: String(it.cartonSize),
-    cartonQty: String(it.cartonQty),
+    totalQty: String(it.totalQty),
     rate: String(it.rate),
     taxRate: String(it.taxRate),
   }));
 }
 
 function calc(l: DraftLine) {
-  const cartonSize = Math.max(0, Math.floor(Number(l.cartonSize) || 0));
-  const cartonQty = Math.max(0, Math.floor(Number(l.cartonQty) || 0));
-  const totalQty = cartonSize * cartonQty;
+  const totalQty = Math.max(0, Math.floor(Number(l.totalQty) || 0));
   const rate = Math.max(0, Number(l.rate) || 0);
   const taxRate = Math.max(0, Number(l.taxRate) || 0);
   const taxAmount = round2((rate * taxRate) / 100);
@@ -177,7 +173,7 @@ export default function PurchaseOrderDetailPage({
   function addLine() {
     setDLines((ls) => [
       ...ls,
-      { hsnCode: "", ean: "", productCode: "", description: "", cartonSize: "", cartonQty: "", rate: "", taxRate: "18" },
+      { hsnCode: "", ean: "", productCode: "", description: "", totalQty: "", rate: "", taxRate: "18" },
     ]);
   }
   function removeLine(i: number) {
@@ -203,8 +199,7 @@ export default function PurchaseOrderDetailPage({
               ean: l.ean.trim(),
               productCode: l.productCode.trim() || undefined,
               description: l.description.trim(),
-              cartonSize: Number(l.cartonSize) || 0,
-              cartonQty: Number(l.cartonQty) || 0,
+              totalQty: Number(l.totalQty) || 0,
               rate: Number(l.rate) || 0,
               taxRate: Number(l.taxRate) || 0,
             })),
@@ -514,16 +509,8 @@ export default function PurchaseOrderDetailPage({
                       <input className={inputClass} value={l.hsnCode} onChange={(e) => setLine(i, { hsnCode: e.target.value })} />
                     </div>
                     <div>
-                      <label className={labelClass}>Carton Size</label>
-                      <input type="number" min={0} className={inputClass} value={l.cartonSize} onChange={(e) => setLine(i, { cartonSize: e.target.value })} />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Carton Qty</label>
-                      <input type="number" min={0} className={inputClass} value={l.cartonQty} onChange={(e) => setLine(i, { cartonQty: e.target.value })} />
-                    </div>
-                    <div>
                       <label className={labelClass}>Total Qty</label>
-                      <input className={`${inputClass} bg-slate-100`} value={c.totalQty.toLocaleString("en-IN")} readOnly tabIndex={-1} />
+                      <input type="number" min={0} className={inputClass} value={l.totalQty} onChange={(e) => setLine(i, { totalQty: e.target.value })} />
                     </div>
                     <div>
                       <label className={labelClass}>Rate (₹/pc)</label>
@@ -555,8 +542,6 @@ export default function PurchaseOrderDetailPage({
                   <th className={th}>HSN Code</th>
                   <th className={th}>Product UPC</th>
                   <th className={th}>Product Description</th>
-                  <th className={`${th} text-right`}>Carton Size</th>
-                  <th className={`${th} text-right`}>Carton Qty</th>
                   <th className={`${th} text-right`}>Total Qty</th>
                   <th className={`${th} text-right`}>Rate</th>
                   <th className={`${th} text-right`}>Tax %</th>
@@ -571,8 +556,6 @@ export default function PurchaseOrderDetailPage({
                     <td className={td}>{it.hsnCode || "—"}</td>
                     <td className={`${td} font-mono`}>{it.ean}</td>
                     <td className={td}>{it.description}</td>
-                    <td className={`${td} text-right tabular-nums`}>{it.cartonSize}</td>
-                    <td className={`${td} text-right tabular-nums`}>{it.cartonQty}</td>
                     <td className={`${td} text-right tabular-nums`}>{it.totalQty.toLocaleString("en-IN")}</td>
                     <td className={`${td} text-right tabular-nums`}>{it.rate}</td>
                     <td className={`${td} text-right tabular-nums`}>{it.taxRate}</td>
@@ -586,7 +569,11 @@ export default function PurchaseOrderDetailPage({
               </tbody>
               <tfoot>
                 <tr className="bg-slate-50 font-bold text-slate-900">
-                  <td className={`${td} text-right`} colSpan={10}>Grand Total</td>
+                  <td className={`${td} text-right`} colSpan={3}>Totals</td>
+                  <td className={`${td} text-right tabular-nums`}>
+                    {po.items.reduce((s, it) => s + (it.totalQty || 0), 0).toLocaleString("en-IN")}
+                  </td>
+                  <td className={td} colSpan={4}></td>
                   <td className={`${td} text-right tabular-nums`}>{inr(po.grandTotal)}</td>
                 </tr>
               </tfoot>

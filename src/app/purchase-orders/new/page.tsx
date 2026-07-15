@@ -29,8 +29,7 @@ interface DraftLine {
   hsnCode: string;
   ean: string;
   description: string;
-  cartonSize: string;
-  cartonQty: string;
+  totalQty: string;
   rate: string;
   taxRate: string;
 }
@@ -39,16 +38,13 @@ const EMPTY_LINE: DraftLine = {
   hsnCode: "",
   ean: "",
   description: "",
-  cartonSize: "",
-  cartonQty: "",
+  totalQty: "",
   rate: "",
   taxRate: "18",
 };
 
 function calc(l: DraftLine) {
-  const cartonSize = Math.max(0, Math.floor(Number(l.cartonSize) || 0));
-  const cartonQty = Math.max(0, Math.floor(Number(l.cartonQty) || 0));
-  const totalQty = cartonSize * cartonQty;
+  const totalQty = Math.max(0, Math.floor(Number(l.totalQty) || 0));
   const rate = Math.max(0, Number(l.rate) || 0);
   const taxRate = Math.max(0, Number(l.taxRate) || 0);
   const taxAmount = round2((rate * taxRate) / 100);
@@ -111,6 +107,7 @@ export default function NewPurchaseOrderPage() {
   }
 
   const grandTotal = round2(lines.reduce((s, l) => s + calc(l).totalAmount, 0));
+  const grandQty = lines.reduce((s, l) => s + calc(l).totalQty, 0);
 
   const validLines = lines.filter(
     (l) => l.ean.trim() && l.description.trim() && calc(l).totalQty > 0
@@ -138,8 +135,7 @@ export default function NewPurchaseOrderPage() {
             hsnCode: l.hsnCode.trim() || undefined,
             ean: l.ean.trim(),
             description: l.description.trim(),
-            cartonSize: Number(l.cartonSize) || 0,
-            cartonQty: Number(l.cartonQty) || 0,
+            totalQty: Number(l.totalQty) || 0,
             rate: Number(l.rate) || 0,
             taxRate: Number(l.taxRate) || 0,
           })),
@@ -246,10 +242,9 @@ export default function NewPurchaseOrderPage() {
                     <label className={labelClass}>HSN Code</label>
                     <input className={inputClass} value={l.hsnCode} onChange={(e) => setLine(i, { hsnCode: e.target.value })} placeholder="e.g. 96151900" />
                   </div>
-  
                   <div>
-                    <label className={labelClass}>Total Qty</label>
-                    <input className={`${inputClass} bg-slate-50`} value={c.totalQty.toLocaleString("en-IN")} readOnly tabIndex={-1} />
+                    <label className={labelClass}>Total Qty *</label>
+                    <input type="number" min={0} step={1} className={inputClass} value={l.totalQty} onChange={(e) => setLine(i, { totalQty: e.target.value })} placeholder="total pieces, e.g. 240" />
                   </div>
                   <div>
                     <label className={labelClass}>Rate (₹/pc)</label>
@@ -288,6 +283,11 @@ export default function NewPurchaseOrderPage() {
         {/* Grand total + submit */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-5">
           <div className="text-lg">
+            <span className="mr-4 text-slate-600">
+              Total Qty:{" "}
+              <strong className="tabular-nums text-slate-900">{grandQty.toLocaleString("en-IN")}</strong>{" "}
+              pcs
+            </span>
             Grand Total:{" "}
             <strong className="tabular-nums text-slate-900">{inr(grandTotal)}</strong>
           </div>
