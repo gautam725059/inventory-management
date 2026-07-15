@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useMe, logout } from "@/lib/useMe";
+import { useChannel, codeWord } from "@/lib/useChannel";
 import type {
   Approval,
   InventoryValuation,
@@ -27,6 +28,7 @@ function formatDateTime(iso: string): string {
 
 export default function AdminPage() {
   const { me, loading: meLoading } = useMe();
+  const channel = useChannel();
   const isAdmin = me?.role === "admin";
   const canView = me?.role === "admin";
 
@@ -239,7 +241,7 @@ export default function AdminPage() {
                   <th className="px-4 py-3 font-medium">Requested</th>
                   <th className="px-4 py-3 font-medium">By</th>
                   <th className="px-4 py-3 font-medium">Type</th>
-                  <th className="px-4 py-3 font-medium">Product / EAN</th>
+                  <th className="px-4 py-3 font-medium">Product / {codeWord(channel)}</th>
                   <th className="px-4 py-3 text-right font-medium">Qty</th>
                   <th className="px-4 py-3 font-medium">Details</th>
                   <th className="px-4 py-3 text-right font-medium">Actions</th>

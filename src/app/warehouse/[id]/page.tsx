@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, use } from "react";
 import Link from "next/link";
 import StockCard from "@/components/StockCard";
 import { useMe, canApprove } from "@/lib/useMe";
+import { useChannel, codeWord } from "@/lib/useChannel";
 import type { WarehouseDetail } from "@/lib/types";
 
 export default function WarehousePage({
@@ -13,6 +14,7 @@ export default function WarehousePage({
 }) {
   const { id } = use(params);
   const { me } = useMe();
+  const channel = useChannel();
   const canManage = canApprove(me);
 
   const [detail, setDetail] = useState<WarehouseDetail | null>(null);
@@ -181,7 +183,7 @@ export default function WarehousePage({
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name or EAN…"
+            placeholder={`Search by name or ${codeWord(channel)}…`}
             className="min-w-50 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
           />
           <a

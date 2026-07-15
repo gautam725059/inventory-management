@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useChannel, codeWord } from "@/lib/useChannel";
 import type { ComboView, ProductCatalogEntry } from "@/lib/types";
 
 const inputClass =
@@ -28,6 +29,7 @@ const EMPTY_DRAFT: Draft = {
 };
 
 export default function CombosPage() {
+  const channel = useChannel();
   const [combos, setCombos] = useState<ComboView[]>([]);
   const [products, setProducts] = useState<ProductCatalogEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -196,7 +198,7 @@ export default function CombosPage() {
                 inputMode="numeric"
                 value={draft.barcode}
                 onChange={(e) => updateDraft({ barcode: e.target.value })}
-                placeholder="Scan / type an EAN"
+                placeholder={`Scan / type a ${codeWord(channel)}`}
               />
             </div>
             <div>

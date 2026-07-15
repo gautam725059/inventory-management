@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, use } from "react";
 import Link from "next/link";
+import { useChannel, codeWord } from "@/lib/useChannel";
 import type { Movement } from "@/lib/types";
 
 function formatDate(iso: string): string {
@@ -60,6 +61,7 @@ export default function HistoryPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const channel = useChannel();
 
   const [movements, setMovements] = useState<Movement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -111,7 +113,7 @@ export default function HistoryPage({
       "Recorded",
       "Type",
       "Product",
-      "EAN",
+      codeWord(channel),
       "Pieces",
       "Invoice",
       "Reference",
@@ -205,8 +207,8 @@ export default function HistoryPage({
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by EAN (or product name)…"
-            inputMode="numeric"
+            placeholder={`Search by ${codeWord(channel)} (or product name)…`}
+            inputMode={channel === "b2b" ? "text" : "numeric"}
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
           />
           {query.trim() && (

@@ -8,7 +8,9 @@ const inputClass =
   "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-50 disabled:text-slate-400";
 const labelClass = "mb-1 block text-xs font-medium text-slate-600";
 
-const MAX_LINES = 10;
+// Max product lines per bulk stock-out. B2B dispatches are larger, so allow 20;
+// Shanya (e-com) stays at 10.
+const MAX_LINES_BY_CHANNEL = { b2b: 20, ecom: 10 } as const;
 
 interface Props {
   warehouseId: string;
@@ -36,7 +38,8 @@ function packLabel(size: number): string {
 
 const EMPTY_ROW: Row = { ean: "", chosenSize: 1, packs: "" };
 
-/** Dispatch several products at once (1–10 lines) on one invoice. */
+/** Dispatch several products at once on one invoice (up to 10 lines in Shanya,
+ *  20 in B2B). */
 export default function BulkStockOutForm({
   warehouseId,
   lines,
@@ -44,6 +47,7 @@ export default function BulkStockOutForm({
   onError,
 }: Props) {
   const channel = useChannel();
+  const maxLines = MAX_LINES_BY_CHANNEL[channel];
   const inStock = useMemo(() => lines.filter((l) => l.quantity > 0), [lines]);
 
   const [rows, setRows] = useState<Row[]>([{ ...EMPTY_ROW }]);
@@ -103,7 +107,7 @@ export default function BulkStockOutForm({
     setRows((rs) => rs.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
   }
   function addRow() {
-    setRows((rs) => (rs.length >= MAX_LINES ? rs : [...rs, { ...EMPTY_ROW }]));
+    setRows((rs) => (rs.length >= maxLines ? rs : [...rs, { ...EMPTY_ROW }]));
   }
   function removeRow(i: number) {
     setRows((rs) => (rs.length === 1 ? rs : rs.filter((_, idx) => idx !== i)));
@@ -173,7 +177,7 @@ export default function BulkStockOutForm({
   return (
     <form onSubmit={handleSubmit} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <h3 className="mb-1 text-base font-semibold text-slate-900">
-        Bulk stock out — up to {MAX_LINES} products
+        Bulk stock out — up to {maxLines} products
       </h3>
       <p className="mb-4 text-sm text-slate-500">
         Add multiple products and dispatch them together on one invoice.
@@ -289,10 +293,10 @@ export default function BulkStockOutForm({
       <button
         type="button"
         onClick={addRow}
-        disabled={rows.length >= MAX_LINES}
+        disabled={rows.length >= maxLines}
         className="mt-2 rounded-lg border border-dashed border-slate-300 bg-white px-4 py-2 text-sm font-medium text-brand-600 transition hover:bg-slate-50 disabled:opacity-40"
       >
-        + Add product {rows.length >= MAX_LINES ? `(max ${MAX_LINES})` : ""}
+        + Add product {rows.length >= maxLines ? `(max ${maxLines})` : ""}
       </button>
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
