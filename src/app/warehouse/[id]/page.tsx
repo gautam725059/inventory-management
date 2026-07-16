@@ -5,7 +5,20 @@ import Link from "next/link";
 import StockCard from "@/components/StockCard";
 import { useMe, canApprove } from "@/lib/useMe";
 import { useChannel, codeWord } from "@/lib/useChannel";
-import type { WarehouseDetail } from "@/lib/types";
+import type { WarehouseDetail, WarehouseStockLine } from "@/lib/types";
+
+/** Brands recognised for the brand-wise filter (mirrors the dashboard). */
+const KNOWN_BRANDS = ["Philips", "Wipro", "Hindware", "Gorav", "Orient"];
+
+/** A stock line's brand: its brand field, else the brand word in its name, else "Other". */
+function lineBrand(l: WarehouseStockLine): string {
+  if (l.brand && l.brand.trim()) {
+    const known = KNOWN_BRANDS.find((b) => b.toLowerCase() === l.brand!.trim().toLowerCase());
+    return known ?? l.brand.trim();
+  }
+  const n = l.name.toLowerCase();
+  return KNOWN_BRANDS.find((b) => n.includes(b.toLowerCase())) ?? "Other";
+}
 
 export default function WarehousePage({
   params,
@@ -22,15 +35,30 @@ export default function WarehousePage({
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [query, setQuery] = useState("");
+  const [brand, setBrand] = useState("");
+
+  // Brands present in this warehouse, with a piece count each (for the dropdown).
+  const brandsPresent = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const l of detail?.lines ?? []) {
+      m.set(lineBrand(l), (m.get(lineBrand(l)) ?? 0) + l.quantity);
+    }
+    return [...m.entries()].sort((a, b) =>
+      a[0] === "Other" ? 1 : b[0] === "Other" ? -1 : a[0].localeCompare(b[0])
+    );
+  }, [detail]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const lines = detail?.lines ?? [];
-    if (!q) return lines;
-    return lines.filter(
-      (l) => l.name.toLowerCase().includes(q) || l.ean.includes(q)
-    );
-  }, [detail, query]);
+    let lines = detail?.lines ?? [];
+    if (brand) lines = lines.filter((l) => lineBrand(l) === brand);
+    if (q) {
+      lines = lines.filter(
+        (l) => l.name.toLowerCase().includes(q) || l.ean.includes(q)
+      );
+    }
+    return lines;
+  }, [detail, query, brand]);
 
   async function load() {
     try {
@@ -186,6 +214,20 @@ export default function WarehousePage({
             placeholder={`Search by name or ${codeWord(channel)}…`}
             className="min-w-50 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
           />
+          {brandsPresent.length > 1 && (
+            <select
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+            >
+              <option value="">All brands</option>
+              {brandsPresent.map(([b, pcs]) => (
+                <option key={b} value={b}>
+                  {b} ({pcs.toLocaleString()})
+                </option>
+              ))}
+            </select>
+          )}
           <a
             href={`/api/warehouses/${id}?format=csv`}
             className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
@@ -193,6 +235,20 @@ export default function WarehousePage({
             ⬇ Export CSV
           </a>
         </div>
+      )}
+
+      {brand && (
+        <p className="mb-3 text-sm text-slate-500">
+          <span className="font-semibold text-slate-900">{brand}</span> ·{" "}
+          {filtered.length} product{filtered.length === 1 ? "" : "s"} ·{" "}
+          {filtered.reduce((s, l) => s + l.quantity, 0).toLocaleString()} pcs{" "}
+          <button
+            onClick={() => setBrand("")}
+            className="ml-1 font-medium text-brand-600 hover:underline"
+          >
+            clear
+          </button>
+        </p>
       )}
 
       {loading ? (

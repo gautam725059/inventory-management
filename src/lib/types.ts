@@ -498,6 +498,7 @@ export interface ComboAvailability {
 export interface WarehouseStockLine {
   ean: string;
   name: string;
+  brand?: string; // product brand, for brand-wise filtering
   quantity: number; // physical on-hand (reserved stock is still counted here)
   packed: number; // reserved by "packed" RO lines, not yet dispatched
   available: number; // quantity − packed (free to sell / reserve)

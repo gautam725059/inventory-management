@@ -328,6 +328,7 @@ function buildLine(
   return {
     ean,
     name: product?.name ?? "Unknown product",
+    brand: product?.brand,
     quantity,
     packed,
     available: Math.max(0, quantity - packed),
