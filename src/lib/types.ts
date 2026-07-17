@@ -426,7 +426,8 @@ export interface ROLineItem {
   gstRate: number; // total GST % (CGST + SGST, or IGST)
   taxAmount: number; // per-unit tax within the landing rate
   landingRate: number; // tax-inclusive rate per unit
-  quantity: number;
+  quantity: number; // ordered quantity
+  dispatchQty?: number; // how much to actually dispatch (defaults to quantity)
   mrp?: number;
   totalAmount: number; // landingRate * quantity
   fulfillment?: ROFulfillment; // per-line pipeline stage (set once approved)

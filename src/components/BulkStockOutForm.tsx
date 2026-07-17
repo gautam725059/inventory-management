@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useChannel, scanWord } from "@/lib/useChannel";
-import type { WarehouseStockLine, Customer } from "@/lib/types";
+import type { WarehouseStockLine, Customer, ReleaseOrder } from "@/lib/types";
 
 const inputClass =
   "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-50 disabled:text-slate-400";
@@ -15,7 +15,7 @@ const MAX_LINES_BY_CHANNEL = { b2b: 20, ecom: 10 } as const;
 interface Props {
   warehouseId: string;
   lines: WarehouseStockLine[];
-  onDispatched: () => void | Promise<void>;
+  onPacked: (ro: ReleaseOrder) => void | Promise<void>;
   onError: (message: string) => void;
 }
 
@@ -38,12 +38,13 @@ function packLabel(size: number): string {
 
 const EMPTY_ROW: Row = { ean: "", chosenSize: 1, packs: "" };
 
-/** Dispatch several products at once on one invoice (up to 10 lines in Shanya,
- *  20 in B2B). */
+/** Pack several products at once for dispatch (up to 10 lines in Shanya, 20 in
+ *  B2B). Packing reserves the stock as a "Counter" release order — it is not
+ *  deducted until each line is dispatched from that RO. */
 export default function BulkStockOutForm({
   warehouseId,
   lines,
-  onDispatched,
+  onPacked,
   onError,
 }: Props) {
   const channel = useChannel();
@@ -118,16 +119,13 @@ export default function BulkStockOutForm({
     return hit && pieces > 0;
   });
   const anyOverdraw = [...requested.entries()].some(([ean, need]) => {
-    const have = inStock.find((l) => l.ean === ean)?.quantity ?? 0;
-    return need > have;
+    const free = inStock.find((l) => l.ean === ean)?.available ?? 0;
+    return need > free;
   });
   const totalPieces = [...requested.values()].reduce((a, b) => a + b, 0);
 
   const canSubmit =
-    validRows.length > 0 &&
-    !anyOverdraw &&
-    date.trim().length > 0 &&
-    invoiceNo.trim().length > 0;
+    validRows.length > 0 && !anyOverdraw && date.trim().length > 0;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -135,32 +133,32 @@ export default function BulkStockOutForm({
     setSaving(true);
     onError("");
     try {
+      // Pack = reserve as a Counter RO. Pack-size × packs collapses to pieces.
       const payloadLines = validRows.map((r) => {
         const { hit, size, packs } = resolveRow(r);
-        return { ean: hit!.line.ean, unitSize: size, packs };
+        return { ean: hit!.line.ean, quantity: size * packs };
       });
-      const res = await fetch(`/api/warehouses/${warehouseId}/dispatch-bulk`, {
+      const res = await fetch(`/api/warehouses/${warehouseId}/pack`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           date: date.trim(),
-          invoiceNo: invoiceNo.trim(),
-          referenceNo: referenceNo.trim() || undefined,
+          reference: invoiceNo.trim() || referenceNo.trim() || undefined,
           customerName: customerName.trim() || undefined,
           lines: payloadLines,
         }),
       });
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to dispatch.");
+        throw new Error(data.error || "Failed to pack.");
       }
       setRows([{ ...EMPTY_ROW }]);
       setInvoiceNo("");
       setReferenceNo("");
       setCustomerName("");
-      await onDispatched();
+      await onPacked(data as ReleaseOrder);
     } catch (err) {
-      onError(err instanceof Error ? err.message : "Failed to dispatch.");
+      onError(err instanceof Error ? err.message : "Failed to pack.");
     } finally {
       setSaving(false);
     }
@@ -169,7 +167,7 @@ export default function BulkStockOutForm({
   if (inStock.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-        Nothing in stock to dispatch.
+        Nothing in stock to pack.
       </div>
     );
   }
@@ -177,21 +175,23 @@ export default function BulkStockOutForm({
   return (
     <form onSubmit={handleSubmit} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <h3 className="mb-1 text-base font-semibold text-slate-900">
-        Bulk stock out — up to {maxLines} products
+        Pack for dispatch — up to {maxLines} products
       </h3>
       <p className="mb-4 text-sm text-slate-500">
-        Add multiple products and dispatch them together on one invoice.
+        Reserve products for an order. Stock is set aside as{" "}
+        <strong>packed</strong>; it leaves the warehouse when you dispatch each
+        line from the release order.
       </p>
 
-      {/* Shared invoice details */}
+      {/* Shared details */}
       <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-4">
         <div>
           <label className={labelClass}>Date *</label>
           <input type="date" className={inputClass} value={date} onChange={(e) => setDate(e.target.value)} required />
         </div>
         <div>
-          <label className={labelClass}>Invoice no. *</label>
-          <input className={inputClass} value={invoiceNo} onChange={(e) => setInvoiceNo(e.target.value)} placeholder="e.g. INV-2026-001" autoComplete="off" required />
+          <label className={labelClass}>Reference / Bill no.</label>
+          <input className={inputClass} value={invoiceNo} onChange={(e) => setInvoiceNo(e.target.value)} placeholder="optional" autoComplete="off" />
         </div>
         <div>
           <label className={labelClass}>Reference no.</label>
@@ -214,7 +214,7 @@ export default function BulkStockOutForm({
           const { hit, isPrimary, sizeOptions, size, pieces } = resolveRow(row);
           const unknown = row.ean.trim().length > 0 && !hit;
           const have = hit ? requested.get(hit.line.ean) ?? 0 : 0;
-          const overdraw = hit ? have > hit.line.quantity : false;
+          const overdraw = hit ? have > hit.line.available : false;
           return (
             <div key={i} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-12 sm:items-end">
@@ -278,8 +278,9 @@ export default function BulkStockOutForm({
               {hit && (
                 <p className={`mt-1 text-xs ${overdraw ? "text-red-600" : "text-slate-500"}`}>
                   <span className="font-medium text-slate-700">{hit.line.name}</span> ·{" "}
-                  {hit.line.quantity.toLocaleString()} in stock
-                  {overdraw && ` · over by ${have - hit.line.quantity}`}
+                  {hit.line.available.toLocaleString()} available
+                  {hit.line.packed > 0 && ` (${hit.line.packed.toLocaleString()} packed)`}
+                  {overdraw && ` · over by ${have - hit.line.available}`}
                 </p>
               )}
               {unknown && (
@@ -306,14 +307,14 @@ export default function BulkStockOutForm({
             {totalPieces.toLocaleString()}
           </strong>{" "}
           pieces
-          {anyOverdraw && <span className="ml-2 text-red-600">— some lines exceed stock</span>}
+          {anyOverdraw && <span className="ml-2 text-red-600">— some lines exceed available</span>}
         </div>
         <button
           type="submit"
           disabled={saving || !canSubmit}
           className="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {saving ? "Dispatching…" : `Dispatch ${validRows.length || ""} (stock out)`}
+          {saving ? "Packing…" : `📦 Pack ${validRows.length || ""} for dispatch`}
         </button>
       </div>
     </form>

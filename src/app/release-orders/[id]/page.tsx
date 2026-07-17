@@ -4,7 +4,7 @@ import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMe } from "@/lib/useMe";
-import type { ReleaseOrder, ROFulfillment } from "@/lib/types";
+import type { ReleaseOrder, ROFulfillment, WarehouseDetail } from "@/lib/types";
 
 function inr(n: number): string {
   return "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
@@ -34,6 +34,9 @@ export default function ReleaseOrderDetailPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyLine, setBusyLine] = useState<number | null>(null);
+  const [tick, setTick] = useState(0); // bumps to re-sync editable inputs after a save
+  // Physical on-hand stock per product in the RO's warehouse (for the Available column).
+  const [stockByEan, setStockByEan] = useState<Record<string, number>>({});
 
   useEffect(() => {
     (async () => {
@@ -48,6 +51,19 @@ export default function ReleaseOrderDetailPage({
       }
     })();
   }, [id]);
+
+  // Once we know the RO's warehouse, load its stock to show "Available" per line.
+  useEffect(() => {
+    if (!ro?.warehouseId) return;
+    fetch(`/api/warehouses/${ro.warehouseId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: WarehouseDetail | null) => {
+        const m: Record<string, number> = {};
+        for (const l of d?.lines ?? []) m[l.ean] = l.quantity;
+        setStockByEan(m);
+      })
+      .catch(() => {});
+  }, [ro?.warehouseId, ro?.items]);
 
   async function remove() {
     if (!ro || !confirm(`Delete ${ro.roNumber}? (Dispatched stock is NOT restored.)`)) return;
@@ -68,6 +84,42 @@ export default function ReleaseOrderDetailPage({
     const d = await res.json().catch(() => ({}));
     if (res.ok) setRo(d);
     else setError(d.error || "Failed.");
+  }
+
+  /** A line can be edited until it has been dispatched. */
+  function canEditLine(it: ReleaseOrder["items"][number]): boolean {
+    return (
+      ro?.status !== "rejected" &&
+      it.fulfillment !== "dispatched" &&
+      it.fulfillment !== "delivered"
+    );
+  }
+
+  /** Save an edited quantity / dispatch qty for one line (only if it changed). */
+  async function saveLine(
+    index: number,
+    patch: { quantity?: string; dispatchQty?: string },
+    oldValue: number
+  ) {
+    const raw = patch.quantity ?? patch.dispatchQty ?? "";
+    const n = Math.floor(Number(raw));
+    if (!Number.isFinite(n) || n < 0 || n === oldValue) {
+      setTick((t) => t + 1); // reset the input to the current value
+      return;
+    }
+    setError(null);
+    const body: Record<string, number> = { itemIndex: index };
+    if (patch.quantity !== undefined) body.quantity = n;
+    if (patch.dispatchQty !== undefined) body.dispatchQty = n;
+    const res = await fetch(`/api/release-orders/${id}/line`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const d = await res.json().catch(() => ({}));
+    if (res.ok) setRo(d);
+    else setError(d.error || "Failed to save.");
+    setTick((t) => t + 1); // re-sync inputs to the saved values
   }
 
   /** Move one line forward: packed → dispatched (deducts stock) → delivered. */
@@ -188,11 +240,12 @@ export default function ReleaseOrderDetailPage({
                 <th className={th}>Item Code</th>
                 <th className={th}>Product UPC</th>
                 <th className={th}>Product Description</th>
-                <th className={th}>Grammage</th>
                 <th className={`${th} text-right`}>GST %</th>
                 <th className={`${th} text-right`}>Tax Amt</th>
                 <th className={`${th} text-right`}>Landing Rate</th>
                 <th className={`${th} text-right`}>Quantity</th>
+                <th className={`${th} text-right`}>Available</th>
+                <th className={`${th} text-right no-print`}>Dispatch Qty</th>
                 <th className={`${th} text-right`}>MRP</th>
                 <th className={`${th} text-right`}>Total Amount</th>
                 {inPipeline && <th className={`${th} no-print`}>Status</th>}
@@ -205,11 +258,51 @@ export default function ReleaseOrderDetailPage({
                   <td className={td}>{it.itemCode || "—"}</td>
                   <td className={`${td} font-mono`}>{it.ean}</td>
                   <td className={td}>{it.description}</td>
-                  <td className={td}>{it.grammage || "—"}</td>
                   <td className={`${td} text-right tabular-nums`}>{it.gstRate}</td>
                   <td className={`${td} text-right tabular-nums`}>{it.taxAmount}</td>
                   <td className={`${td} text-right tabular-nums`}>{it.landingRate}</td>
-                  <td className={`${td} text-right tabular-nums`}>{it.quantity}</td>
+                  <td className={`${td} text-right tabular-nums`}>
+                    {canEditLine(it) ? (
+                      <input
+                        key={`q-${i}-${tick}`}
+                        type="number"
+                        min={1}
+                        defaultValue={it.quantity}
+                        onBlur={(e) => saveLine(i, { quantity: e.target.value }, it.quantity)}
+                        className="w-16 rounded border border-slate-300 px-1.5 py-0.5 text-right text-xs tabular-nums outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-200"
+                      />
+                    ) : (
+                      it.quantity
+                    )}
+                  </td>
+                  <td
+                    className={`${td} text-right tabular-nums ${
+                      stockByEan[it.ean] !== undefined && stockByEan[it.ean] < it.quantity
+                        ? "font-semibold text-red-600"
+                        : "text-slate-600"
+                    }`}
+                    title={
+                      stockByEan[it.ean] !== undefined && stockByEan[it.ean] < it.quantity
+                        ? "Warehouse stock is less than the ordered quantity"
+                        : ""
+                    }
+                  >
+                    {stockByEan[it.ean] !== undefined ? stockByEan[it.ean].toLocaleString("en-IN") : "—"}
+                  </td>
+                  <td className={`${td} text-right tabular-nums no-print`}>
+                    {canEditLine(it) ? (
+                      <input
+                        key={`d-${i}-${tick}`}
+                        type="number"
+                        min={0}
+                        defaultValue={it.dispatchQty ?? it.quantity}
+                        onBlur={(e) => saveLine(i, { dispatchQty: e.target.value }, it.dispatchQty ?? it.quantity)}
+                        className="w-16 rounded border border-slate-300 bg-brand-50/40 px-1.5 py-0.5 text-right text-xs font-semibold tabular-nums outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-200"
+                      />
+                    ) : (
+                      (it.dispatchQty ?? it.quantity)
+                    )}
+                  </td>
                   <td className={`${td} text-right tabular-nums`}>{it.mrp ?? "—"}</td>
                   <td className={`${td} text-right font-semibold tabular-nums`}>{it.totalAmount.toLocaleString("en-IN")}</td>
                   {inPipeline && (
@@ -239,8 +332,10 @@ export default function ReleaseOrderDetailPage({
             </tbody>
             <tfoot>
               <tr className="bg-slate-50 font-semibold text-slate-900">
-                <td className={`${td} text-right`} colSpan={8}>Total Qty</td>
+                <td className={`${td} text-right`} colSpan={7}>Total Qty</td>
                 <td className={`${td} text-right tabular-nums`}>{ro.totalQuantity.toLocaleString("en-IN")}</td>
+                <td className={td}></td>
+                <td className={`${td} no-print`}></td>
                 <td className={td}></td>
                 <td className={`${td} text-right tabular-nums`}>{inr(ro.totalAmount)}</td>
                 {inPipeline && <td className={`${td} no-print`}></td>}

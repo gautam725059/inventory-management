@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ComboOutForm from "@/components/ComboOutForm";
 import BulkStockOutForm from "@/components/BulkStockOutForm";
 import StockCard from "@/components/StockCard";
@@ -13,6 +14,7 @@ export default function StockOutPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const router = useRouter();
 
   const [detail, setDetail] = useState<WarehouseDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,10 +50,12 @@ export default function StockOutPage({
 
       <header className="mt-3 mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Stock Out — packs
+          Pack for Dispatch
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          Dispatch from {detail?.name ?? "this warehouse"} as packs or singles.
+          Reserve products from {detail?.name ?? "this warehouse"} as{" "}
+          <strong>packed</strong>. Dispatch &amp; deliver each item from the
+          release order it creates.
         </p>
       </header>
 
@@ -75,7 +79,7 @@ export default function StockOutPage({
               : "text-slate-600 hover:bg-slate-50"
           }`}
         >
-          📤 Products
+          📦 Pack products
         </button>
         <button
           onClick={() => setMode("combo")}
@@ -95,9 +99,9 @@ export default function StockOutPage({
         <BulkStockOutForm
           warehouseId={id}
           lines={detail?.lines ?? []}
-          onDispatched={async () => {
-            setSuccess("Stock dispatched.");
-            await load();
+          onPacked={(ro) => {
+            // Jump to the release order it created, to dispatch → deliver there.
+            router.push(`/release-orders/${ro.id}`);
           }}
           onError={(message) => {
             setError(message || null);

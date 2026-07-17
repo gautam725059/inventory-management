@@ -2563,16 +2563,22 @@ export async function updateROLineStatus(
     const now = new Date().toISOString();
 
     if (to === "dispatched") {
+      // Dispatch the actual "dispatch qty" (defaults to the ordered quantity).
+      const qty = Math.max(0, Math.floor(line.dispatchQty ?? line.quantity));
+      if (qty <= 0) {
+        return [store, { ok: false, error: "Dispatch quantity must be more than 0." }];
+      }
       // Stock physically leaves now.
       const row = store.stock.find(
         (s) => s.warehouseId === ro.warehouseId && s.ean === line.ean
       );
       const have = row?.quantity ?? 0;
-      if (have < line.quantity) {
+      if (have < qty) {
         const name = findProduct(store, line.ean, ro.channel)?.name ?? line.ean;
-        return [store, { ok: false, error: `"${name}" — only ${have} in stock, need ${line.quantity}.` }];
+        return [store, { ok: false, error: `"${name}" — only ${have} in stock, need ${qty}.` }];
       }
-      row!.quantity -= line.quantity;
+      row!.quantity -= qty;
+      line.dispatchQty = qty;
 
       const customerId = upsertPartyByName(
         store.customers,
@@ -2584,8 +2590,8 @@ export async function updateROLineStatus(
         warehouseId: ro.warehouseId,
         ean: line.ean,
         unitSize: 1,
-        packs: line.quantity,
-        quantity: line.quantity,
+        packs: qty,
+        quantity: qty,
         date: ro.date,
         invoiceNo: ro.roNumber,
         referenceNo: ro.source || undefined,
@@ -2601,6 +2607,45 @@ export async function updateROLineStatus(
       line.fulfillment = "delivered";
       line.deliveredAt = now;
     }
+
+    return [store, { ok: true, ro }];
+  });
+}
+
+/** Edit one RO line's ordered quantity and/or dispatch quantity, then recompute
+ *  the RO totals. Allowed while the line hasn't been dispatched yet. */
+export async function updateROLine(
+  roId: string,
+  itemIndex: number,
+  patch: { quantity?: number; dispatchQty?: number }
+): Promise<ROResult> {
+  return mutate<ROResult>((store) => {
+    const ro = store.releaseOrders.find((r) => r.id === roId);
+    if (!ro) return [store, { ok: false, error: "Release order not found." }];
+    if (ro.status === "rejected") {
+      return [store, { ok: false, error: "This RO is rejected." }];
+    }
+    const line = ro.items[itemIndex];
+    if (!line) return [store, { ok: false, error: "RO line not found." }];
+    if (line.fulfillment === "dispatched" || line.fulfillment === "delivered") {
+      return [store, { ok: false, error: "This line is already dispatched — can't edit it." }];
+    }
+
+    if (patch.quantity != null) {
+      const q = Math.max(1, Math.floor(Number(patch.quantity) || 0));
+      line.quantity = q;
+      line.totalAmount = round2(line.landingRate * q);
+      // Keep dispatch qty within the new order quantity.
+      if (line.dispatchQty != null && line.dispatchQty > q) line.dispatchQty = q;
+    }
+    if (patch.dispatchQty != null) {
+      line.dispatchQty = Math.max(0, Math.floor(Number(patch.dispatchQty) || 0));
+    }
+
+    // Recompute RO totals.
+    ro.totalQuantity = ro.items.reduce((s, it) => s + it.quantity, 0);
+    ro.totalAmount = round2(ro.items.reduce((s, it) => s + it.totalAmount, 0));
+    ro.netAmount = round2(ro.totalAmount - (ro.cartDiscount || 0));
 
     return [store, { ok: true, ro }];
   });

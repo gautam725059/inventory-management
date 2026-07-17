@@ -137,12 +137,12 @@ export default function WarehousePage({
           className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-md"
         >
           <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-50 text-2xl">
-            📤
+            📦
           </span>
           <span>
-            <span className="block font-semibold text-slate-900">Stock Out</span>
+            <span className="block font-semibold text-slate-900">Pack</span>
             <span className="mt-0.5 block text-sm text-slate-500">
-              Dispatch packs / singles
+              Reserve for dispatch
             </span>
           </span>
         </Link>
