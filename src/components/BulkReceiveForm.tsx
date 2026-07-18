@@ -43,6 +43,8 @@ export default function BulkReceiveForm({ warehouseId, onReceived, onError }: Pr
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [products, setProducts] = useState<ProductCatalogEntry[]>([]);
   const [saving, setSaving] = useState(false);
+  // Per-row "search by name" text (Blinkit-style product picker).
+  const [search, setSearch] = useState<Record<number, string>>({});
 
   useEffect(() => {
     fetch("/api/vendors").then((r) => (r.ok ? r.json() : [])).then((d) => setVendors(Array.isArray(d) ? d : [])).catch(() => {});
@@ -61,6 +63,21 @@ export default function BulkReceiveForm({ warehouseId, onReceived, onError }: Pr
 
   function setRow(i: number, patch: Partial<Row>) {
     setRows((rs) => rs.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+  }
+
+  /** Products matching a row's name search (min 2 chars), best few first. */
+  function nameMatches(i: number): ProductCatalogEntry[] {
+    const q = (search[i] ?? "").trim().toLowerCase();
+    if (q.length < 2) return [];
+    return products
+      .filter((p) => p.name.toLowerCase().includes(q) || p.ean.includes(q))
+      .slice(0, 8);
+  }
+
+  /** Pick a product from the name search — fills its code into the line. */
+  function pickProduct(i: number, p: ProductCatalogEntry) {
+    setRow(i, { ean: p.ean, name: "" });
+    setSearch((s) => ({ ...s, [i]: "" }));
   }
   function addRow() {
     setRows((rs) => (rs.length >= MAX_LINES ? rs : [...rs, { ...EMPTY_ROW }]));
@@ -131,8 +148,10 @@ export default function BulkReceiveForm({ warehouseId, onReceived, onError }: Pr
     <form onSubmit={handleSubmit} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <h3 className="mb-1 text-base font-semibold text-slate-900">Receive products</h3>
       <p className="mb-4 text-sm text-slate-500">
-        Add one or more products on one bill. If a {codeWord(channel)} isn&rsquo;t
-        in the catalog yet, type a name on that line to create it.
+        Add one or more products on one bill. <strong>Search by name</strong> to
+        pick a product (its image and {codeWord(channel)} fill in), or scan the{" "}
+        {codeWord(channel)} directly. A code that isn&rsquo;t in the catalog yet
+        creates a new product — just type its name on that line.
       </p>
 
       {/* Shared bill details */}
@@ -162,6 +181,53 @@ export default function BulkReceiveForm({ warehouseId, onReceived, onError }: Pr
           const x = info[i];
           return (
             <div key={i} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+              {/* Search by name — picks the product and fills its code */}
+              <div className="relative mb-2">
+                <label className={labelClass}>🔍 Search product by name</label>
+                <input
+                  className={inputClass}
+                  value={search[i] ?? ""}
+                  onChange={(e) => setSearch((s) => ({ ...s, [i]: e.target.value }))}
+                  placeholder="Type a product name… (e.g. wall hooks)"
+                  autoComplete="off"
+                />
+                {nameMatches(i).length > 0 && (
+                  <ul className="absolute z-20 mt-1 max-h-72 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                    {nameMatches(i).map((p) => (
+                      <li key={p.ean}>
+                        <button
+                          type="button"
+                          onClick={() => pickProduct(i, p)}
+                          className="flex w-full items-center gap-3 px-3 py-2 text-left transition hover:bg-brand-50"
+                        >
+                          {p.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={p.imageUrl}
+                              alt={p.name}
+                              className="h-10 w-10 shrink-0 rounded-md border border-slate-200 object-cover"
+                            />
+                          ) : (
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-slate-200 bg-slate-50 text-slate-300">
+                              📷
+                            </span>
+                          )}
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm text-slate-900">{p.name}</span>
+                            <span className="block font-mono text-xs text-slate-400">
+                              {codeWord(channel)} {p.ean}
+                              <span className="ml-2 font-sans text-slate-400">
+                                · {p.totalQuantity.toLocaleString()} in stock
+                              </span>
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-12 sm:items-end">
                 <div className="sm:col-span-5">
                   <label className={labelClass}>Scan / enter {codeWord(channel)}</label>
@@ -214,7 +280,31 @@ export default function BulkReceiveForm({ warehouseId, onReceived, onError }: Pr
               </div>
 
               {x.product && (
-                <p className="mt-1 text-xs text-emerald-600">✓ {x.product.name}</p>
+                <div className="mt-2 flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50/60 p-2">
+                  {x.product.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={x.product.imageUrl}
+                      alt={x.product.name}
+                      className="h-11 w-11 shrink-0 rounded-md border border-emerald-200 bg-white object-cover"
+                    />
+                  ) : (
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-emerald-200 bg-white text-slate-300">
+                      📷
+                    </span>
+                  )}
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium text-emerald-800">
+                      ✓ {x.product.name}
+                    </div>
+                    <div className="font-mono text-xs text-emerald-700">
+                      {codeWord(channel)} {x.product.ean}
+                      <span className="ml-2 font-sans text-emerald-600">
+                        · {x.product.totalQuantity.toLocaleString()} in stock
+                      </span>
+                    </div>
+                  </div>
+                </div>
               )}
 
               {x.isNew && (
